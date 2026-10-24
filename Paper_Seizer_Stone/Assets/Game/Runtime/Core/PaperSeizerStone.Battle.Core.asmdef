@@ -1,0 +1,7 @@
+{
+  "name": "PaperSeizerStone.Battle.Core",
+  "rootNamespace": "PaperSeizerStone.Battle",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}
