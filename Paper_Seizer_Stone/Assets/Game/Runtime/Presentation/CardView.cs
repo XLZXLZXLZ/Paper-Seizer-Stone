@@ -15,6 +15,8 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private GameObject ghost;
         [SerializeField] private TMP_Text faceText;
         [SerializeField] private TMP_Text ghostText;
+        [SerializeField] private TMP_Text effectText;
+        [SerializeField] private TMP_Text ghostEffectText;
         [SerializeField] private Renderer back;
         [SerializeField] private BoxCollider hitbox;
         [SerializeField] private Material playerBack;
@@ -64,16 +66,49 @@ namespace PaperSeizerStone.Presentation
             string label = definition == null ? "" : definition.DisplayName;
             faceText.text = label;
             ghostText.text = label;
+            if (effectText != null) effectText.text = definition == null ? "" : definition.Description;
+            if (ghostEffectText != null) ghostEffectText.text = definition == null ? "" : definition.Description;
             bool known = card.Gesture.HasValue;
             bool faceUp = known && (card.IsRevealed || (!onBoard && owner == Side.Player));
             face.gameObject.SetActive(faceUp);
             faceText.gameObject.SetActive(faceUp);
+            if (effectText != null) effectText.gameObject.SetActive(faceUp);
             bool privatePreview = known && onBoard && owner == Side.Player && !card.IsRevealed;
             ghost.SetActive(privatePreview);
             ghostText.gameObject.SetActive(privatePreview);
+            if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(privatePreview);
         }
 
         public void SetHitbox(bool enabled) { if (hitbox != null) hitbox.enabled = enabled; }
+
+        public void DisplayShop(CardDefinition definition, bool clickable)
+        {
+            transform.DOKill();
+            visual.DOKill();
+            visual.localRotation = visualRotation;
+            visual.localScale = visualScale;
+            CardId = 0;
+            Owner = Side.Player;
+            IsOnBoard = false;
+            CanDrag = false;
+            Revealed = true;
+            back.sharedMaterial = playerBack;
+            backColor = playerBack.color;
+            faceColor = definition.FaceColor;
+            Texture texture = definition.Artwork == null ? Texture2D.whiteTexture : definition.Artwork;
+            faceProperties.SetTexture("_BaseMap", texture);
+            faceProperties.SetTexture("_MainTex", texture);
+            faceText.text = definition.DisplayName;
+            if (effectText != null) { effectText.text = definition.Description; effectText.gameObject.SetActive(true); }
+            face.gameObject.SetActive(true);
+            faceText.gameObject.SetActive(true);
+            ghost.SetActive(false);
+            ghostText.gameObject.SetActive(false);
+            if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(false);
+            highlighted = false;
+            ApplyColors();
+            SetHitbox(clickable);
+        }
 
         private void ApplyColors()
         {

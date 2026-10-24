@@ -22,7 +22,7 @@ namespace PaperSeizerStone.Battle
     {
         RoundStarted, DeckShuffled, CardDrawn, LayoutCommitted, CardRevealed,
         CardsSwapped, AmmunitionChanged, DecisionPassed, PhaseChanged,
-        LaneScored, ShotResolved, RoundEnded, BattleEnded
+        LaneScored, ShotResolved, RoundEnded, BattleEnded, AbilityTriggered, CardTransformed
     }
 
     public sealed class BattleEvent

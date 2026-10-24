@@ -17,3 +17,6 @@ MonoBehaviour:
   gesture: 2
   artwork: {fileID: 0}
   faceColor: {r: 0.82, g: 0.77, b: 0.64, a: 1}
+  ability: 0
+  description: "剪刀类\n胜布，负石头。"
+  transformation: {fileID: 0}

@@ -16,12 +16,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private SideTableBindings enemy;
         [SerializeField] private Transform cardRoot;
         [SerializeField] private Transform dragAnchor;
-        [SerializeField] private Transform chipRoot;
+        [SerializeField] private PhysicsTokenArea chipArea;
         [SerializeField] private GameObject editorPreview;
-        [SerializeField] private GameObject chipPrefab;
-        [SerializeField] private List<GameObject> chipModels = new List<GameObject>();
-        [SerializeField] private Vector3 chipSpacing = new Vector3(0.5f, 0.07f, 0);
-        [SerializeField, Min(1)] private int chipColumns = 2;
+        [SerializeField] private Transform opponentAnchor;
+        [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
         [SerializeField] private TMP_Text roundLabel;
         [SerializeField] private Renderer confirmButtonRenderer;
@@ -38,6 +36,12 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private float maximumHandWidth = 4.7f;
         [SerializeField] private float handFanDepth = 0.2f;
         [SerializeField] private float handFanAngle = 24;
+        [Header("举枪与敌方紧张表现")]
+        [SerializeField, Min(0.05f)] private float gunRaiseDuration = 0.3f;
+        [SerializeField, Min(0)] private float aimHoldDuration = 0.65f;
+        [SerializeField, Min(0)] private float enemyTremorPosition = 0.008f;
+        [SerializeField, Min(0)] private float enemyTremorAngle = 0.65f;
+        [SerializeField, Min(0.1f)] private float enemyTremorFrequency = 13;
 
         private readonly Dictionary<int, CardView> cards = new Dictionary<int, CardView>();
         private readonly Stack<CardView> pool = new Stack<CardView>();
@@ -48,6 +52,7 @@ namespace PaperSeizerStone.Presentation
         private IReadOnlyList<int> draftHand;
         private IReadOnlyList<int> draftSlots;
         private bool expandedHand;
+        private GameObject opponentInstance;
 
         public string Message { get; private set; }
         public BattleObservation Displayed => displayed;
@@ -62,17 +67,52 @@ namespace PaperSeizerStone.Presentation
             if (player == null || enemy == null) throw new InvalidOperationException("请配置双方桌面节点。");
             player.RequireAssigned("玩家");
             enemy.RequireAssigned("对手");
-            if (prefab == null || cardRoot == null || dragAnchor == null || chipRoot == null || chipPrefab == null
+            if (prefab == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
                 || confirmLabel == null || roundLabel == null || confirmButtonRenderer == null
                 || activeButtonMaterial == null || inactiveButtonMaterial == null || audioSource == null)
                 throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点、按钮或声音节点。");
-            foreach (GameObject chip in chipModels)
-                if (chip == null) throw new InvalidOperationException("筹码列表中有未绑定的物体。");
+            chipArea.Initialize();
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
             if (editorPreview != null) editorPreview.SetActive(false);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
+        }
+
+        public void ResetEncounter(EnemyDefinition opponent)
+        {
+            foreach (CardView view in cards.Values) { view.ResetForPool(); pool.Push(view); }
+            cards.Clear();
+            ReleaseRetired();
+            displayed = null;
+            draftHand = null;
+            draftSlots = null;
+            expandedHand = false;
+            Message = "下一位对手：" + opponent.DisplayName;
+            chipArea.SetCount(0, true);
+            foreach (SideTableBindings side in new[] { player, enemy })
+            {
+                side.BulletArea.SetCount(0, true);
+                side.MuzzleFlash.SetActive(false);
+                side.Gun.DOKill();
+                side.Gun.SetPositionAndRotation(side.GunRestPose.position, side.GunRestPose.rotation);
+            }
+            if (opponentInstance != null)
+            {
+                opponentInstance.SetActive(false);
+                Destroy(opponentInstance);
+                opponentInstance = null;
+            }
+            defaultOpponent.SetActive(opponent.Appearance == null);
+            if (opponent.Appearance != null) opponentInstance = Instantiate(opponent.Appearance, opponentAnchor);
+        }
+
+        public void PrepareExit()
+        {
+            foreach (CardView view in cards.Values) view.transform.DOKill();
+            chipArea.Freeze();
+            player.BulletArea.Freeze();
+            enemy.BulletArea.Freeze();
         }
 
         private sealed class Placement
@@ -177,9 +217,10 @@ namespace PaperSeizerStone.Presentation
             retiring.Clear();
         }
 
-        private void Apply(BattleObservation snapshot)
+        private float Apply(BattleObservation snapshot, bool resetBullets = false)
         {
             displayed = snapshot;
+            float dropDuration = 0;
             for (int i = 0; i < 2; i++)
             {
                 SideTableBindings nodes = Get((Side)i);
@@ -187,22 +228,16 @@ namespace PaperSeizerStone.Presentation
                 nodes.DrawLabel.text = "牌库\n" + fighter.DrawCount.ToString("00");
                 nodes.DiscardLabel.text = "弃牌\n" + fighter.DiscardCount.ToString("00");
                 nodes.ScoreLabel.text = (i == 0 ? "你" : "对手") + "    " + fighter.Score + " 分    ·    生命 " + fighter.Life;
-                for (int bullet = 0; bullet < BasicRules.Chambers; bullet++) nodes.Bullets[bullet].SetActive(bullet < fighter.Bullets);
+                nodes.DrawPile.SetCount(fighter.DrawCount);
+                dropDuration = Mathf.Max(dropDuration, nodes.BulletArea.SetCount(fighter.Bullets, resetBullets));
             }
-            // Only additional gameplay tokens are pooled from a saved prefab; the table itself is static.
-            while (chipModels.Count < snapshot.Chips)
-            {
-                int i = chipModels.Count;
-                GameObject chip = Instantiate(chipPrefab, chipRoot);
-                chip.transform.localPosition = new Vector3(-(i % chipColumns) * chipSpacing.x, (i / chipColumns) * chipSpacing.y, (i / chipColumns) * chipSpacing.z);
-                chipModels.Add(chip);
-            }
-            for (int i = 0; i < chipModels.Count; i++) chipModels[i].SetActive(i < snapshot.Chips);
+            dropDuration = Mathf.Max(dropDuration, chipArea.SetCount(snapshot.Chips));
             roundLabel.text = "第 " + snapshot.Round + " 回合   ·   揭牌 " + snapshot.RevealStep;
             confirmLabel.text = snapshot.Phase == BattlePhase.Planning ? "确认出牌"
-                : snapshot.Phase == BattlePhase.PlayerCheat ? "跳过作弊" : snapshot.Phase == BattlePhase.BattleEnd ? "再来一局" : "请稍候";
+                : snapshot.Phase == BattlePhase.PlayerCheat ? "跳过作弊" : snapshot.Phase == BattlePhase.BattleEnd ? snapshot.PlayerWon ? "胜利" : "重新开始" : "请稍候";
             bool active = snapshot.Phase == BattlePhase.Planning || snapshot.Phase == BattlePhase.PlayerCheat || snapshot.Phase == BattlePhase.BattleEnd;
             confirmButtonRenderer.sharedMaterial = active ? activeButtonMaterial : inactiveButtonMaterial;
+            return dropDuration;
         }
 
         private void PlaySound(AudioClip clip) { if (clip != null) audioSource.PlayOneShot(clip); }
@@ -218,7 +253,7 @@ namespace PaperSeizerStone.Presentation
             }
             draftHand = null;
             draftSlots = null;
-            Apply(battleEvent.Snapshot);
+            float dropDuration = Apply(battleEvent.Snapshot, battleEvent.Kind == BattleEventKind.RoundStarted);
             Layout(moveDuration);
             if (flipping != null) flipping.Tilt(0, 0.14f);
             if (battleEvent.Kind == BattleEventKind.CardDrawn || flipping != null || battleEvent.Kind == BattleEventKind.CardsSwapped)
@@ -236,21 +271,95 @@ namespace PaperSeizerStone.Presentation
                     CardView view = FindCard(fighter.Board[battleEvent.Lane].Id);
                     if (view != null) view.Pulse();
                 }
+            if (battleEvent.Kind == BattleEventKind.AbilityTriggered || battleEvent.Kind == BattleEventKind.CardTransformed)
+            {
+                CardView effectCard = FindCard(battleEvent.CardId);
+                if (effectCard != null) effectCard.Pulse();
+            }
             float duration = battleEvent.Kind == BattleEventKind.LaneScored ? 0.55f
                 : battleEvent.Kind == BattleEventKind.RoundEnded ? 0.6f : moveDuration;
-            yield return new WaitForSeconds(Mathf.Max(moveDuration, duration));
+            yield return new WaitForSeconds(Mathf.Max(dropDuration, Mathf.Max(moveDuration, duration)));
             ReleaseRetired();
+        }
+
+        public IEnumerator PresentCheats(IReadOnlyList<BattleEvent> playerEvents, IReadOnlyList<BattleEvent> enemyEvents)
+        {
+            // Both rule actions have resolved. Display one combined board instead of replaying intermediate boards.
+            BattleObservation finalSnapshot = enemyEvents[enemyEvents.Count - 1].Snapshot;
+            BattleObservation actionSnapshot = finalSnapshot;
+            for (int i = enemyEvents.Count - 1; i >= 0; i--)
+                if (enemyEvents[i].Kind != BattleEventKind.PhaseChanged)
+                {
+                    actionSnapshot = enemyEvents[i].Snapshot;
+                    break;
+                }
+            Message = CheatMessage(playerEvents) + "  " + CheatMessage(enemyEvents);
+            draftHand = null;
+            draftSlots = null;
+            float dropDuration = Apply(actionSnapshot);
+            Layout(moveDuration);
+            PulseTransforms(playerEvents);
+            PulseTransforms(enemyEvents);
+            if (HasCardMotion(playerEvents) || HasCardMotion(enemyEvents)) PlaySound(cardSound);
+            yield return new WaitForSeconds(Mathf.Max(moveDuration, dropDuration));
+            Apply(finalSnapshot);
+            ReleaseRetired();
+        }
+
+        private static string CheatMessage(IReadOnlyList<BattleEvent> events)
+        {
+            string message = "";
+            foreach (BattleEvent action in events)
+                if (action.Kind == BattleEventKind.CardsSwapped || action.Kind == BattleEventKind.CardDrawn
+                    || action.Kind == BattleEventKind.DecisionPassed || action.Kind == BattleEventKind.CardTransformed) message += action.Message + " ";
+            return message;
+        }
+
+        private void PulseTransforms(IReadOnlyList<BattleEvent> events)
+        {
+            foreach (BattleEvent action in events)
+                if (action.Kind == BattleEventKind.CardTransformed)
+                {
+                    CardView view = FindCard(action.CardId);
+                    if (view != null) view.Pulse();
+                }
+        }
+
+        private static bool HasCardMotion(IReadOnlyList<BattleEvent> events)
+        {
+            foreach (BattleEvent action in events)
+                if (action.Kind == BattleEventKind.CardsSwapped || action.Kind == BattleEventKind.CardDrawn) return true;
+            return false;
         }
 
         public IEnumerator PrepareShooting()
         {
+            bool enemyFires = displayed.Enemy.Score >= displayed.Player.Score;
             foreach (SideTableBindings side in new[] { player, enemy })
             {
-                side.Gun.DOMove(side.GunAimPose.position, 0.3f);
-                side.Gun.DORotateQuaternion(side.GunAimPose.rotation, 0.3f);
+                bool fires = side == enemy ? enemyFires : displayed.Player.Score >= displayed.Enemy.Score;
+                side.Gun.DOKill();
+                if (!fires) continue;
+                side.Gun.DOMove(side.GunAimPose.position, gunRaiseDuration);
+                side.Gun.DORotateQuaternion(side.GunAimPose.rotation, gunRaiseDuration);
             }
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(gunRaiseDuration);
+            if (enemyFires) enemy.Gun.DOKill();
+            for (float elapsed = 0; elapsed < aimHoldDuration; elapsed += Time.deltaTime)
+            {
+                if (enemyFires)
+                {
+                    float time = elapsed * enemyTremorFrequency;
+                    Vector3 noise = new Vector3(Tremor(time, 1), Tremor(time, 19), Tremor(time, 47));
+                    enemy.Gun.position = enemy.GunAimPose.position + enemy.GunAimPose.TransformDirection(noise * enemyTremorPosition);
+                    enemy.Gun.rotation = enemy.GunAimPose.rotation * Quaternion.Euler(noise * enemyTremorAngle);
+                }
+                yield return null;
+            }
+            if (enemyFires) enemy.Gun.SetPositionAndRotation(enemy.GunAimPose.position, enemy.GunAimPose.rotation);
         }
+
+        private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
 
         public IEnumerator PresentShots(IReadOnlyList<BattleEvent> shots)
         {

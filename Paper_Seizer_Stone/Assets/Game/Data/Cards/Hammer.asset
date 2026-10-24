@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e5e1928390a05a00d0a96f8c4a60c3, type: 3}
+  m_Name: Hammer
+  m_EditorClassIdentifier:
+  definitionId: hammer
+  displayName: 锤子
+  gesture: 0
+  ability: 1
+  description: "胜过剪刀类和石头类。\n同名牌对拼为平局。"
+  transformation: {fileID: 0}
+  artwork: {fileID: 0}
+  faceColor: {r: 0.76, g: 0.65, b: 0.48, a: 1}

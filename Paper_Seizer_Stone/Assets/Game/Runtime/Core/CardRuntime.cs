@@ -4,6 +4,7 @@ namespace PaperSeizerStone.Battle
 {
     public enum Side { Player, Enemy }
     public enum Gesture { Rock, Paper, Scissors }
+    public enum CardAbility { None, Hammer, Glass, ShatteredGlass, WoodenCrate, FlowerScissors, Pliers, Fork, Silk, GunpowderPaper }
     public enum BattlePhase { Created, Preparing, Planning, Revealing, PlayerCheat, EnemyCheat, Scoring, Shooting, RoundEnd, BattleEnd }
 
     // Immutable rule data, detached from Unity assets.
@@ -11,13 +12,19 @@ namespace PaperSeizerStone.Battle
     {
         public string Id { get; }
         public Gesture Gesture { get; }
+        public CardAbility Ability { get; }
+        public string TransformId { get; }
+        public string Name { get; }
 
-        public CardSpec(string id, Gesture gesture)
+        public CardSpec(string id, Gesture gesture, CardAbility ability = CardAbility.None, string transformId = null, string name = null)
         {
             if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("卡牌必须配置非空的稳定标识。");
             if (!Enum.IsDefined(typeof(Gesture), gesture)) throw new ArgumentOutOfRangeException(nameof(gesture));
             Id = id;
             Gesture = gesture;
+            Ability = ability;
+            TransformId = transformId;
+            Name = name ?? id;
         }
     }
 
@@ -42,7 +49,7 @@ namespace PaperSeizerStone.Battle
         public int InstanceId { get; }
         public string SourceRecordId { get; }
         public Side OriginalSide { get; }
-        public CardSpec Definition { get; }
+        public CardSpec Definition { get; internal set; }
         public bool IsRevealed { get; internal set; }
         public bool RevealedThisRound { get; internal set; }
 

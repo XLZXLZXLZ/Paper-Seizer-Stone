@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c95c0c24771d59a13b1c702858e99e81, type: 3}
+  m_Name: ScissorDealer
+  m_EditorClassIdentifier:
+  enemyId: scissordealer
+  displayName: 利剪客
+  life: 1
+  deck: {fileID: 11400000, guid: 597303ee61c57bf68a4a16957c75b5b8, type: 2}
+  appearance: {fileID: 10001, guid: 682d206a4994d1648810a3aec6779c30, type: 3}

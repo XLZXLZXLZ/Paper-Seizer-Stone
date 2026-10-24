@@ -9,14 +9,20 @@ namespace PaperSeizerStone.Configuration
         [SerializeField] private string definitionId;
         [SerializeField] private string displayName;
         [SerializeField] private Gesture gesture;
+        [SerializeField] private CardAbility ability;
+        [SerializeField, TextArea(2, 4)] private string description;
+        [SerializeField] private CardDefinition transformation;
         [SerializeField] private Texture2D artwork;
         [SerializeField] private Color faceColor = new Color(0.84f, 0.77f, 0.6f);
 
         public string Id => definitionId;
         public string DisplayName => displayName;
         public Gesture Gesture => gesture;
+        public CardAbility Ability => ability;
+        public string Description => description ?? string.Empty;
+        public CardDefinition Transformation => transformation;
         public Texture2D Artwork => artwork;
         public Color FaceColor => faceColor;
-        public CardSpec ToSpec() => new CardSpec(definitionId, gesture);
+        public CardSpec ToSpec() => new CardSpec(definitionId, gesture, ability, transformation == null ? null : transformation.Id, displayName);
     }
 }

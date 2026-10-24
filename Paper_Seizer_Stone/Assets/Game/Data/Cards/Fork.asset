@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e5e1928390a05a00d0a96f8c4a60c3, type: 3}
+  m_Name: Fork
+  m_EditorClassIdentifier:
+  definitionId: fork
+  displayName: 叉子
+  gesture: 2
+  ability: 7
+  description: "揭牌：抽 1 张牌。\n不增加作弊子弹。"
+  transformation: {fileID: 0}
+  artwork: {fileID: 0}
+  faceColor: {r: 0.81, g: 0.79, b: 0.63, a: 1}

@@ -60,6 +60,7 @@ namespace PaperSeizerStone.Battle
         public Side OriginalSide { get; }
         public string DefinitionId { get; }
         public Gesture? Gesture { get; }
+        public CardSpec Spec { get; }
         public bool IsRevealed { get; }
 
         internal ObservedCard(CardRuntime card, bool visible)
@@ -69,6 +70,7 @@ namespace PaperSeizerStone.Battle
             IsRevealed = card.IsRevealed;
             DefinitionId = visible ? card.Definition.Id : null;
             Gesture = visible ? (Gesture?)card.Definition.Gesture : null;
+            Spec = visible ? card.Definition : null;
         }
     }
 
@@ -137,6 +139,24 @@ namespace PaperSeizerStone.Battle
             Enemy = new FighterObservation(state, Side.Enemy, observer);
             ForbiddenCards = new List<int>(state.ForbiddenCards).AsReadOnly();
         }
+
+        private BattleObservation(BattleObservation source, IEnumerable<int> forbiddenCards)
+        {
+            Observer = source.Observer;
+            Phase = source.Phase;
+            Round = source.Round;
+            RevealStep = source.RevealStep;
+            Chips = source.Chips;
+            RewardChips = source.RewardChips;
+            PlayerWon = source.PlayerWon;
+            Player = source.Player;
+            Enemy = source.Enemy;
+            ForbiddenCards = new List<int>(forbiddenCards).AsReadOnly();
+        }
+
+        // Reuse the immutable observations; only the action restrictions may change.
+        internal BattleObservation WithForbiddenCards(IEnumerable<int> forbiddenCards)
+            => new BattleObservation(this, forbiddenCards);
 
         public FighterObservation Get(Side side) => side == Side.Player ? Player : Enemy;
     }

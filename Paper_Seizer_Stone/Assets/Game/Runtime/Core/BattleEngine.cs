@@ -7,14 +7,18 @@ namespace PaperSeizerStone.Battle
     public sealed class BattleEngine
     {
         private readonly Random random;
+        private readonly Dictionary<string, CardSpec> catalog = new Dictionary<string, CardSpec>();
+        private BattleObservation enemyCheatStart;
         public BattleState State { get; }
 
         public BattleEngine(IReadOnlyList<CardSpec> definitions, IReadOnlyList<DeckCardRecord> playerDeck,
             IReadOnlyList<DeckCardRecord> enemyDeck, int playerLife, int enemyLife, int chips, int seed)
         {
             if (playerLife < 1 || enemyLife < 1 || chips < 0) throw new ArgumentException("战斗的初始生命或筹码配置无效。");
-            var catalog = new Dictionary<string, CardSpec>();
             foreach (CardSpec definition in definitions) catalog.Add(definition.Id, definition);
+            foreach (CardSpec definition in definitions)
+                if (definition.Ability == CardAbility.Glass && (string.IsNullOrEmpty(definition.TransformId) || !catalog.ContainsKey(definition.TransformId)))
+                    throw new ArgumentException("玻璃必须配置碎玻璃变形目标。");
             State = new BattleState(playerLife, enemyLife, chips);
             random = new Random(seed);
             AddDeck(playerDeck, catalog, Side.Player);
@@ -24,6 +28,13 @@ namespace PaperSeizerStone.Battle
         }
 
         public BattleObservation Observe(Side observer) => new BattleObservation(State, observer);
+
+        public BattleObservation ObserveEnemyCheat()
+        {
+            if (State.Phase != BattlePhase.EnemyCheat || enemyCheatStart == null)
+                throw new InvalidOperationException("当前没有可用的作弊开始快照。");
+            return enemyCheatStart.WithForbiddenCards(State.ForbiddenCards);
+        }
 
         private static string SideName(Side side) => side == Side.Player ? "你" : "对手";
         private static string GestureName(Gesture gesture) => gesture == Gesture.Rock ? "石头" : gesture == Gesture.Paper ? "布" : "剪刀";
@@ -70,6 +81,7 @@ namespace PaperSeizerStone.Battle
             State.Round++;
             State.RevealStep = 0;
             State.ForbiddenCards.Clear();
+            enemyCheatStart = null;
             foreach (CardRuntime card in State.CardMap.Values)
             {
                 card.IsRevealed = false;
@@ -163,14 +175,49 @@ namespace PaperSeizerStone.Battle
                 {
                     CardRuntime card = State.CardMap[id];
                     card.IsRevealed = true;
+                    bool firstReveal = !card.RevealedThisRound;
                     card.RevealedThisRound = true;
-                    Emit(events, BattleEventKind.CardRevealed, SideName(color) + "揭示了「" + GestureName(card.Definition.Gesture) + "」。", color, id);
+                    Emit(events, BattleEventKind.CardRevealed, SideName(color) + "揭示了「" + card.Definition.Name + "」。", color, id);
+                    if (firstReveal) RevealAbility(card, events);
                 }
             }
             State.Phase = State.RevealStep == 4 ? BattlePhase.Scoring : BattlePhase.PlayerCheat;
+            enemyCheatStart = State.Phase == BattlePhase.PlayerCheat ? Observe(Side.Enemy) : null;
             Emit(events, BattleEventKind.PhaseChanged, State.Phase == BattlePhase.Scoring
                 ? "所有底牌已揭示，开始计分。" : "要冒险改变局面，还是保持原样？");
             return ActionResult.Ok(events);
+        }
+
+        private Side BoardSide(int id)
+        {
+            return Array.IndexOf(State.Get(Side.Player).Slots, id) >= 0 ? Side.Player : Side.Enemy;
+        }
+
+        private void RevealAbility(CardRuntime card, List<BattleEvent> events)
+        {
+            Side side = BoardSide(card.InstanceId);
+            if (card.Definition.Ability == CardAbility.Pliers)
+            {
+                FighterState opponent = State.Get(BasicRules.Other(side));
+                int removed = opponent.Bullets > 1 ? 1 : 0;
+                opponent.Bullets -= removed;
+                Emit(events, BattleEventKind.AbilityTriggered, removed > 0 ? SideName(side) + "的钳子移除了对方一发子弹。" : "钳子无法继续减弹：至少保留一发。", side, card.InstanceId);
+            }
+            else if (card.Definition.Ability == CardAbility.Fork)
+            {
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的叉子尝试抽取一张牌，不增加作弊子弹。", side, card.InstanceId);
+                if (Draw(side, events) == 0) Emit(events, BattleEventKind.AbilityTriggered, "牌库与弃牌堆已空，叉子没有抽到牌。", side, card.InstanceId);
+            }
+        }
+
+        private void TransformAfterSwap(int id, Side side, List<BattleEvent> events)
+        {
+            CardRuntime card = State.CardMap[id];
+            if (card.Definition.Ability != CardAbility.Glass) return;
+            card.Definition = catalog[card.Definition.TransformId];
+            // Private enemy transformations must not disclose the hidden card's identity.
+            string message = side == Side.Player || card.IsRevealed ? SideName(side) + "的玻璃碎裂，变为碎玻璃。" : "对手的暗牌发生了变化。";
+            Emit(events, BattleEventKind.CardTransformed, message, side, id);
         }
 
         public ActionResult Cheat(Side side, CheatAction action)
@@ -223,7 +270,11 @@ namespace PaperSeizerStone.Battle
                 State.ForbiddenCards.Add(action.SecondCard);
             }
             if (action.Kind == CheatKind.SwapBoard || action.Kind == CheatKind.SwapHand)
+            {
                 Emit(events, BattleEventKind.CardsSwapped, SideName(side) + "交换了两张牌。", side, action.FirstCard);
+                TransformAfterSwap(action.FirstCard, side, events);
+                TransformAfterSwap(action.SecondCard, side, events);
+            }
             else if (action.Kind == CheatKind.Draw)
             {
                 int drawnId = Draw(side, events);
@@ -240,9 +291,10 @@ namespace PaperSeizerStone.Battle
             else
             {
                 State.ForbiddenCards.Clear();
+                enemyCheatStart = null;
                 State.Phase = BattlePhase.Revealing;
             }
-            Emit(events, BattleEventKind.PhaseChanged, side == Side.Player ? "对手正在考虑下一步。" : "继续揭牌。");
+            Emit(events, BattleEventKind.PhaseChanged, side == Side.Player ? "双方正在执行本次行动。" : "继续揭牌。");
             return ActionResult.Ok(events);
         }
 
@@ -254,17 +306,35 @@ namespace PaperSeizerStone.Battle
             FighterState enemy = State.Get(Side.Enemy);
             for (int lane = 0; lane < BasicRules.Slots; lane++)
             {
-                Gesture a = State.Cards[player.Slots[lane]].Definition.Gesture;
-                Gesture b = State.Cards[enemy.Slots[lane]].Definition.Gesture;
-                int p = BasicRules.Points(a, b);
-                int e = BasicRules.Points(b, a);
+                CardRuntime a = State.CardMap[player.Slots[lane]];
+                CardRuntime b = State.CardMap[enemy.Slots[lane]];
+                int result = CardRules.Compare(a.Definition, b.Definition);
+                int p = CardRules.Points(a.Definition, result);
+                int e = CardRules.Points(b.Definition, -result);
                 player.Score += p;
                 enemy.Score += e;
                 Emit(events, BattleEventKind.LaneScored, "第 " + (lane + 1) + " 组对位    你 +" + p + " 分    ·    对手 +" + e + " 分", lane: lane);
+                if (result != 0) WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
             }
             State.Phase = BattlePhase.Shooting;
             Emit(events, BattleEventKind.PhaseChanged, player.Score == enemy.Score ? "总分相同，双方同时开枪。" : player.Score > enemy.Score ? "你赢下了总分，举枪吧。" : "对手赢下了总分，即将开枪。");
             return ActionResult.Ok(events);
+        }
+
+        private void WinAbility(CardRuntime card, Side side, List<BattleEvent> events)
+        {
+            if (card.Definition.Ability == CardAbility.Silk)
+            {
+                State.Chips += 2;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的绸缎赢下对位，奖池增加两枚筹码。", side, card.InstanceId);
+            }
+            else if (card.Definition.Ability == CardAbility.GunpowderPaper)
+            {
+                FighterState fighter = State.Get(side);
+                bool full = fighter.Bullets >= BasicRules.Chambers;
+                fighter.Bullets = Math.Min(BasicRules.Chambers, fighter.Bullets + 1);
+                Emit(events, BattleEventKind.AbilityTriggered, full ? "火药纸获胜，但己方弹巢已满。" : SideName(side) + "的火药纸获胜，己方装入一发子弹。", side, card.InstanceId);
+            }
         }
 
         public ActionResult ExecuteShots()

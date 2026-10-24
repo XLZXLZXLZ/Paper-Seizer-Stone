@@ -12,21 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c245235b6d02f2f3454ff0f5d40ebfc, type: 3}
   m_Name: BasicBattle
   m_EditorClassIdentifier:
-  playerDeck:
-  - Card: {fileID: 11400000, guid: 479642ed1224655219da791985cf46cd, type: 2}
-    Copies: 4
-  - Card: {fileID: 11400000, guid: e9c195d4c4b83362ded9847faaaad54c, type: 2}
-    Copies: 4
-  - Card: {fileID: 11400000, guid: fcf6cbe8af1805bc721b86cd9de2177b, type: 2}
-    Copies: 4
-  enemyDeck:
-  - Card: {fileID: 11400000, guid: 479642ed1224655219da791985cf46cd, type: 2}
-    Copies: 4
-  - Card: {fileID: 11400000, guid: e9c195d4c4b83362ded9847faaaad54c, type: 2}
-    Copies: 4
-  - Card: {fileID: 11400000, guid: fcf6cbe8af1805bc721b86cd9de2177b, type: 2}
-    Copies: 4
+  playerDeck: {fileID: 11400000, guid: 30d172c64f83b355321fce3de14e3099, type: 2}
+  enemies:
+  - {fileID: 11400000, guid: a38d2e25d57c23c7e7c09c8523f40fec, type: 2}
+  - {fileID: 11400000, guid: fc5c9d36c47c138023d7f3a952f65387, type: 2}
+  - {fileID: 11400000, guid: fe56872624f795d7dcd28bd4fde9148e, type: 2}
+  - {fileID: 11400000, guid: 47766ce73413db68539f50168441d7d0, type: 2}
+  shop: {fileID: 11400000, guid: c29dc638b5d9b5b601cfd1383deb0c7d, type: 2}
   playerLife: 2
-  enemyLife: 1
   chips: 8
   seed: 0

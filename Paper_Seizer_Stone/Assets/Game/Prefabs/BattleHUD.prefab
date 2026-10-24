@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 10002}
+  - component: {fileID: 2052224317999067416}
   - component: {fileID: 10003}
   - component: {fileID: 10004}
   - component: {fileID: 10100}
@@ -1877,7 +1878,7 @@ MonoBehaviour:
   m_Color: {r: 0.62, g: 0.66, b: 0.61, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
-  m_text: "按回车，或点击桌面的「再来一局」"
+  m_text: "按回车，或点击桌面的「重新开始」"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
   m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
@@ -2277,3 +2278,30 @@ MonoBehaviour:
   m_baseMaterial: {fileID: 0}
   m_sortingLayerID: 0
   m_sortingOrder: 0
+--- !u!114 &2052224317999067416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ff8b34e969c8b25ba789d2f3e095740, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  parts:
+  - {fileID: 10006}
+  - {fileID: 10022}
+  - {fileID: 10042}
+  runtimeRoots: []
+  radialWorld: 0
+  tableCenter: {fileID: 0}
+  centerOffset: {x: 0, y: 0, z: 0}
+  outwardDistance: 8
+  rise: 4
+  randomOffset: {x: 0.65, y: 0.8, z: 0.65}
+  travelOffset: {x: 0, y: -1100, z: 0}
+  travelRotation: {x: 0, y: 0, z: 0}
+  duration: 0.6
+  stagger: 0.02

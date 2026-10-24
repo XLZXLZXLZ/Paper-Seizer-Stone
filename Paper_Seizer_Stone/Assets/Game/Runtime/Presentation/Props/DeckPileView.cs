@@ -1,0 +1,28 @@
+using UnityEngine;
+
+namespace PaperSeizerStone.Presentation
+{
+    // Each saved layer has its own slight offset and yaw; refreshing counts never rerolls it.
+    public sealed class DeckPileView : MonoBehaviour
+    {
+        [SerializeField] private Renderer[] layers;
+        [SerializeField] private Material backMaterial;
+        private bool initialized;
+
+        public void SetCount(int count)
+        {
+            if (!initialized)
+            {
+                if (layers == null || layers.Length == 0 || backMaterial == null)
+                    throw new System.InvalidOperationException(name + "缺少牌堆卡背层或卡背材质。");
+                foreach (Renderer layer in layers)
+                {
+                    if (layer == null) throw new System.InvalidOperationException(name + "有未绑定的卡背层。");
+                    layer.sharedMaterial = backMaterial;
+                }
+                initialized = true;
+            }
+            for (int i = 0; i < layers.Length; i++) layers[i].gameObject.SetActive(i < count);
+        }
+    }
+}

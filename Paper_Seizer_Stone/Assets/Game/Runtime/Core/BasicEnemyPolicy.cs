@@ -21,10 +21,16 @@ namespace PaperSeizerStone.Battle
             return ids.GetRange(0, BasicRules.Slots).ToArray();
         }
 
-        private static float Value(Gesture? own, Gesture? opponent)
+        private static float Value(CardSpec own, CardSpec opponent)
         {
             // Unknown cards contribute neutral expected score difference, never their real gesture.
-            return own.HasValue && opponent.HasValue ? BasicRules.Compare(own.Value, opponent.Value) * 2 : 0;
+            return own != null && opponent != null ? CardRules.Points(own, CardRules.Compare(own, opponent)) - CardRules.Points(opponent, CardRules.Compare(opponent, own)) : 0;
+        }
+
+        private static CardSpec AfterSwap(CardSpec card)
+        {
+            return card != null && card.Ability == CardAbility.Glass
+                ? new CardSpec(card.TransformId, Gesture.Scissors, CardAbility.ShatteredGlass) : card;
         }
 
         public CheatAction ChooseCheat(BattleObservation observation)
@@ -43,8 +49,8 @@ namespace PaperSeizerStone.Battle
                 {
                     ObservedCard second = own.Board[b];
                     if (second == null || forbidden.Contains(second.Id)) continue;
-                    float gain = Value(second.Gesture, opponent.Board[a]?.Gesture) + Value(first.Gesture, opponent.Board[b]?.Gesture)
-                        - Value(first.Gesture, opponent.Board[a]?.Gesture) - Value(second.Gesture, opponent.Board[b]?.Gesture);
+                    float gain = Value(AfterSwap(second.Spec), opponent.Board[a]?.Spec) + Value(AfterSwap(first.Spec), opponent.Board[b]?.Spec)
+                        - Value(first.Spec, opponent.Board[a]?.Spec) - Value(second.Spec, opponent.Board[b]?.Spec);
                     if (gain > bestGain)
                     {
                         bestGain = gain;
@@ -54,7 +60,7 @@ namespace PaperSeizerStone.Battle
                 foreach (ObservedCard hand in own.Hand)
                 {
                     if (forbidden.Contains(hand.Id)) continue;
-                    float gain = Value(hand.Gesture, opponent.Board[a]?.Gesture) - Value(first.Gesture, opponent.Board[a]?.Gesture);
+                    float gain = Value(AfterSwap(hand.Spec), opponent.Board[a]?.Spec) - Value(first.Spec, opponent.Board[a]?.Spec);
                     if (gain > bestGain)
                     {
                         bestGain = gain;
@@ -69,3 +75,4 @@ namespace PaperSeizerStone.Battle
         }
     }
 }
+

@@ -17,12 +17,22 @@ namespace PaperSeizerStone.Flow
         [SerializeField] private BattleCameraRig cameraRig;
         [SerializeField] private TabletopView tableView;
         [SerializeField] private BattleInput battleInput;
+        [SerializeField] private ShopTableView shopView;
+        [SerializeField] private BurnTableView burnView;
+        [SerializeField] private TablePanel battlePanel;
+        [Header("动画之间的留白")]
+        [SerializeField, Min(0)] private float actionPause = 0.15f;
+        [SerializeField, Min(0)] private float phasePause = 0.3f;
+        [SerializeField, Min(0)] private float victoryPause = 0.8f;
 
         private BattleEngine engine;
         private BasicEnemyPolicy enemy;
+        private AdventureState adventure;
+        private EnemyDefinition currentEnemy;
         private readonly List<int> draftHand = new List<int>();
         private readonly int[] draftSlots = new int[BasicRules.Slots];
         private bool busy = true;
+        private bool burningDeck;
         private int actualSeed;
         private string initializationError;
         public string InitializationError => initializationError;
@@ -30,7 +40,11 @@ namespace PaperSeizerStone.Flow
         public event Action<BattleObservation> BattleFinished;
         public TabletopView View => tableView;
         public Camera Camera => cameraRig != null ? cameraRig.Camera : null;
-        public bool CanInteract => !busy && engine != null;
+        public string EnemyName => currentEnemy == null ? "对手" : currentEnemy.DisplayName;
+        public int EncounterNumber => adventure == null ? 1 : adventure.EncounterIndex + 1;
+        public bool CanInteract => !busy && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
+        public bool CanShopInteract => !busy && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanBurnInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
             || (engine.State.Phase == BattlePhase.PlayerCheat && engine.State.Get(Side.Enemy).Bullets < BasicRules.Chambers));
 
@@ -39,13 +53,19 @@ namespace PaperSeizerStone.Flow
             try
             {
                 if (definition == null) throw new InvalidOperationException("请在战斗控制器中配置战斗资源。");
-                engine = definition.CreateEngine(out actualSeed);
-                enemy = new BasicEnemyPolicy(unchecked(actualSeed + 7919));
-                if (cameraRig == null || tableView == null || cardPrefab == null || battleInput == null)
-                    throw new InvalidOperationException("请在场景中绑定桌面、相机、卡牌预制体与输入组件。");
+                adventure = definition.CreateAdventure();
+                if (cameraRig == null || tableView == null || cardPrefab == null || battleInput == null
+                    || shopView == null || burnView == null || battlePanel == null)
+                    throw new InvalidOperationException("请在场景中绑定战斗、商店、烧牌 Panel、相机与输入组件。");
                 cameraRig.Initialize();
                 tableView.Initialize(definition, cardPrefab);
                 battleInput.Initialize(this);
+                shopView.gameObject.SetActive(true);
+                shopView.Initialize(this, definition.GetCardAssets());
+                burnView.gameObject.SetActive(true);
+                burnView.Initialize(this, definition.GetCardAssets());
+                battlePanel.Initialize();
+                ConfigureEncounter();
             }
             catch (Exception exception)
             {
@@ -53,7 +73,35 @@ namespace PaperSeizerStone.Flow
                 Debug.LogException(exception, this);
                 return;
             }
-            StartCoroutine(BeginRound());
+            StartCoroutine(EnterEncounter());
+        }
+
+        private void ConfigureEncounter()
+        {
+            currentEnemy = definition.GetEnemy(adventure.EncounterIndex);
+            engine = definition.CreateEngine(adventure, out actualSeed);
+            enemy = new BasicEnemyPolicy(unchecked(actualSeed + 7919));
+            tableView.ResetEncounter(currentEnemy);
+        }
+
+        private IEnumerator MoveBattle(bool enter)
+        {
+            if (!enter) tableView.PrepareExit();
+            yield return enter ? battlePanel.Show() : battlePanel.Hide();
+            yield return new WaitForSeconds(phasePause);
+        }
+
+        private IEnumerator MoveCamera(BattleCameraPose pose)
+        {
+            yield return cameraRig.MoveTo(pose);
+            yield return new WaitForSeconds(phasePause);
+        }
+
+        private IEnumerator EnterEncounter()
+        {
+            busy = true;
+            yield return MoveBattle(true);
+            yield return BeginRound();
         }
 
         private IEnumerator BeginRound()
@@ -82,9 +130,10 @@ namespace PaperSeizerStone.Flow
                 }
                 else
                 {
-                    if (battleEvent.Kind == BattleEventKind.RoundEnded) yield return cameraRig.MoveTo(BattleCameraPose.Table);
+                    if (battleEvent.Kind == BattleEventKind.RoundEnded) yield return MoveCamera(BattleCameraPose.Table);
                     yield return tableView.Present(battleEvent);
                 }
+                yield return new WaitForSeconds(battleEvent.Kind == BattleEventKind.PhaseChanged ? phasePause : actionPause);
             }
         }
 
@@ -93,7 +142,7 @@ namespace PaperSeizerStone.Flow
             if (!CanInteract) return;
             if (engine.State.Phase == BattlePhase.BattleEnd)
             {
-                // A restart is a fresh encounter, not continuation of an adventure.
+                // Defeat starts a fresh adventure; victories enter the shop automatically.
                 UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path);
                 return;
             }
@@ -123,16 +172,14 @@ namespace PaperSeizerStone.Flow
                 busy = false;
                 yield break;
             }
-            yield return cameraRig.MoveTo(BattleCameraPose.Scoring);
+            yield return MoveCamera(BattleCameraPose.Scoring);
             yield return Play(engine.ScoreRound());
-            yield return cameraRig.MoveTo(BattleCameraPose.Shooting);
+            yield return MoveCamera(BattleCameraPose.Shooting);
             yield return tableView.PrepareShooting();
             yield return Play(engine.ExecuteShots());
             if (engine.State.Phase == BattlePhase.BattleEnd)
             {
-                yield return cameraRig.MoveTo(BattleCameraPose.Table);
-                busy = false;
-                BattleFinished?.Invoke(engine.Observe(Side.Player));
+                yield return FinishEncounter();
             }
             else yield return BeginRound();
         }
@@ -152,11 +199,135 @@ namespace PaperSeizerStone.Flow
 
         private IEnumerator ResolveCheats(ActionResult playerResult)
         {
-            yield return Play(playerResult);
-            yield return new WaitForSeconds(0.35f);
-            CheatAction enemyAction = enemy.ChooseCheat(engine.Observe(Side.Enemy));
-            yield return Play(engine.Cheat(Side.Enemy, enemyAction));
+            CheatAction enemyAction = enemy.ChooseCheat(engine.ObserveEnemyCheat());
+            ActionResult enemyResult = engine.Cheat(Side.Enemy, enemyAction);
+            if (!enemyResult.Success) throw new InvalidOperationException(enemyResult.Error);
+            yield return tableView.PresentCheats(playerResult.Events, enemyResult.Events);
+            yield return new WaitForSeconds(actionPause);
             yield return RevealAndContinue();
+        }
+
+        private IEnumerator FinishEncounter()
+        {
+            BattleObservation outcome = engine.Observe(Side.Player);
+            adventure.FinishBattle(outcome, outcome.PlayerWon
+                ? definition.Shop.CreateStock(unchecked(actualSeed ^ 15485863)) : new List<ShopOffer>());
+            BattleFinished?.Invoke(outcome);
+            if (!outcome.PlayerWon)
+            {
+                yield return MoveCamera(BattleCameraPose.Table);
+                busy = false;
+                yield break;
+            }
+            yield return new WaitForSeconds(victoryPause);
+            yield return MoveCamera(BattleCameraPose.Table);
+            yield return MoveBattle(false);
+            shopView.Prepare(adventure, definition.Shop, definition.GetEnemy(adventure.EncounterIndex + 1));
+            yield return shopView.Show();
+            yield return new WaitForSeconds(phasePause);
+            busy = false;
+            shopView.Refresh();
+        }
+
+        public void BuyCard(int index)
+        {
+            if (!CanShopInteract) return;
+            if (!adventure.TryBuy(index, out string error)) { shopView.Notify(error); return; }
+            busy = true;
+            shopView.SetInteractable(false);
+            StartCoroutine(CompletePurchase(index, adventure.Offers[index].Price));
+        }
+
+        private IEnumerator CompletePurchase(int index, int price)
+        {
+            yield return shopView.Purchase(index, price);
+            yield return new WaitForSeconds(actionPause);
+            busy = false;
+            shopView.Refresh();
+            shopView.Notify("新牌已加入牌组。可以继续整备，或前往下一场战斗。");
+        }
+
+        public void RemoveCard(string recordId)
+        {
+            if (!CanBurnInteract) return;
+            int price = definition.Shop.RemovePrice;
+            if (!adventure.TryRemove(recordId, price, definition.Shop.MinimumDeckSize, out string error))
+            { burnView.Notify(error); return; }
+            busy = true;
+            burnView.SetInteractable(false);
+            StartCoroutine(CompleteRemoval(price));
+        }
+
+        private IEnumerator CompleteRemoval(int price)
+        {
+            yield return burnView.Burn(price);
+            yield return new WaitForSeconds(actionPause);
+            yield return ReturnFromBurnTable();
+            shopView.Notify("选中的牌已烧毁。可以继续整备，或前往下一场战斗。");
+        }
+
+        public void OpenBurnTable()
+        {
+            if (!CanShopInteract) return;
+            busy = true;
+            shopView.SetInteractable(false);
+            StartCoroutine(EnterBurnTable());
+        }
+
+        private IEnumerator EnterBurnTable()
+        {
+            yield return shopView.Hide();
+            yield return new WaitForSeconds(phasePause);
+            burningDeck = true;
+            burnView.Prepare(adventure, definition.Shop);
+            yield return burnView.Show();
+            yield return new WaitForSeconds(phasePause);
+            busy = false;
+            burnView.Refresh();
+        }
+
+        public void CloseBurnTable()
+        {
+            if (!CanBurnInteract) return;
+            busy = true;
+            burnView.SetInteractable(false);
+            StartCoroutine(ReturnFromBurnTable());
+        }
+
+        private IEnumerator ReturnFromBurnTable()
+        {
+            yield return burnView.Hide();
+            yield return new WaitForSeconds(phasePause);
+            burningDeck = false;
+            shopView.Prepare(adventure, definition.Shop, definition.GetEnemy(adventure.EncounterIndex + 1));
+            yield return shopView.Show();
+            yield return new WaitForSeconds(phasePause);
+            busy = false;
+            shopView.Refresh();
+        }
+
+        public void LeaveShop()
+        {
+            if (!CanShopInteract) return;
+            busy = true;
+            shopView.SetInteractable(false);
+            StartCoroutine(ContinueAdventure());
+        }
+
+        private IEnumerator ContinueAdventure()
+        {
+            yield return shopView.Hide();
+            yield return new WaitForSeconds(phasePause);
+            adventure.BeginNextBattle();
+            bool configured = true;
+            try { ConfigureEncounter(); }
+            catch (Exception exception)
+            {
+                configured = false;
+                initializationError = exception.Message;
+                Debug.LogException(exception, this);
+            }
+            if (configured) yield return EnterEncounter();
         }
 
         public void DrawExtra()
