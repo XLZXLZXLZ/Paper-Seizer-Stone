@@ -9,14 +9,16 @@ namespace PaperSeizerStone.Presentation
     {
         [SerializeField] private TableFlyGroup world;
         [SerializeField] private TableFlyGroup hud;
+        [SerializeField] private TableFadeGroup hudFade;
         [SerializeField] private GameObject[] contentRoots;
         public bool IsVisible { get; private set; }
 
         public void Initialize()
         {
-            if (world == null || hud == null) throw new InvalidOperationException(name + "未配置 Panel 的桌面与界面转场。");
+            if (world == null || (hud == null && hudFade == null)) throw new InvalidOperationException(name + "未配置 Panel 的桌面与界面转场。");
             world.Initialize();
-            hud.Initialize();
+            if (hudFade != null) hudFade.Initialize();
+            else hud.Initialize();
             HideImmediately();
         }
 
@@ -28,7 +30,8 @@ namespace PaperSeizerStone.Presentation
         public void HideImmediately()
         {
             world.HideImmediately();
-            hud.HideImmediately();
+            if (hudFade != null) hudFade.HideImmediately();
+            else hud.HideImmediately();
             SetContent(false);
             IsVisible = false;
         }
@@ -37,17 +40,19 @@ namespace PaperSeizerStone.Presentation
         {
             SetContent(true);
             Coroutine worldMotion = StartCoroutine(world.Play(true));
-            Coroutine hudMotion = StartCoroutine(hud.Play(true));
+            Coroutine hudMotion = StartCoroutine(hudFade != null ? hudFade.Play(true) : hud.Play(true));
             yield return worldMotion;
             yield return hudMotion;
             IsVisible = true;
+            if (hudFade != null) hudFade.SetInteractable(true);
         }
 
         public IEnumerator Hide()
         {
             IsVisible = false;
+            if (hudFade != null) hudFade.SetInteractable(false);
             Coroutine worldMotion = StartCoroutine(world.Play(false));
-            Coroutine hudMotion = StartCoroutine(hud.Play(false));
+            Coroutine hudMotion = StartCoroutine(hudFade != null ? hudFade.Play(false) : hud.Play(false));
             yield return worldMotion;
             yield return hudMotion;
             SetContent(false);

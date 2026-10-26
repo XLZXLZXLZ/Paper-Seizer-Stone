@@ -93,9 +93,11 @@ namespace PaperSeizerStone.Battle
                 State.Get(side).Score = 0;
             }
             Emit(events, BattleEventKind.RoundStarted, "新回合开始，双方左轮重新装入两发子弹。");
-            int count = State.Round == 1 ? 5 : 4;
             foreach (Side side in new[] { Side.Player, Side.Enemy })
+            {
+                int count = State.Round == 1 && side == Side.Player ? 5 : 4;
                 for (int i = 0; i < count; i++) Draw(side, events);
+            }
             State.Phase = BattlePhase.Planning;
             Emit(events, BattleEventKind.PhaseChanged, "选好四张牌，安排它们的位置。");
             return ActionResult.Ok(events);
