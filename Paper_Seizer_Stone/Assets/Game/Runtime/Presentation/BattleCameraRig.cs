@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using PaperSeizerStone.Configuration;
 
 namespace PaperSeizerStone.Presentation
 {
@@ -9,22 +10,28 @@ namespace PaperSeizerStone.Presentation
     public sealed class BattleCameraRig : MonoBehaviour
     {
         [SerializeField] private Camera sceneCamera;
-        [SerializeField] private Transform tablePose;
-        [SerializeField] private Transform scoringPose;
-        [SerializeField] private Transform shootingPose;
-        [SerializeField, Min(0.05f)] private float transitionDuration = 0.3f;
+        [SerializeField] private BattleCameraDefinition definition;
         public Camera Camera => sceneCamera;
+        public BattleCameraDefinition Definition => definition;
 
         public void Initialize()
         {
-            if (sceneCamera == null || tablePose == null || scoringPose == null || shootingPose == null)
-                throw new System.InvalidOperationException("请配置相机预制体中的相机与三个机位定位点。");
-            sceneCamera.transform.SetPositionAndRotation(tablePose.position, tablePose.rotation);
+            if (sceneCamera == null || definition == null)
+                throw new System.InvalidOperationException("请配置相机预制体中的 MainCamera 与相机配置 SO。");
+            Pose target = GetWorldPose(BattleCameraPose.Table);
+            sceneCamera.transform.SetPositionAndRotation(target.position, target.rotation);
+        }
+
+        public Pose GetWorldPose(BattleCameraPose pose)
+        {
+            Pose localPose = definition.GetLocalPose(pose);
+            return new Pose(transform.TransformPoint(localPose.position), transform.rotation * localPose.rotation);
         }
 
         public IEnumerator MoveTo(BattleCameraPose pose)
         {
-            Transform target = pose == BattleCameraPose.Table ? tablePose : pose == BattleCameraPose.Scoring ? scoringPose : shootingPose;
+            Pose target = GetWorldPose(pose);
+            float transitionDuration = definition.TransitionDuration;
             Transform cameraTransform = sceneCamera.transform;
             cameraTransform.DOKill();
             cameraTransform.DOMove(target.position, transitionDuration).SetEase(Ease.InOutSine);
@@ -35,11 +42,12 @@ namespace PaperSeizerStone.Presentation
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0.8f, 0.65f, 0.35f);
-            foreach (Transform pose in new[] { tablePose, scoringPose, shootingPose })
+            if (definition == null) return;
+            foreach (BattleCameraPose key in new[] { BattleCameraPose.Table, BattleCameraPose.Scoring, BattleCameraPose.Shooting })
             {
-                if (pose == null) continue;
+                Pose pose = GetWorldPose(key);
                 Gizmos.DrawWireSphere(pose.position, 0.12f);
-                Gizmos.DrawRay(pose.position, pose.forward * 0.65f);
+                Gizmos.DrawRay(pose.position, pose.rotation * Vector3.forward * 0.65f);
             }
         }
 

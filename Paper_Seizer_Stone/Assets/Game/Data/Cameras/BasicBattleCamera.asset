@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f849b77145f54b32a70fdcdcbeb7d9ea, type: 3}
+  m_Name: BasicBattleCamera
+  m_EditorClassIdentifier:
+  tablePose:
+    localPosition: {x: 0, y: 3.54, z: -4.3}
+    localRotation: {x: 0.19181989, y: 0, z: 0, w: 0.9814302}
+  scoringPose:
+    localPosition: {x: 0, y: 9, z: -0.05}
+    localRotation: {x: 0.70513989, y: 0, z: 0, w: 0.709068216}
+  shootingPose:
+    localPosition: {x: 0, y: 1.65, z: -3.7}
+    localRotation: {x: 0.0421408836, y: 0, z: 0, w: 0.999111678}
+  transitionDuration: 0.3
