@@ -66,8 +66,8 @@ MonoBehaviour:
   ghostText: {fileID: 10027}
   back: {fileID: 10009}
   hitbox: {fileID: 10003}
-  playerBack: {fileID: 2100000, guid: 9b038ecf06e0665d538d0055b4c5705a, type: 2}
-  enemyBack: {fileID: 2100000, guid: 599db448521d3fbd015ff41a7ea8baac, type: 2}
+  playerBack: {fileID: 2100000, guid: 0b6a78c179a34d8c8694399c65eb9460, type: 2}
+  enemyBack: {fileID: 2100000, guid: 2419cbfbbb96462c9f950f828ec0fe2f, type: 2}
   effectText: {fileID: 3629948931126321761}
   ghostEffectText: {fileID: 1379074921339262721}
 --- !u!1 &10004
@@ -166,7 +166,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9b038ecf06e0665d538d0055b4c5705a, type: 2}
+  - {fileID: 2100000, guid: 0b6a78c179a34d8c8694399c65eb9460, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -236,7 +236,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c6969250f0ca08ff6573a1bb21d9a2f7, type: 2}
+  - {fileID: 2100000, guid: 03060a88b69643dd873313abca053691, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

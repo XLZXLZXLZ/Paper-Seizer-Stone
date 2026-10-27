@@ -124,8 +124,8 @@ MonoBehaviour:
   confirmLabel: {fileID: 10197}
   roundLabel: {fileID: 10202}
   confirmButtonRenderer: {fileID: 10190}
-  activeButtonMaterial: {fileID: 2100000, guid: 0e922db63741e2e58e89d860141b5083, type: 2}
-  inactiveButtonMaterial: {fileID: 2100000, guid: e96a2001afbee141e9e104dc89dad47d, type: 2}
+  activeButtonMaterial: {fileID: 2100000, guid: 440db14085b546efa3293ff07915c118, type: 2}
+  inactiveButtonMaterial: {fileID: 2100000, guid: c55cbd37e56045d69af666c2dbd9b882, type: 2}
   audioSource: {fileID: 10242}
   cardSound: {fileID: 0}
   shotSound: {fileID: 0}
@@ -2153,11 +2153,11 @@ PrefabInstance:
     - target: {fileID: 10007, guid: 0d37c7f9552cb2644ede9366125318ef, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: ""
-      objectReference: {fileID: 2100000, guid: 599db448521d3fbd015ff41a7ea8baac, type: 2}
+      objectReference: {fileID: 2100000, guid: 2419cbfbbb96462c9f950f828ec0fe2f, type: 2}
     - target: {fileID: 2149235644351483153, guid: 0d37c7f9552cb2644ede9366125318ef, type: 3}
       propertyPath: backMaterial
       value: 
-      objectReference: {fileID: 2100000, guid: 599db448521d3fbd015ff41a7ea8baac, type: 2}
+      objectReference: {fileID: 2100000, guid: 2419cbfbbb96462c9f950f828ec0fe2f, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d37c7f9552cb2644ede9366125318ef, type: 3}
 --- !u!4 &2980274701340094079 stripped
