@@ -16,7 +16,8 @@ MonoBehaviour:
   displayName: 绸缎
   gesture: 1
   ability: 8
-  description: "对位获胜：奖池增加\n2 枚筹码。"
+  description: "被翻开时触发效果，该局分数比对方低则对方减少三分。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.74, g: 0.66, b: 0.85, a: 1}
+  appearance: {fileID: 11400000, guid: 908a4424e3594a07a5ea90fc480ebea8, type: 2}

@@ -9,6 +9,8 @@ namespace PaperSeizerStone.Battle
         private readonly Random random;
         private readonly Dictionary<string, CardSpec> catalog = new Dictionary<string, CardSpec>();
         private BattleObservation enemyCheatStart;
+        // Reveal effects survive returning the source card to hand until this round ends.
+        private readonly Dictionary<int, Side> trailingScorePenalties = new Dictionary<int, Side>();
         public BattleState State { get; }
 
         public BattleEngine(IReadOnlyList<CardSpec> definitions, IReadOnlyList<DeckCardRecord> playerDeck,
@@ -80,6 +82,7 @@ namespace PaperSeizerStone.Battle
             State.Phase = BattlePhase.Preparing;
             State.Round++;
             State.RevealStep = 0;
+            trailingScorePenalties.Clear();
             State.ForbiddenCards.Clear();
             enemyCheatStart = null;
             foreach (CardRuntime card in State.CardMap.Values)
@@ -203,12 +206,13 @@ namespace PaperSeizerStone.Battle
                 FighterState opponent = State.Get(BasicRules.Other(side));
                 int removed = opponent.Bullets > 1 ? 1 : 0;
                 opponent.Bullets -= removed;
-                Emit(events, BattleEventKind.AbilityTriggered, removed > 0 ? SideName(side) + "的钳子移除了对方一发子弹。" : "钳子无法继续减弹：至少保留一发。", side, card.InstanceId);
+                Emit(events, BattleEventKind.AbilityTriggered, removed > 0 ? SideName(side) + "的「" + card.Definition.Name + "」移除了对方一发子弹。" : "至少保留一发子弹，无法继续减弹。", side, card.InstanceId);
             }
-            else if (card.Definition.Ability == CardAbility.Fork)
+            else if (card.Definition.Ability == CardAbility.Fork || card.Definition.Ability == CardAbility.Silk)
             {
-                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的叉子尝试抽取一张牌，不增加作弊子弹。", side, card.InstanceId);
-                if (Draw(side, events) == 0) Emit(events, BattleEventKind.AbilityTriggered, "牌库与弃牌堆已空，叉子没有抽到牌。", side, card.InstanceId);
+                trailingScorePenalties[card.InstanceId] = side;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                    + "」已生效：本回合计分后若己方分数较低，对方减少三分。", side, card.InstanceId);
             }
         }
 
@@ -218,7 +222,7 @@ namespace PaperSeizerStone.Battle
             if (card.Definition.Ability != CardAbility.Glass) return;
             card.Definition = catalog[card.Definition.TransformId];
             // Private enemy transformations must not disclose the hidden card's identity.
-            string message = side == Side.Player || card.IsRevealed ? SideName(side) + "的玻璃碎裂，变为碎玻璃。" : "对手的暗牌发生了变化。";
+            string message = side == Side.Player || card.IsRevealed ? SideName(side) + "的炼金玻璃瓶碎裂，变为碎玻璃。" : "对手的暗牌发生了变化。";
             Emit(events, BattleEventKind.CardTransformed, message, side, id);
         }
 
@@ -318,19 +322,33 @@ namespace PaperSeizerStone.Battle
                 Emit(events, BattleEventKind.LaneScored, "第 " + (lane + 1) + " 组对位    你 +" + p + " 分    ·    对手 +" + e + " 分", lane: lane);
                 if (result != 0) WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
             }
+            ResolveTrailingScorePenalties(events);
             State.Phase = BattlePhase.Shooting;
             Emit(events, BattleEventKind.PhaseChanged, player.Score == enemy.Score ? "总分相同，双方同时开枪。" : player.Score > enemy.Score ? "你赢下了总分，举枪吧。" : "对手赢下了总分，即将开枪。");
             return ActionResult.Ok(events);
         }
 
+        private void ResolveTrailingScorePenalties(List<BattleEvent> events)
+        {
+            int playerScore = State.Get(Side.Player).Score;
+            int enemyScore = State.Get(Side.Enemy).Score;
+            // All conditions use the same completed lane totals; deductions never re-evaluate them.
+            foreach (var effect in trailingScorePenalties)
+            {
+                int ownScore = effect.Value == Side.Player ? playerScore : enemyScore;
+                int otherScore = effect.Value == Side.Player ? enemyScore : playerScore;
+                if (ownScore >= otherScore) continue;
+                State.Get(BasicRules.Other(effect.Value)).Score -= 3;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(effect.Value) + "的「"
+                    + State.CardMap[effect.Key].Definition.Name + "」结算：己方分数较低，对方减少三分。",
+                    effect.Value, effect.Key);
+            }
+            trailingScorePenalties.Clear();
+        }
+
         private void WinAbility(CardRuntime card, Side side, List<BattleEvent> events)
         {
-            if (card.Definition.Ability == CardAbility.Silk)
-            {
-                State.Chips += 2;
-                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的绸缎赢下对位，奖池增加两枚筹码。", side, card.InstanceId);
-            }
-            else if (card.Definition.Ability == CardAbility.GunpowderPaper)
+            if (card.Definition.Ability == CardAbility.GunpowderPaper)
             {
                 FighterState fighter = State.Get(side);
                 bool full = fighter.Bullets >= BasicRules.Chambers;

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91ab00117d03b7d498d3adc8f3eae7e4, type: 3}
+  m_Name: CypressClub
+  m_EditorClassIdentifier:
+  displayName: 柏木棒
+  description: "对上布类牌时，只有基础“布”能击败它，其它布类牌造成的败局改为平局。"
+  frontArtwork: {fileID: 2800000, guid: e4ed482a111ee364fb06d75495cb44a4, type: 3}
+  artworkIncludesText: 1
+  faceTint: {r: 1, g: 1, b: 1, a: 1}
+  backArtwork: {fileID: 2800000, guid: d316035bff0d2d543b8076d9aa91f132, type: 3}
+  playerBackTint: {r: 0.5, g: 0.72, b: 1, a: 1}
+  enemyBackTint: {r: 1, g: 0.55, b: 0.42, a: 1}

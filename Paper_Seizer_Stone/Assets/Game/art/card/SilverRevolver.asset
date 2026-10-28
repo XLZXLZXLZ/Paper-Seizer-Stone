@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91ab00117d03b7d498d3adc8f3eae7e4, type: 3}
+  m_Name: SilverRevolver
+  m_EditorClassIdentifier:
+  displayName: 银色左轮枪
+  description: "对上非基础“剪刀”“石头”“布”的卡牌时获胜，否则落败。枪对枪平局。"
+  frontArtwork: {fileID: 2800000, guid: ca3cf49a9a172db40a7c1052f0cee999, type: 3}
+  artworkIncludesText: 1
+  faceTint: {r: 1, g: 1, b: 1, a: 1}
+  backArtwork: {fileID: 2800000, guid: d316035bff0d2d543b8076d9aa91f132, type: 3}
+  playerBackTint: {r: 0.5, g: 0.72, b: 1, a: 1}
+  enemyBackTint: {r: 1, g: 0.55, b: 0.42, a: 1}

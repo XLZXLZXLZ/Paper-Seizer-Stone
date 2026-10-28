@@ -4,6 +4,8 @@ namespace PaperSeizerStone.Battle
 {
     public enum Side { Player, Enemy }
     public enum Gesture { Rock, Paper, Scissors }
+    // Keep serialized values and legacy identifiers: WoodenCrate = 柏木棒, Pliers = 刀子,
+    // Fork = 三叉戟. Fork and Silk now arm the card-face trailing-score effect on reveal.
     public enum CardAbility { None, Hammer, Glass, ShatteredGlass, WoodenCrate, FlowerScissors, Pliers, Fork, Silk, GunpowderPaper }
     public enum BattlePhase { Created, Preparing, Planning, Revealing, PlayerCheat, EnemyCheat, Scoring, Shooting, RoundEnd, BattleEnd }
 

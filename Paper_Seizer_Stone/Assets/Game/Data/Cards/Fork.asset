@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Fork
   m_EditorClassIdentifier:
   definitionId: fork
-  displayName: 叉子
+  displayName: 三叉戟
   gesture: 2
   ability: 7
-  description: "揭牌：抽 1 张牌。\n不增加作弊子弹。"
+  description: "被翻开时触发效果，该局分数比对方低则对方减少三分。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.81, g: 0.79, b: 0.63, a: 1}
+  appearance: {fileID: 11400000, guid: 033b7b3a2cf24433904801046026eaa8, type: 2}
