@@ -1,0 +1,56 @@
+毯子／卷轴道具 RPS_Scroll
+完成日期：2026-10-28
+
+本机文件位置
+Blender 源文件：E:\asset\blend\RPS_Scroll.blend
+FBX 与贴图备份：E:\asset\fbx\RPS_Scroll\
+Unity 工程：E:\unity\Paper-Seizer-Stone\Paper_Seizer_Stone
+Unity 资源：Assets\Game\art\animation\RPS_Scroll\
+Unity 预制体：Assets\Game\art\animation\RPS_Scroll\RPS_Scroll.prefab
+
+使用
+把 RPS_Scroll.prefab 拖入场景，默认摊开。
+在 Animator 中触发 Close：播放卷起，然后保持卷起。
+在 Animator 中触发 Open：播放摊开，然后保持摊开。
+代码调用：animator.SetTrigger("Close"); 或 animator.SetTrigger("Open");
+Open 在 RolledIdle 状态使用；Close 在 OpenIdle 状态使用。
+需要从全卷状态开始时，可将控制器的默认状态改为 RolledIdle。
+不需要布料模拟，也不需要 Root Motion。
+
+文件及动画
+RPS_Scroll.blend：模型、骨骼、两段 Action、已打包贴图；默认 RollUp 的第 1 帧，即摊开。
+RPS_Scroll_Model.fbx：摊开的蒙皮模型和骨骼，不含动画。
+RPS_Scroll_Unroll.fbx：从完全卷起到摊开。
+RPS_Scroll_RollUp.fbx：从摊开到完全卷起。
+两段动作均为 1–61 帧、30 fps、2 秒，不循环。
+Unity 同时提供两个独立 .anim，以及 OpenIdle／RolledIdle 两个定格姿态。
+控制器默认 OpenIdle，状态依次为 OpenIdle → RollUp → RolledIdle → Unroll → OpenIdle。
+RPS_Scroll_Unity2021.unitypackage：由本机 Unity 导出的资源包，含依赖材质和工程自有着色器；不打包引擎 Packages 文件。
+
+尺寸和原点
+布面主体约 1.65 × 2.35 米，厚约 2.4 毫米；毛边使外轮廓略大。
+原点：固定短边的中心，位置为零，缩放为 1。
+Blender：沿 +Y 摊开，+Z 朝上；Unity 实际导入：沿 -Z 摊开，+Y 朝上。
+布面离原点平面约 8 毫米，留有卷曲和毛边的地面间距。
+129 个布料变形骨骼加一个固定 Root，最多两个骨骼权重，约 20,624 三角面。
+预览摄影机、灯光、地面位于 Blender 的 Preview_ONLY_not_exported 集合，未导出到 FBX。
+
+材质
+低饱和紫褐色粗织布、破损轮廓与细毛边，正面为磨损的石头／剪刀／布符号。
+2048 × 2048 正面颜色贴图；背面和毛边为独立深紫褐色材质。
+Unity 新材质沿用工程已有 ToonSurface 的分段明暗表现。
+Blender 预览与 Unity 灯光效果会有所差别。
+引用聊天未提供可读取的设计图，本版依据文字描述制作。
+
+完成检查
+使用本机 Blender 5.2.3 LTS 制作；Unity 2021.3.32f1c1 实际导入成功。
+FBX 重新读入确认模型尺寸、原点、单位缩放、骨骼与完整帧范围。
+Unity 采样了两段动画的起止姿态，确认卷起／摊开端点对应，动画绑定与模型骨骼匹配。
+Unity 导入报告无警告，记录在 RPS_Scroll_SetupReport.json。
+未修改现有场景或游戏结算逻辑。
+
+再次导入
+当前工程已安装完成，无需再运行导入脚本。
+在其他 Unity 工程使用时，优先导入 .unitypackage，目标工程应安装兼容的 URP（当前工程缓存实际使用 12.1.13）。
+仅使用 FBX 时，选择 Generic 骨骼、启用动画、关闭循环，指定 1–61 帧并设置贴图。
+Unity\RPSScrollSetup.cs 保留为手动重建配置的参考；该脚本目标路径写明为上述 RPS_Scroll 目录。
