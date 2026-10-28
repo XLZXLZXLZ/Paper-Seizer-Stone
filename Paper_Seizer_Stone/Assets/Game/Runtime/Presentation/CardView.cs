@@ -21,6 +21,8 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private BoxCollider hitbox;
         [SerializeField] private Material playerBack;
         [SerializeField] private Material enemyBack;
+        [Tooltip("Use the artwork on one solid card; keep the owner's known face visible without extra text or ghost layers.")]
+        [SerializeField] private bool textureOnly;
         private MaterialPropertyBlock faceProperties;
         private MaterialPropertyBlock backProperties;
         private Color faceColor;
@@ -58,10 +60,11 @@ namespace PaperSeizerStone.Presentation
             backColor = back.sharedMaterial.color;
             faceColor = definition != null ? definition.FaceColor : face.sharedMaterial.color;
             Texture texture = definition != null ? definition.Artwork : null;
-            if (texture == null) texture = face.sharedMaterial.mainTexture;
+            if (texture == null) texture = textureOnly ? Texture2D.whiteTexture : face.sharedMaterial.mainTexture;
             if (texture == null) texture = Texture2D.whiteTexture;
             faceProperties.SetTexture("_BaseMap", texture);
             faceProperties.SetTexture("_MainTex", texture);
+            faceProperties.SetFloat("_ArtworkStrength", 1);
             ApplyColors();
             string label = definition == null ? "" : definition.DisplayName;
             faceText.text = label;
@@ -69,11 +72,12 @@ namespace PaperSeizerStone.Presentation
             if (effectText != null) effectText.text = definition == null ? "" : definition.Description;
             if (ghostEffectText != null) ghostEffectText.text = definition == null ? "" : definition.Description;
             bool known = card.Gesture.HasValue;
-            bool faceUp = known && (card.IsRevealed || (!onBoard && owner == Side.Player));
+            bool showText = !textureOnly || (definition != null && definition.Artwork == null);
+            bool faceUp = known && (card.IsRevealed || (owner == Side.Player && (!onBoard || textureOnly)));
             face.gameObject.SetActive(faceUp);
-            faceText.gameObject.SetActive(faceUp);
-            if (effectText != null) effectText.gameObject.SetActive(faceUp);
-            bool privatePreview = known && onBoard && owner == Side.Player && !card.IsRevealed;
+            faceText.gameObject.SetActive(faceUp && showText);
+            if (effectText != null) effectText.gameObject.SetActive(faceUp && showText);
+            bool privatePreview = !textureOnly && known && onBoard && owner == Side.Player && !card.IsRevealed;
             ghost.SetActive(privatePreview);
             ghostText.gameObject.SetActive(privatePreview);
             if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(privatePreview);
@@ -96,12 +100,14 @@ namespace PaperSeizerStone.Presentation
             backColor = playerBack.color;
             faceColor = definition.FaceColor;
             Texture texture = definition.Artwork == null ? Texture2D.whiteTexture : definition.Artwork;
+            bool showText = !textureOnly || definition.Artwork == null;
             faceProperties.SetTexture("_BaseMap", texture);
             faceProperties.SetTexture("_MainTex", texture);
+            faceProperties.SetFloat("_ArtworkStrength", 1);
             faceText.text = definition.DisplayName;
-            if (effectText != null) { effectText.text = definition.Description; effectText.gameObject.SetActive(true); }
+            if (effectText != null) { effectText.text = definition.Description; effectText.gameObject.SetActive(showText); }
             face.gameObject.SetActive(true);
-            faceText.gameObject.SetActive(true);
+            faceText.gameObject.SetActive(showText);
             ghost.SetActive(false);
             ghostText.gameObject.SetActive(false);
             if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(false);

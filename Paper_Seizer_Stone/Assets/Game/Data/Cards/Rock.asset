@@ -15,8 +15,8 @@ MonoBehaviour:
   definitionId: rock
   displayName: 石头
   gesture: 0
-  artwork: {fileID: 0}
-  faceColor: {r: 0.77, g: 0.8, b: 0.75, a: 1}
+  artwork: {fileID: 2800000, guid: 7f784e07f86c68340b6f257e36afe8fb, type: 3}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
   ability: 0
   description: "石头类\n胜剪刀，负布。"
   transformation: {fileID: 0}

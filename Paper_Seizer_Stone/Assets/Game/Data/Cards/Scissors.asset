@@ -15,8 +15,8 @@ MonoBehaviour:
   definitionId: scissors
   displayName: 剪刀
   gesture: 2
-  artwork: {fileID: 0}
-  faceColor: {r: 0.82, g: 0.77, b: 0.64, a: 1}
+  artwork: {fileID: 2800000, guid: 913a66098d843b146b6d9c7c83d374e9, type: 3}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
   ability: 0
   description: "剪刀类\n胜布，负石头。"
   transformation: {fileID: 0}

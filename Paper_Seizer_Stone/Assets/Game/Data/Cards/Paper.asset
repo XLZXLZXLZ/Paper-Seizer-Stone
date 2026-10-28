@@ -15,8 +15,8 @@ MonoBehaviour:
   definitionId: paper
   displayName: 布
   gesture: 1
-  artwork: {fileID: 0}
-  faceColor: {r: 0.88, g: 0.84, b: 0.72, a: 1}
+  artwork: {fileID: 2800000, guid: 23ceeeecaf616544d93450df7407a11e, type: 3}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
   ability: 0
   description: "布类\n胜石头，负剪刀。"
   transformation: {fileID: 0}

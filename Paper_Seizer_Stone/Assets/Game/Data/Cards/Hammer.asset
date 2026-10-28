@@ -18,5 +18,5 @@ MonoBehaviour:
   ability: 1
   description: "胜过剪刀类和石头类。\n同名牌对拼为平局。"
   transformation: {fileID: 0}
-  artwork: {fileID: 0}
-  faceColor: {r: 0.76, g: 0.65, b: 0.48, a: 1}
+  artwork: {fileID: 2800000, guid: 5de3abd35d3b01a458e1d3698163bc49, type: 3}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}

@@ -18,5 +18,5 @@ MonoBehaviour:
   ability: 9
   description: "对位获胜：自己增加\n1 发子弹，最多 6 发。"
   transformation: {fileID: 0}
-  artwork: {fileID: 0}
-  faceColor: {r: 0.86, g: 0.65, b: 0.48, a: 1}
+  artwork: {fileID: 2800000, guid: c802c245d72c65d41a7a21a68c8bce7f, type: 3}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}

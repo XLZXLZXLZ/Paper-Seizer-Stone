@@ -35,7 +35,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: c4ec683a0ff88f84891504673f1b34b2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 4cb92bf4a32a37c44b5212501083e5cc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PaintMap:
@@ -60,12 +60,12 @@ Material:
     - _BandSoftness: 0.085
     - _BrushScale: 18
     - _BrushStrength: 0.025
-    - _DetailMip: 2.2
-    - _DetailSoftening: 0.78
+    - _DetailMip: 0
+    - _DetailSoftening: 0.53
     - _EnvironmentStrength: 0.65
-    - _Exposure: 1.05
+    - _Exposure: 0.9
     - _GrainRotation: 0
-    - _GrainScale: 14
+    - _GrainScale: 37.3
     - _GrainStrength: 0.07
     - _HighlightSoftness: 0.11
     - _HighlightStrength: 0.006
@@ -79,10 +79,10 @@ Material:
     - _PatinaStrength: 0.1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Saturation: 0.2
+    - _Saturation: 1
     - _ShadowThreshold: 0.25
-    - _SourceRetention: 0.08
-    - _ToneGamma: 0.7
+    - _SourceRetention: 0.19
+    - _ToneGamma: 0.59
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _HighlightColor: {r: 0.76, g: 0.78, b: 0.72, a: 1}
