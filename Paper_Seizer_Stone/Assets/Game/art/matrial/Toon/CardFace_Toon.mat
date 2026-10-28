@@ -22,7 +22,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d4ff6303cc9b3194a870819247cd352b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -39,6 +39,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AdditionalLightStrength: 1
     - _AmbientStrength: 0.35
     - _BandSoftness: 0.035
     - _BrushScale: 40
@@ -51,7 +52,7 @@ Material:
     - _QueueOffset: 0
     - _ShadowThreshold: 0.33
     m_Colors:
-    - _BaseColor: {r: 0.88, g: 0.84, b: 0.72, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.88, g: 0.84, b: 0.72, a: 1}
     - _HighlightColor: {r: 0.72, g: 0.68, b: 0.59, a: 1}
     - _LightColor: {r: 1, g: 0.98, b: 0.92, a: 1}
