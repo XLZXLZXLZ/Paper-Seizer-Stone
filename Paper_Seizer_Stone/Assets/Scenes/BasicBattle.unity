@@ -1247,7 +1247,7 @@ PrefabInstance:
     - target: {fileID: 1943723331919050915, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.78
+      value: -3.37
       objectReference: {fileID: 0}
     - target: {fileID: 1943723331919050936, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
@@ -1334,6 +1334,11 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 3994875636903827991, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.68
+      objectReference: {fileID: 0}
     - target: {fileID: 4017063010849730220, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1418,6 +1423,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_BounceIntensity
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7935447568168297673, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.68
       objectReference: {fileID: 0}
     - target: {fileID: 8689943813781724663, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
