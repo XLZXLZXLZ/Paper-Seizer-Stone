@@ -71,6 +71,9 @@ MonoBehaviour:
   playerBack: {fileID: 2100000, guid: 05899c95ab5e4b9f96dd076737d31a46, type: 2}
   enemyBack: {fileID: 2100000, guid: 05899c95ab5e4b9f96dd076737d31a46, type: 2}
   textureOnly: 1
+  previewAppearance: {fileID: 11400000, guid: ac7d5c2ba6af4448b1116b7dce3d100b, type: 2}
+  previewSide: 0
+  previewFaceDown: 0
 --- !u!1 &10004
 GameObject:
   m_ObjectHideFlags: 0

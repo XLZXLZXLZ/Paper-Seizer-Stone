@@ -18,5 +18,6 @@ MonoBehaviour:
   artwork: {fileID: 2800000, guid: 913a66098d843b146b6d9c7c83d374e9, type: 3}
   faceColor: {r: 1, g: 1, b: 1, a: 1}
   ability: 0
-  description: "剪刀类\n胜布，负石头。"
+  description: "剪刀可以克制布。"
   transformation: {fileID: 0}
+  appearance: {fileID: 11400000, guid: ac7d5c2ba6af4448b1116b7dce3d100b, type: 2}

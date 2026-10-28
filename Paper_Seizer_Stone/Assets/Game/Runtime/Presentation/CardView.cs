@@ -7,7 +7,7 @@ using PaperSeizerStone.Configuration;
 namespace PaperSeizerStone.Presentation
 {
     // Geometry and text are authored in the prefab; runtime changes display data only.
-    [RequireComponent(typeof(BoxCollider))]
+    [ExecuteAlways, RequireComponent(typeof(BoxCollider))]
     public sealed class CardView : MonoBehaviour
     {
         [SerializeField] private Transform visual;
@@ -23,8 +23,15 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Material enemyBack;
         [Tooltip("Use the artwork on one solid card; keep the owner's known face visible without extra text or ghost layers.")]
         [SerializeField] private bool textureOnly;
+        [Header("编辑器卡面预览")]
+        [Tooltip("选择 Game/art/card 下的美术 SO。运行时由实际卡牌定义覆盖正面；此 SO 同时提供统一卡背。")]
+        [SerializeField] private CardAppearanceDefinition previewAppearance;
+        [SerializeField] private Side previewSide;
+        [SerializeField] private bool previewFaceDown;
         private MaterialPropertyBlock faceProperties;
         private MaterialPropertyBlock backProperties;
+        private MaterialPropertyBlock ghostProperties;
+        private Renderer ghostRenderer;
         private Color faceColor;
         private Color backColor;
         private Vector3 visualScale;
@@ -37,14 +44,39 @@ namespace PaperSeizerStone.Presentation
         public bool IsOnBoard { get; private set; }
         public bool CanDrag { get; private set; }
 
+        private void OnEnable() { RefreshEditorPreview(); }
+
+        private void Update()
+        {
+            if (!Application.IsPlaying(gameObject)) RefreshEditorPreview();
+        }
+
+        public void RefreshEditorPreview()
+        {
+            if (Application.IsPlaying(gameObject) || previewAppearance == null || face == null || back == null) return;
+            highlighted = false;
+            ApplyArtwork(previewAppearance.FrontArtwork, previewAppearance.FaceTint,
+                previewAppearance.DisplayName, previewAppearance.Description);
+            ApplyBack(previewSide);
+            SetVisibility(!previewFaceDown, false, previewAppearance.ShowText);
+            ApplyColors();
+        }
+
+        private void EnsureProperties()
+        {
+            if (faceProperties == null) faceProperties = new MaterialPropertyBlock();
+            if (backProperties == null) backProperties = new MaterialPropertyBlock();
+            if (ghostProperties == null) ghostProperties = new MaterialPropertyBlock();
+            if (ghostRenderer == null && ghost != null) ghostRenderer = ghost.GetComponent<Renderer>();
+        }
+
         public void Initialize()
         {
             if (hitbox == null) hitbox = GetComponent<BoxCollider>();
             if (visual == null || face == null || ghost == null || faceText == null || ghostText == null
                 || back == null || hitbox == null || playerBack == null || enemyBack == null)
                 throw new System.InvalidOperationException("请完整配置卡牌预制体的外观、文字、碰撞体与双方卡背材质。");
-            faceProperties = new MaterialPropertyBlock();
-            backProperties = new MaterialPropertyBlock();
+            EnsureProperties();
             visualScale = visual.localScale;
             visualRotation = visual.localRotation;
         }
@@ -56,31 +88,17 @@ namespace PaperSeizerStone.Presentation
             IsOnBoard = onBoard;
             CanDrag = draggable;
             Revealed = card.IsRevealed;
-            back.sharedMaterial = card.OriginalSide == Side.Player ? playerBack : enemyBack;
-            backColor = back.sharedMaterial.color;
-            faceColor = definition != null ? definition.FaceColor : face.sharedMaterial.color;
-            Texture texture = definition != null ? definition.Artwork : null;
-            if (texture == null) texture = textureOnly ? Texture2D.whiteTexture : face.sharedMaterial.mainTexture;
-            if (texture == null) texture = Texture2D.whiteTexture;
-            faceProperties.SetTexture("_BaseMap", texture);
-            faceProperties.SetTexture("_MainTex", texture);
-            faceProperties.SetFloat("_ArtworkStrength", 1);
+            ApplyBack(card.OriginalSide);
+            ApplyArtwork(definition == null ? null : definition.Artwork,
+                definition == null ? Color.white : definition.FaceColor,
+                definition == null ? "" : definition.DisplayName,
+                definition == null ? "" : definition.Description);
             ApplyColors();
-            string label = definition == null ? "" : definition.DisplayName;
-            faceText.text = label;
-            ghostText.text = label;
-            if (effectText != null) effectText.text = definition == null ? "" : definition.Description;
-            if (ghostEffectText != null) ghostEffectText.text = definition == null ? "" : definition.Description;
             bool known = card.Gesture.HasValue;
-            bool showText = !textureOnly || (definition != null && definition.Artwork == null);
+            bool showText = definition == null || definition.ShowText;
             bool faceUp = known && (card.IsRevealed || (owner == Side.Player && (!onBoard || textureOnly)));
-            face.gameObject.SetActive(faceUp);
-            faceText.gameObject.SetActive(faceUp && showText);
-            if (effectText != null) effectText.gameObject.SetActive(faceUp && showText);
             bool privatePreview = !textureOnly && known && onBoard && owner == Side.Player && !card.IsRevealed;
-            ghost.SetActive(privatePreview);
-            ghostText.gameObject.SetActive(privatePreview);
-            if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(privatePreview);
+            SetVisibility(faceUp, privatePreview, showText);
         }
 
         public void SetHitbox(bool enabled) { if (hitbox != null) hitbox.enabled = enabled; }
@@ -96,24 +114,55 @@ namespace PaperSeizerStone.Presentation
             IsOnBoard = false;
             CanDrag = false;
             Revealed = true;
-            back.sharedMaterial = playerBack;
-            backColor = playerBack.color;
-            faceColor = definition.FaceColor;
-            Texture texture = definition.Artwork == null ? Texture2D.whiteTexture : definition.Artwork;
-            bool showText = !textureOnly || definition.Artwork == null;
-            faceProperties.SetTexture("_BaseMap", texture);
-            faceProperties.SetTexture("_MainTex", texture);
-            faceProperties.SetFloat("_ArtworkStrength", 1);
-            faceText.text = definition.DisplayName;
-            if (effectText != null) { effectText.text = definition.Description; effectText.gameObject.SetActive(showText); }
-            face.gameObject.SetActive(true);
-            faceText.gameObject.SetActive(showText);
-            ghost.SetActive(false);
-            ghostText.gameObject.SetActive(false);
-            if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(false);
+            ApplyBack(Side.Player);
+            ApplyArtwork(definition.Artwork, definition.FaceColor, definition.DisplayName, definition.Description);
+            SetVisibility(true, false, definition.ShowText);
             highlighted = false;
             ApplyColors();
             SetHitbox(clickable);
+        }
+
+        private void ApplyArtwork(Texture texture, Color color, string label, string description)
+        {
+            EnsureProperties();
+            faceColor = color;
+            // Clear the previous pooled card's artwork, including art-less transformations.
+            bool hasArtwork = texture != null;
+            if (!hasArtwork) texture = Texture2D.whiteTexture;
+            faceProperties.SetTexture("_BaseMap", texture);
+            faceProperties.SetTexture("_MainTex", texture);
+            faceProperties.SetFloat("_ArtworkStrength", hasArtwork ? 1f : 0f);
+            ghostProperties.SetTexture("_BaseMap", texture);
+            ghostProperties.SetTexture("_MainTex", texture);
+            if (faceText != null) faceText.text = label;
+            if (ghostText != null) ghostText.text = label;
+            if (effectText != null) effectText.text = description;
+            if (ghostEffectText != null) ghostEffectText.text = description;
+        }
+
+        private void ApplyBack(Side originalSide)
+        {
+            EnsureProperties();
+            Material material = originalSide == Side.Player ? playerBack : enemyBack;
+            if (material != null && back.sharedMaterial != material) back.sharedMaterial = material;
+            // The back style never depends on the hidden card's definition.
+            Texture texture = previewAppearance != null ? previewAppearance.BackArtwork : null;
+            if (texture == null && material != null) texture = material.mainTexture;
+            if (texture == null) texture = Texture2D.whiteTexture;
+            backColor = previewAppearance != null ? previewAppearance.BackTint(originalSide == Side.Player)
+                : material != null ? material.color : Color.white;
+            backProperties.SetTexture("_BaseMap", texture);
+            backProperties.SetTexture("_MainTex", texture);
+        }
+
+        private void SetVisibility(bool faceUp, bool privatePreview, bool showText)
+        {
+            face.gameObject.SetActive(faceUp);
+            if (faceText != null) faceText.gameObject.SetActive(faceUp && showText);
+            if (effectText != null) effectText.gameObject.SetActive(faceUp && showText);
+            if (ghost != null) ghost.SetActive(privatePreview);
+            if (ghostText != null) ghostText.gameObject.SetActive(privatePreview && showText);
+            if (ghostEffectText != null) ghostEffectText.gameObject.SetActive(privatePreview && showText);
         }
 
         private void ApplyColors()
@@ -127,6 +176,7 @@ namespace PaperSeizerStone.Presentation
             backProperties.SetColor("_Color", b);
             face.SetPropertyBlock(faceProperties);
             back.SetPropertyBlock(backProperties);
+            if (ghostRenderer != null) ghostRenderer.SetPropertyBlock(ghostProperties);
         }
 
         public void SetHighlight(bool value)
@@ -169,6 +219,7 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDestroy()
         {
+            if (!Application.IsPlaying(gameObject)) return;
             transform.DOKill();
             if (visual != null) visual.DOKill();
         }

@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Pliers
   m_EditorClassIdentifier:
   definitionId: pliers
-  displayName: 钳子
+  displayName: 刀子
   gesture: 2
   ability: 6
-  description: "揭牌：对手减少 1 发子弹。\n至少保留 1 发。"
+  description: "被翻开时，移除对手的 1 发子弹，最低保留 1 发。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.72, g: 0.76, b: 0.79, a: 1}
+  appearance: {fileID: 11400000, guid: ca6e41ad30c348e9b8d7d90293744164, type: 2}

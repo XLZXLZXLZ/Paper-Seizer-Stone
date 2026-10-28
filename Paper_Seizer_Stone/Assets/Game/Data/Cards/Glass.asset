@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Glass
   m_EditorClassIdentifier:
   definitionId: glass
-  displayName: 玻璃
+  displayName: 炼金玻璃瓶
   gesture: 0
   ability: 2
-  description: "作弊交换后变为碎玻璃。\n变形仅持续本场战斗。"
+  description: "与其它卡牌作弊交换后，变为“碎玻璃”，基类变为剪刀。变形仅持续本场战斗。"
   transformation: {fileID: 11400000, guid: 49b7a04dd8f3e30a1f8ec4829ac094f0, type: 2}
   artwork: {fileID: 2800000, guid: b87678bb10c385a4dbca0cbbc03529ed, type: 3}
   faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: 02ec05818bb8497c898c116ffe75deba, type: 2}

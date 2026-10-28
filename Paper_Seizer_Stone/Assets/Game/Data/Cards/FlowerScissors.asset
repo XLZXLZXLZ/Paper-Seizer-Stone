@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: FlowerScissors
   m_EditorClassIdentifier:
   definitionId: flower_scissors
-  displayName: 花剪刀
+  displayName: 花剪
   gesture: 2
   ability: 5
-  description: "对位失败时仍获得 1 分。"
+  description: "对拼失败时，额外为自己增加 1 分。"
   transformation: {fileID: 0}
   artwork: {fileID: 2800000, guid: fe7ef49ee2f9d04439a18bad9af3f0c3, type: 3}
   faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: 4195051d06f54433a8f749b20cabda17, type: 2}

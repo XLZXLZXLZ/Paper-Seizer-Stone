@@ -21,7 +21,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Transform opponentAnchor;
         [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
-        [SerializeField] private TMP_Text roundLabel;
+        [SerializeField, Tooltip("可选：未绑定时不显示桌面回合文字。")] private TMP_Text roundLabel;
         [SerializeField] private Renderer confirmButtonRenderer;
         [SerializeField] private Material activeButtonMaterial;
         [SerializeField] private Material inactiveButtonMaterial;
@@ -68,7 +68,7 @@ namespace PaperSeizerStone.Presentation
             player.RequireAssigned("玩家");
             enemy.RequireAssigned("对手");
             if (prefab == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
-                || confirmLabel == null || roundLabel == null || confirmButtonRenderer == null
+                || confirmLabel == null || confirmButtonRenderer == null
                 || activeButtonMaterial == null || inactiveButtonMaterial == null || audioSource == null)
                 throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点、按钮或声音节点。");
             chipArea.Initialize();
@@ -225,14 +225,14 @@ namespace PaperSeizerStone.Presentation
             {
                 SideTableBindings nodes = Get((Side)i);
                 FighterObservation fighter = snapshot.Get((Side)i);
-                nodes.DrawLabel.text = "牌库\n" + fighter.DrawCount.ToString("00");
-                nodes.DiscardLabel.text = "弃牌\n" + fighter.DiscardCount.ToString("00");
-                nodes.ScoreLabel.text = (i == 0 ? "你" : "对手") + "    " + fighter.Score + " 分    ·    生命 " + fighter.Life;
+                if (nodes.DrawLabel != null) nodes.DrawLabel.text = "牌库\n" + fighter.DrawCount.ToString("00");
+                if (nodes.DiscardLabel != null) nodes.DiscardLabel.text = "弃牌\n" + fighter.DiscardCount.ToString("00");
+                if (nodes.ScoreLabel != null) nodes.ScoreLabel.text = (i == 0 ? "你" : "对手") + "    " + fighter.Score + " 分    ·    生命 " + fighter.Life;
                 nodes.DrawPile.SetCount(fighter.DrawCount);
                 dropDuration = Mathf.Max(dropDuration, nodes.BulletArea.SetCount(fighter.Bullets, resetBullets));
             }
             dropDuration = Mathf.Max(dropDuration, chipArea.SetCount(snapshot.Chips));
-            roundLabel.text = "第 " + snapshot.Round + " 回合   ·   揭牌 " + snapshot.RevealStep;
+            if (roundLabel != null) roundLabel.text = "第 " + snapshot.Round + " 回合   ·   揭牌 " + snapshot.RevealStep;
             confirmLabel.text = snapshot.Phase == BattlePhase.Planning ? "确认出牌"
                 : snapshot.Phase == BattlePhase.PlayerCheat ? "跳过作弊" : snapshot.Phase == BattlePhase.BattleEnd ? snapshot.PlayerWon ? "胜利" : "重新开始" : "请稍候";
             bool active = snapshot.Phase == BattlePhase.Planning || snapshot.Phase == BattlePhase.PlayerCheat || snapshot.Phase == BattlePhase.BattleEnd;

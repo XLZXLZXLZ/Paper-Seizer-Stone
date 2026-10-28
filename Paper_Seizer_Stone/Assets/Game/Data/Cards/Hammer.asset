@@ -16,7 +16,8 @@ MonoBehaviour:
   displayName: 锤子
   gesture: 0
   ability: 1
-  description: "胜过剪刀类和石头类。\n同名牌对拼为平局。"
+  description: "对上剪刀类和石头类均视为胜利。同名牌对拼为平局。"
   transformation: {fileID: 0}
   artwork: {fileID: 2800000, guid: 5de3abd35d3b01a458e1d3698163bc49, type: 3}
   faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: bdb2ca7e45504103b78e90d637759614, type: 2}
