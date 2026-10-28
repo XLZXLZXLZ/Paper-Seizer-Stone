@@ -1,0 +1,30 @@
+桌面大色块版本（2026-10-28，当前使用）
+
+模式：内置 image_gen 编辑，目标为原 Table_Wood_Brush.png。
+最终资产：Assets/Game/art/texture/Table_Wood_Brush_ColorBlocks.png
+实际尺寸：1254 × 1254；没有放大为 4K。
+导入：沿用初版的线性数据、Repeat、NPOT None、Mip Maps、Trilinear、Aniso 8、无压缩配置。
+用途：以赭灰、灰蓝、灰绿及少量灰紫的大面积色块增强冷暖变化；既提供笔触明暗，也向材质传入 RGB 色度。
+接入：Table_Wood_Painterly.mat 的 _PaintMap 指向新版；_PaintStrength=0.4、_PaintTiling=1、_PaintColorStrength=0.55。原图、UV、线框保护、灯光与模型保留，旧版笔触图仍保留。
+节点：从 RGB 除以 max(luma,0.05) 取得色度，限制到 0.6～1.5；以色块强度和原线框保护遮罩混合白色后乘木底色。该处理位于木色重映射之后，主光与附加灯均使用结果，避免大色块退化为灰度。
+未运行编译、测试或试玩。
+
+新版完整提示词（原文）：
+Use case: style-transfer. Asset type: a seamless square painted old-wood brush and COLOR detail map for a Unity table material. Image 1 is the edit target. Keep its square crop, horizontal wood-grain flow and continuous flat material identity, but strengthen the visual design with LARGE painted color masses in the painterly visual language of Arcane / League of Legends animated environments.
+Change only this material surface. Shift from countless tiny gray-brown streaks to a composition of broad, irregular, overlapping opaque paint planes and short bold dry-brush marks. Several clear muted warm ochre-gray and taupe fields, cool slate-blue gray fields, a few desaturated sage/olive fields, very restrained muted plum-gray undertones. Make these cold/warm COLOR differences visibly readable, not just grayscale contrast. Broad patches roughly 10 to 25 percent of the image width, uneven broken bristle edges and a few crisp angular edges; no regular checkerboard, no outlined polygons. Let the wood grain continue through these patches, simplified into sparse purposeful broad strokes and small distressed edges. Preserve a believable aged wooden material rather than turning it into abstract camouflage. Subtle layered gouache / hand-painted production texture, thoughtful directional mark making. Medium subdued values, balanced approximate average luminance around 0.38 in encoded RGB, matte finish and flat illumination. Gentle light/dark variation, not a strong lighting gradient.
+This is an independent repeating pigment/brush layer; the original UV atlas will retain all frames and seams separately. Therefore no plank seams, rectangular panels, UV islands, white borders, linework, wireframes, deep cracks, logos, characters, objects, room, table silhouette, perspective, cast shadows, neon, glowing blue points, bloom, text or watermark. All four edges should tile unobtrusively. Fill the whole square. Output only the painted texture, at highest practical native square resolution.
+
+--------------------
+桌面笔触纹理初版（2026-10-28，保留）
+
+模式：内置 image_gen 生成（非 CLI）。
+用途：桌面 Shader Graph 的独立明暗笔触层，不替换原始 UV 图集。
+最终资产：Assets/Game/art/texture/Table_Wood_Brush.png
+实际尺寸：1254 × 1254；保留生成工具返回的原生尺寸，没有放大为 4K。
+导入：sRGB 关闭（明暗数据），NPOT None，Repeat，Mip Maps，Trilinear，Aniso 8，无压缩，Max Size 4096。
+原图：Assets/Game/art/texture/table_basecolor.jpg；保持文件、材质 BaseMap 引用及全部 UV 原样。
+材质：Assets/Game/art/matrial/shader/Table_Wood_Painterly.mat。
+说明：曾尝试重绘完整图集，但因部分线框边缘偏移而弃用。项目使用下述独立纹理，由原图保留结构，仅在木面叠加笔触，并以原图亮度遮罩保护亮框、深缝。实际场景效果未编译或试玩验证。
+
+最终提示词（原文）：
+Use case: stylized-concept. Asset type: seamless square hand-painted wood brush-detail texture, used as a subtle overlay in a Unity material, not as a UV atlas or a render. Fill the entire square edge to edge with a continuous flat, evenly lit, matte old timber surface. Restrained irregular broad short dry-brush dabs and longer broken grain marks, predominantly flowing horizontally. Readable angular paint planes and dry bristle edges, intentionally authored painted game-environment wood. Neutral gray-brown and muted taupe, cool gray shallow creases, a very small amount of desaturated olive-gray weathering, subdued warm-gray worn streaks. Keep all local values in a moderate middle-value range, no white edge highlights, no black holes. No strong lighting gradients, no cast shadows, no glossy sheen. Surface relief only suggested by brush strokes, no deep cracks or alligator crack patterns. The texture should blend with a dark painterly old wooden room while remaining legible on a playable table. Make the scale of strokes varied but not noisy or blurry. This is a seamlessly repeatable material detail map: no rectangular panels, no plank seams, no frames, no borders, no islands, no lines or diagrams, no individual objects, no perspective, no text, no watermark. All four edges tile unobtrusively. Output only this square texture at highest practical native square resolution.

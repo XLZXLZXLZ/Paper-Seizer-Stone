@@ -65,8 +65,8 @@ Material:
     - _ShadowThreshold: 0.33
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _HighlightColor: {r: 1, g: 0.93, b: 0.8, a: 1}
-    - _LightColor: {r: 1, g: 0.96, b: 0.89, a: 1}
-    - _MidColor: {r: 0.75, g: 0.7, b: 0.6399999, a: 1}
-    - _ShadowColor: {r: 0.41999996, g: 0.36999997, b: 0.32999998, a: 1}
+    - _HighlightColor: {r: 0.8, g: 1, b: 0.9096752, a: 1}
+    - _LightColor: {r: 0.9937701, g: 1, b: 0.8901961, a: 1}
+    - _MidColor: {r: 0.6392157, g: 0.7490196, b: 0.65587246, a: 1}
+    - _ShadowColor: {r: 0.32941177, g: 0.41960785, b: 0.34263945, a: 1}
   m_BuildTextureStacks: []

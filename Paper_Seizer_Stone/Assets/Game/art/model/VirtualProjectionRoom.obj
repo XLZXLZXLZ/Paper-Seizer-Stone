@@ -1,30 +1,30 @@
-# Projection-matched room shell for the saved BasicBattle scene.
+# Timber Cabin matched room shell for the saved BasicBattle scene.
 # All scene, prefab, projection and camera transforms remain unchanged.
 # Unity local floor Y=-3; player-side Z=-22. The player side stays open.
 # Five planar surfaces share corner vertices to avoid diagonal fold seams.
 # OBJ coordinates mirror X and reverse triangles for the Unity OBJ importer.
-# Calibration uses FOV=26, source rect=(0.18,0.14,0.625,0.625), aspect=2.
-# Source pixels (top-left): rear LB=(425,507), RB=(1250,504),
-# LT=(418,128), RT=(1264,130); floor sides=(0,662)/(1672,668).
+# Calibration uses FOV=26, source rect=(0.18,0.12,0.625,0.625), aspect=2.
+# Timber Cabin pixels (1774x887, top-left): rear LB=(460,503), RB=(1330,507),
+# LT=(447,145), RT=(1338,145); side floor anchors=(212,571)/(1532,569).
 o VirtualProjectionRoom
 g VirtualProjectionRoom
-v 15.455453 -3.000000 -22.000000
-v -16.629768 -3.000000 -22.000000
-v -8.083840 -3.000000 -0.094720
-v 6.034486 -3.000000 -0.348721
-v 13.559750 30.586218 -22.000000
-v -14.781140 30.786321 -22.000000
-v -7.303176 11.367896 -0.108765
-v 5.210818 11.478703 -0.333902
+v 17.283779 -3.000000 -22.000000
+v -17.627528 -3.000000 -22.000000
+v -7.981891 -3.000000 -1.346139
+v 5.811968 -3.000000 -0.998807
+v 15.307814 35.584687 -22.000000
+v -15.327067 34.860156 -22.000000
+v -7.093597 11.447314 -1.323772
+v 5.085281 11.385206 -1.017105
 vt 0 0
 vt 1 0
 vt 1 1
 vt 0 1
 vn 0.000000 1.000000 0.000000
-vn -0.017988 0.000000 -0.999838
-vn -0.915730 -0.051686 -0.398455
-vn 0.930405 -0.050907 -0.362980
-vn -0.005288 -0.748981 -0.662570
+vn 0.025172 0.000000 -0.999683
+vn -0.876719 -0.044898 -0.478904
+vn 0.904693 -0.054971 -0.422504
+vn 0.015580 -0.658778 -0.752176
 s off
 # Floor, inward-facing.
 f 1/1/1 3/3/1 4/2/1

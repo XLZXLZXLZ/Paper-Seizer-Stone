@@ -6,7 +6,7 @@ Shader "PaperSeizerStone/Environment/VirtualProjection"
         _Tint ("Tint", Color) = (1, 1, 1, 1)
         _Brightness ("Brightness", Float) = 1
         _OutsideColor ("Outside Image Color", Color) = (0.018, 0.014, 0.011, 1)
-        _EdgeFeather ("Image Edge Feather", Range(0, 0.25)) = 0.025
+        _EdgeFeather ("Image Edge Feather", Range(0, 1)) = 0.025
         [HideInInspector] _RoomProjectionParams ("Projection Parameters", Vector) = (0.565, 1.003, 0.05, 0)
         [HideInInspector] _RoomImageRect ("Source Image Rect", Vector) = (0, 0, 1, 1)
     }

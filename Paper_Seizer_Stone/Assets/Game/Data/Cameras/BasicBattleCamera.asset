@@ -11,14 +11,14 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f849b77145f54b32a70fdcdcbeb7d9ea, type: 3}
   m_Name: BasicBattleCamera
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   tablePose:
     localPosition: {x: 0, y: 3.54, z: -4.3}
-    localRotation: {x: 0.19181989, y: 0, z: 0, w: 0.9814302}
+    localRotation: {x: 0.19181989, y: 0, z: 0, w: 0.98143023}
   scoringPose:
     localPosition: {x: 0, y: 9, z: -0.05}
-    localRotation: {x: 0.70513989, y: 0, z: 0, w: 0.709068216}
+    localRotation: {x: 0.7051399, y: 0, z: 0, w: 0.70906824}
   shootingPose:
     localPosition: {x: 0, y: 1.65, z: -3.7}
-    localRotation: {x: 0.0421408836, y: 0, z: 0, w: 0.999111678}
+    localRotation: {x: 0.042140882, y: 0, z: 0, w: 0.99911165}
   transitionDuration: 0.3

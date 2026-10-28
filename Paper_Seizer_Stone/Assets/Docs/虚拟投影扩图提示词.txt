@@ -1,3 +1,69 @@
+无蓝光木屋背景与风格统一（2026-10-28）
+
+当前使用版本：Assets/Game/art/texture/Virtual Projection Timber Cabin No Glow.png
+编辑目标：上一版 Virtual Projection Timber Cabin.png，保留房间构图、墙角、门洞、箱柜及柱脚位置。
+用户要求：去掉蓝绿小发光点和光晕、减少糊边与无规律细碎纹理、背景退后、桌面与环境统一为中性灰褐旧木。
+工具：内置 image_gen 编辑，非 CLI/API；原版含荧光贴图保留。
+实际输出：1774×887、2:1。工具未返回请求的3840×1920，不将上采样作为真实高分辨率。
+导入：NPOT None、无压缩、最大4096、Mip Maps、Trilinear、Aniso16、Clamp，保留原始像素尺寸。
+接入：场景、房间预制体和材质引用同步；场景与预制体Brightness=.22，背景材质Saturation=.55、HighlightCompression=2，轻度色阶混合=.03。
+模型、全部Transform、相机、FOV、裁切区域与既有墙角匹配保留；未运行Unity编译、测试或试玩。
+
+完整编辑提示词：
+Use case: precise-object-edit and controlled painted-background cleanup.
+EDIT TARGET: the supplied timber cabin image is the exact background already camera-projected onto a calibrated 3D room. Preserve its spatial layout and every major silhouette. This is a careful repaint of this image, not a newly designed room.
+
+PRIMARY CHANGES:
+1. Completely remove EVERY cyan/blue/green glowing mushroom, luminous bead, floating light dot, emissive speck and the colored halo/reflected light around it. This includes the left posts and box, above and beside the door, the broken wall, the right corner and barrel, and all floor/post bases. Replace the removed growth and halos with believable continuous non-luminous wood, ordinary dust, subtle grime or shadow. Do not add lamps, lanterns, candles, other glowing plants or replacement light sources.
+2. Resolve fuzzy/mushy edges and indiscriminate texture into deliberate, coherent painted construction. Use clearly readable plank boundaries, straight structural timber edges with a few purposeful worn chips, consistent hinge/metal-strip geometry and understandable box joinery. Broad restrained angular brush planes should follow each plank's grain. Keep small wear marks sparse, varied and mechanically plausible: stronger at exposed edges, contact zones and nail/hinge locations, quieter within flat plank faces. Avoid uniform scratch/noise coverage, melted joinery, floating shapes, repeated decorative marks, over-sharpened halos, a waxy airbrushed finish or photographic wood grain. Retain the rough painted environment style but make the drawing more designed and less busy.
+3. Unify the materials into a low-saturation neutral gray-brown old-wood palette, with only faint gray-olive aging and cool neutral charcoal shadows. Remove blue/turquoise color casts previously caused by the glowing growth. Keep diffuse light restrained, timber rough and matte. Retain enough local tonal separation for wood seams and silhouettes to read; final in-game darkness is controlled separately. No visible spotlight shaft, bloom, fog veil, depth-of-field blur or artificial vignette.
+
+STRICT INVARIANTS:
+- Same full-frame horizontal 2:1 composition, viewpoint, horizon, vanishing directions, ceiling/floor layout and perspective. No zoom/crop, shifting, extending or relocating room elements.
+- Preserve the central open damaged door, dark doorway beyond, existing broken wall opening, all structural posts, beam junctions, wall-side boxes and right background barrel in exactly their current locations and proportions. Do not add furniture, a table, characters, cards or foreground occluders.
+- Important calibrated room-plane seams must remain at the same normalized positions as the input. Source is 1774x887; rear-wall upper corners approximately (447,145)/(1338,145), lower corners (460,503)/(1330,507); side floor lines pass through (212,571)/(1532,569), with coordinates measured from the top-left. Preserve those normalized locations if output size changes. The near posts around x=12% and x=86% must not move.
+- Preserve the broad clear foreground plank floor for a separate real 3D table.
+- No text, logos, watermarks, black borders or transparency.
+
+Request an actual high-detail 3840x1920 output if supported, maintaining 2:1 exactly; clarity must come from coherent painted shapes, readable joinery and intentional grain rather than invented microtexture. Deliver one opaque, unlit-looking matte old-wood cabin background with zero luminous dots or blue lamps.
+
+----- 以下为此前版本记录 -----
+
+虚拟投影木屋背景（2026-10-28）
+
+当前使用版本：Assets/Game/art/texture/Virtual Projection Timber Cabin.png
+参考：用户提供的旧木房间与蓝绿荧光背景（codex-clipboard-41b2c89a-2d2b-4382-bfd7-dee166755163.jpg）。
+方式：内置 image_gen 编辑提取、遮挡补画，并进行一次构图校准；非 CLI/API。
+保留：开放门洞、旧木结构、墙边箱柜与蓝绿色荧光氛围。
+移除：底部文字/Logo/水印、近景瓶桶/绳索/栏沿遮挡；遮挡后墙面与地板由工具补画。
+输出尺寸：1774×887，2:1；Default Texture，NPOT ToNearest，最大 2048，Mip Maps、Trilinear、Aniso 8、Clamp。导入后保持 2048×1024 比例。
+接入：场景 projectionTexture 覆盖、房间预制体 projectionTexture 与投影材质 _BaseMap 同步更新。
+构图校准：sourceImageRect=(0.18,0.12,0.625,0.625)，仅对新图作轻微垂直采样偏移；模型、所有 Transform、FOV 和相机均保持。
+旧背景和生成原始输出均保留；没有运行 Unity 编译、测试或试玩。
+
+首次提取/补画完整提示词：
+Use case: precise-object-edit, background cleanup and reconstruction for a camera-projected game environment.
+INPUT IMAGE 1 is the EDIT TARGET and authoritative environment/style reference: the decayed timber cabin interior with a central open doorway, wooden boxes, framing timbers, subtle cobwebs, and cyan-green bioluminescent growth.
+INPUT IMAGE 2 is ONLY a projection geometry/composition guide. Its plain brown room must NOT determine the content, palette, door design or painting style. Use only its wall-floor-ceiling junction positions and its deep, unobstructed foreground floor.
+
+PRIMARY REQUEST: extract and reconstruct the ROOM BACKGROUND from Image 1 as a complete usable opaque environment texture, retaining its recognizable cabin design, weathered gray-brown and olive timber, open central doorway into darkness, sparse damaged planks, ceiling beams, wall-side boxes and small pale cyan/green luminous fungi. Match Image 1's angular painted brushwork, broad broken color planes and muted cool atmospheric lighting closely. Do not merely tint Image 2 blue or give its original simple door glowing dots.
+
+REMOVE the entire black bottom credit/footer band and every logo, watermark, username and letter. Remove the very close dark foreground bottle on the right, close foreground barrel silhouette, ropes, foreground rail/sill and other camera-adjacent occluders across the lower frame. Reconstruct the hidden wall, boxes and floor behind them. Retain appropriately small background crates/cabin storage against the walls. No people, table, cards, guns, HUD or new foreground props. The central foreground must be a broad continuous worn plank floor where the game's real table will be placed separately.
+
+PROJECTION LAYOUT IS IMPORTANT: produce a full-frame horizontal 2:1 image, request 2048x1024. Match the guide's five-plane room layout so existing mesh corner folds do not cut through wood beams: a nearly flat rear wall bounded by left rear corner at approximately x=25% and right rear corner at x=75%; rear wall top edge y=14% from the top, and rear wall floor edge y=54% from the top. Specifically rear-wall corners in normalized image coordinates (origin top-left): upper-left (0.250,0.136), upper-right (0.756,0.138), lower-left (0.254,0.539), lower-right (0.748,0.536). The side-wall floor seams extend from those lower rear corners toward the left/right canvas edges near y=70.5%/71%. Keep structural folding lines in dark seams beside beams rather than through a painted column face. Continue the simple ceiling plane above and both side walls to the canvas edges, with the same perspective as Image 2. Reposition cabin background elements naturally inside these plane boundaries: the open damaged door stays on the rear wall near the center, wall crates remain beside it, and glowing fungi chiefly decorate wall/beam junctions.
+
+Keep the background atmospheric and dim, but wood surfaces readable with cool gray/blue-green ambient bounce and restrained warm brown remaining in timber. Keep cyan fungi highlights soft and localized, with no large lens bloom, spotlight cone, sun shaft, white fog or clipped glowing blobs. Do not imitate the large pure-black near-field silhouettes of the original reference. Do not crop the composition after arranging it. No black borders, no lettering, no watermark, no transparency. The result is the cleaned, extended cabin background from Image 1 adapted to the exact room-surface layout of Image 2, ready for projection.
+
+二次构图校准完整提示词：
+Use case: precise-object-edit, projection layout calibration.
+IMAGE 1 is the EDIT TARGET: the newly cleaned and reconstructed cyan-lit decayed timber cabin background. Keep its recognizable room, open central door, damaged timbers, crates, side barrel, small cyan fungi, restrained lighting, excellent angular painted brushwork and cool gray-brown/olive palette. IMAGE 2 is a STRICT GEOMETRY GUIDE ONLY; do not copy its brown palette or simple closed door.
+
+Make one targeted correction to Image 1: align the rear wall, ceiling and floor plane boundaries with Image 2. The current rear wall floor junction and ceiling junction in Image 1 sit too low. Lift/reconstruct the rear wall floor baseline to y=54% of the full image height, and the rear wall ceiling junction to y=14%. Keep the rear wall's left/right corners near x=25% and x=75%. Normalized corner targets (top-left image origin) are: upper-left (.250,.136), upper-right (.756,.138), lower-left (.254,.539), lower-right (.748,.536). Move the door, wall-side crates and rear floor threshold with their supporting wall, maintaining their proportions and readable designs. Extend the continuous foreground floor naturally to fill the lower 46% of the full canvas. The wall-floor seam runs from the left rear bottom corner toward the left frame edge at y=70.5%, and from the right rear bottom corner toward the right edge at y=71%. Ceiling-side seams reach the top edge near x=11% and x=89%. Fold seams should coincide with dark gaps beside posts, never cut across a post face.
+
+This is a spatial calibration of the existing painted background, not a redesign. Keep all identity, props, light placement, textures, restrained small fungi highlights and paint style of Image 1. Do not crop the final canvas, zoom, add props, add text, add large bloom, change illumination, put a bottle/barrel/rope silhouette in the foreground, or turn the open door into the closed door from Image 2. Keep the front floor broad and clear for a separate 3D table. Output one opaque full-frame 2:1 texture; request 2048x1024 pixels. No letterboxing, credit band, logos, watermarks or transparency.
+
+----- 以下为旧背景历史记录 -----
+
 虚拟投影房间扩图
 
 当前使用版本：Assets/Game/art/texture/Virtual Projection Reference Style.png

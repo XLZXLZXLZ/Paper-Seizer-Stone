@@ -82,10 +82,10 @@ namespace PaperSeizerStone.Presentation
                 return;
             }
             roundText.text = snapshot == null ? "准备第 " + controller.EncounterNumber + " 场战斗" : "第 " + controller.EncounterNumber + " 场  ·  第 " + snapshot.Round.ToString("00") + " 回合  /  " + PhaseName(snapshot.Phase);
-            playerScore.text = "你  " + (snapshot == null ? "00" : snapshot.Player.Score.ToString("00"));
-            enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
+            if (playerScore != null) playerScore.text = "你  " + (snapshot == null ? "00" : snapshot.Player.Score.ToString("00"));
+            if (enemyScore != null) enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
             messageText.text = string.IsNullOrEmpty(message) ? "正在准备对局。" : message;
-            instructionText.text = snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
+            if (instructionText != null) instructionText.text = snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
             bool finished = snapshot != null && snapshot.Phase == BattlePhase.BattleEnd && interactive;
             resultPanel.SetActive(finished);
             if (finished)

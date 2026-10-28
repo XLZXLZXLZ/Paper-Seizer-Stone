@@ -24,8 +24,8 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Color tint = Color.white;
         [Tooltip("原图没有覆盖到的模型区域使用此颜色，不重复或拉长图像边缘。")]
         [SerializeField] private Color outsideColor = new Color(0.018f, 0.014f, 0.011f, 1f);
-        [Tooltip("图像四边向填充颜色柔化的宽度，占图像宽高的比例。")]
-        [SerializeField, Range(0f, 0.25f)] private float edgeFeather = 0.025f;
+        [Tooltip("图像四边向填充颜色柔化的宽度，占图像宽高的比例。值越大暗边覆盖越广；超过 0.5 时也会影响画面中心。")]
+        [SerializeField, Range(0f, 1f)] private float edgeFeather = 0.025f;
 
         private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
         private static readonly int TintId = Shader.PropertyToID("_Tint");
@@ -51,7 +51,7 @@ namespace PaperSeizerStone.Presentation
             // OnValidate can run during import. Keep Renderer calls in OnEnable/LateUpdate.
             verticalFieldOfView = Mathf.Clamp(verticalFieldOfView, 1f, 179f);
             brightness = Mathf.Max(0f, brightness);
-            edgeFeather = Mathf.Clamp(edgeFeather, 0f, 0.25f);
+            edgeFeather = Mathf.Clamp(edgeFeather, 0f, 1f);
             sourceImageRect = ClampSourceImageRect(sourceImageRect);
         }
 
@@ -91,7 +91,7 @@ namespace PaperSeizerStone.Presentation
                 properties.SetFloat(BrightnessId, Mathf.Max(0f, brightness));
                 properties.SetColor(TintId, tint);
                 properties.SetColor(OutsideColorId, outsideColor);
-                properties.SetFloat(EdgeFeatherId, Mathf.Clamp(edgeFeather, 0f, 0.25f));
+                properties.SetFloat(EdgeFeatherId, Mathf.Clamp(edgeFeather, 0f, 1f));
                 surface.SetPropertyBlock(properties);
             }
         }
