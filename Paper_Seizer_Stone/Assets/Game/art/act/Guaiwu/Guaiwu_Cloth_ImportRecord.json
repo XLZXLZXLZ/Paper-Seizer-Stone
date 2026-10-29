@@ -1,0 +1,12 @@
+{
+    "prefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth.prefab",
+    "bones": 67,
+    "clothParticles": 8868,
+    "fixedParticles": 4273,
+    "movingParticles": 4595,
+    "capsuleColliders": 13,
+    "characterHeight": 1.0235083103179932,
+    "hemMaximumDistance": 0.1432911604642868,
+    "cuffMaximumDistance": 0.06652803719043732,
+    "constraints": "Hood, collar, shoulders and upper central torso fixed; graded hem and cuff motion. Backstop disabled; explicit bone capsules enabled."
+}
