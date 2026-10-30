@@ -1,0 +1,58 @@
+{
+  "source": "E:/asset/blend/gun.blend",
+  "blend": "E:/asset/blend/gun_SW_MechanicalRig.blend",
+  "fbx": "E:/unity/Paper-Seizer-Stone/Paper_Seizer_Stone/Assets/Game/art/model/Weapons/Revolver/Revolver_MechanicalRig.fbx",
+  "reference": "S&W-style swing-out double-action; exterior game animation rig, not a specific production model",
+  "source_vertices": 3141,
+  "source_faces": 3437,
+  "source_bones_replaced": 22,
+  "parts": [
+    {
+      "name": "gun_cylinder",
+      "bone": "Cylinder",
+      "animated": true,
+      "vertices": 732,
+      "faces": 882
+    },
+    {
+      "name": "gun_hammer",
+      "bone": "Hammer",
+      "animated": true,
+      "vertices": 297,
+      "faces": 310
+    },
+    {
+      "name": "gun_trigger",
+      "bone": "Trigger",
+      "animated": true,
+      "vertices": 143,
+      "faces": 148
+    },
+    {
+      "name": "gun_body",
+      "bone": "Frame",
+      "animated": false,
+      "vertices": 2183,
+      "faces": 2305
+    }
+  ],
+  "deform_bones": [
+    "GunRoot",
+    "Frame",
+    "Cylinder",
+    "Trigger",
+    "Hammer"
+  ],
+  "authoring_controls": [
+    "trigger_pull",
+    "hammer_cock",
+    "cylinder_turn",
+    "double_action_cycle"
+  ],
+  "rigid_weights": "one bone per part, all vertices weight 1.0",
+  "source_uv": "preserved on retained original surface faces",
+  "source_textures": "none in source blend",
+  "fbx_animation_exported": false,
+  "notes": "Only three moving parts. All other geometry merged into fixed gun_body. Yoke swing, latch and ejector controls removed. Original gun.blend preserved; no scene replacement or Unity/Play tests.",
+  "revision": "four-part model layout requested by user"
+}

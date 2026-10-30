@@ -1,0 +1,50 @@
+{
+  "source": "E:/asset/blend/tongling.blend",
+  "fbx": "Assets/Game/art/model/Props/Tongling/Tongling.fbx",
+  "fbx_guid": "c74d2ef97e14451ea71fb253903b44fb",
+  "objects": [
+    {
+      "name": "Tongling",
+      "vertices": 3076,
+      "faces": 5860,
+      "uvs": [
+        "UVMap"
+      ]
+    }
+  ],
+  "deform_bones": [],
+  "textures": [
+    {
+      "source_image": "brass_service_bell_3d_model_basecolor",
+      "path": "Assets/Game/art/model/Props/Tongling/Textures/Tongling_BaseColor.jpg",
+      "guid": "22a2566241f14e89b46d2696c1e2dcfc",
+      "size": [
+        4096,
+        4096
+      ],
+      "bytes": 2374731,
+      "original_bytes_preserved": true
+    }
+  ],
+  "materials": [
+    {
+      "source_material": "tripo_mat_424c016e",
+      "name": "Tongling",
+      "path": "Assets/Game/art/model/Props/Tongling/Materials/Tongling.mat",
+      "guid": "7ada00c526204b90a25dbaefb94b23b7",
+      "base_texture": "Assets/Game/art/model/Props/Tongling/Textures/Tongling_BaseColor.jpg",
+      "base_color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.10000002384185791
+    }
+  ],
+  "unity_material_binding": "ModelImporter externalObjects remapped by original source material name",
+  "animations_exported": false,
+  "source_blend_modified": false,
+  "notes": "Source geometry, UV and scale preserved. Cameras/lights excluded. Original packed texture bytes extracted; no generated textures. No Unity build, Play mode or tests."
+}

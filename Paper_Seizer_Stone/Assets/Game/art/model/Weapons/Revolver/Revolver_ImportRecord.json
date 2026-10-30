@@ -1,0 +1,68 @@
+{
+  "source": "E:/asset/blend/gun_SW_MechanicalRig.blend",
+  "fbx": "Assets/Game/art/model/Weapons/Revolver/Revolver_MechanicalRig.fbx",
+  "fbx_guid": "780b9a77de42411690d9546da02741aa",
+  "objects": [
+    {
+      "name": "gun_body",
+      "vertices": 2183,
+      "faces": 2305,
+      "uvs": [
+        "UVChannel_1"
+      ]
+    },
+    {
+      "name": "gun_cylinder",
+      "vertices": 732,
+      "faces": 882,
+      "uvs": [
+        "UVChannel_1"
+      ]
+    },
+    {
+      "name": "gun_hammer",
+      "vertices": 297,
+      "faces": 310,
+      "uvs": [
+        "UVChannel_1"
+      ]
+    },
+    {
+      "name": "gun_trigger",
+      "vertices": 143,
+      "faces": 148,
+      "uvs": [
+        "UVChannel_1"
+      ]
+    }
+  ],
+  "deform_bones": [
+    "GunRoot",
+    "Frame",
+    "Cylinder",
+    "Trigger",
+    "Hammer"
+  ],
+  "textures": [],
+  "materials": [
+    {
+      "source_material": "tripo_mat_db5077a9",
+      "name": "Revolver_Source",
+      "path": "Assets/Game/art/model/Weapons/Revolver/Materials/Revolver_Source.mat",
+      "guid": "e7408b4bbc02460e802041b0b32d677f",
+      "base_texture": null,
+      "base_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "metallic": 0.0,
+      "smoothness": 1.0
+    }
+  ],
+  "unity_material_binding": "ModelImporter externalObjects remapped by original source material name",
+  "animations_exported": false,
+  "source_blend_modified": false,
+  "notes": "Source geometry, UV and scale preserved. Cameras/lights excluded. Original packed texture bytes extracted; no generated textures. No Unity build, Play mode or tests."
+}

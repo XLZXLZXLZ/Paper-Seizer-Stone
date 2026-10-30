@@ -1,0 +1,50 @@
+{
+  "source": "E:/asset/blend/money.blend",
+  "fbx": "Assets/Game/art/model/Props/Money/Money.fbx",
+  "fbx_guid": "d62590d31a3e4051ac9fd30d884fea17",
+  "objects": [
+    {
+      "name": "Money",
+      "vertices": 1014,
+      "faces": 1113,
+      "uvs": [
+        "f6d2563f_f346_4ed3_a91d_21b064ac25e0_PackedUVMap"
+      ]
+    }
+  ],
+  "deform_bones": [],
+  "textures": [
+    {
+      "source_image": "tripo_image_c5420d61_0",
+      "path": "Assets/Game/art/model/Props/Money/Textures/Money_BaseColor.jpg",
+      "guid": "1389388bb4574785821cc3b13b2f1945",
+      "size": [
+        4096,
+        4096
+      ],
+      "bytes": 4328325,
+      "original_bytes_preserved": true
+    }
+  ],
+  "materials": [
+    {
+      "source_material": "tripo_mat_c5420d61",
+      "name": "Money",
+      "path": "Assets/Game/art/model/Props/Money/Materials/Money.mat",
+      "guid": "96462517ab7144a5b384552302489048",
+      "base_texture": "Assets/Game/art/model/Props/Money/Textures/Money_BaseColor.jpg",
+      "base_color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.10000002384185791
+    }
+  ],
+  "unity_material_binding": "ModelImporter externalObjects remapped by original source material name",
+  "animations_exported": false,
+  "source_blend_modified": false,
+  "notes": "Source geometry, UV and scale preserved. Cameras/lights excluded. Original packed texture bytes extracted; no generated textures. No Unity build, Play mode or tests."
+}
