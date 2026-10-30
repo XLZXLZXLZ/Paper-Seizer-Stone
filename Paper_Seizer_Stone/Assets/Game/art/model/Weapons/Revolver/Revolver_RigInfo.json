@@ -40,19 +40,26 @@
     "GunRoot",
     "Frame",
     "Cylinder",
+    "Cylinder_End",
     "Trigger",
-    "Hammer"
+    "Trigger_End",
+    "Hammer",
+    "Hammer_End"
   ],
   "authoring_controls": [
-    "trigger_pull",
-    "hammer_cock",
-    "cylinder_turn",
-    "double_action_cycle"
+    "Trigger local Y",
+    "Hammer local Y",
+    "Cylinder local X"
   ],
   "rigid_weights": "one bone per part, all vertices weight 1.0",
   "source_uv": "preserved on retained original surface faces",
   "source_textures": "none in source blend",
   "fbx_animation_exported": false,
-  "notes": "Only three moving parts. All other geometry merged into fixed gun_body. Yoke swing, latch and ejector controls removed. Original gun.blend preserved; no scene replacement or Unity/Play tests.",
-  "revision": "four-part model layout requested by user"
+  "notes": "Original main bone pivots/bases/hierarchy preserved. Four rigid meshes and UVs retained. Removed Blender-only driver dependency; explicit terminal joints are unweighted visual endpoints. Existing animation channels stay on original bone names.",
+  "revision": "direct FK with visible explicit end joints",
+  "end_joint_names": [
+    "Trigger_End",
+    "Hammer_End",
+    "Cylinder_End"
+  ]
 }

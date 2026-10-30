@@ -40,8 +40,11 @@
     "GunRoot",
     "Frame",
     "Cylinder",
+    "Cylinder_End",
+    "Hammer",
+    "Hammer_End",
     "Trigger",
-    "Hammer"
+    "Trigger_End"
   ],
   "textures": [],
   "materials": [
@@ -63,6 +66,6 @@
   ],
   "unity_material_binding": "ModelImporter externalObjects remapped by original source material name",
   "animations_exported": false,
-  "source_blend_modified": false,
-  "notes": "Source geometry, UV and scale preserved. Cameras/lights excluded. Original packed texture bytes extracted; no generated textures. No Unity build, Play mode or tests."
+  "source_blend_modified": true,
+  "notes": "2026-10-30 direct FK revision: original five main bone names, hierarchy, pivots and rest bases retained; three unweighted explicit end joints added. Four single-bone rigid skins and UVs retained. Blender-only mechanism control/drivers removed. Original FBX GUID and material mapping retained. No Play, build or animation tests."
 }

@@ -1,22 +1,20 @@
-左轮四分件绑定
-原始来源：E:/asset/blend/gun.blend（未改写）。
-编辑版：E:/asset/blend/gun_SW_MechanicalRig.blend
-导出：Revolver_MechanicalRig.fbx
+左轮机械骨骼（直接 FK 版，2026-10-30）
 
-按本次要求只保留四个模型：
-gun_cylinder：弹巢，绑定Cylinder，独立自转。
-gun_hammer：击锤，绑定Hammer，独立转动。
-gun_trigger：扳机，绑定Trigger，独立转动。
-gun_body：枪身、枪管、支架、释放闩、退壳杆及退壳头等其余几何合并，全部固定绑定Frame。
-每个模型均为单骨100%刚性权重，保留当前闭合外形和UV。
-本版仅前三个部分做动画，不保留独立弹巢支架外摆、释放闩或退壳动作。
+保留原来四分件、UV、闭合外形和五根主骨骼的名称、层级、转轴与静止姿态。
+每个分件采用对应骨骼 100% 刚性权重：
+gun_body → Frame
+gun_trigger → Trigger
+gun_hammer → Hammer
+gun_cylinder → Cylinder
 
-Blender：选Revolver_Rig → Pose Mode → CTRL_Mechanism → Bone Custom Properties。
-trigger_pull：扳机后扣。hammer_cock：击锤待击。cylinder_turn：弹巢连续步进。
-double_action_cycle：连续递增的双动演出相位，0→1→2，每增加1完成一轮，不要每次倒回0。
-独立通道可用于姿态微调，避免与双动相位重复叠加同一动作。
-导出骨骼：GunRoot、Frame、Cylinder、Hammer、Trigger。
-CTRL_Mechanism和Drivers仅保留在Blender；FBX只含机械骨架、4个模型和挂点，不附带动作。
-在Cascadeur/Unity中直接制作骨骼动作；若导出Blender控件驱动的动作，需先烘焙到机械骨骼。
-Unity使用Generic，保留骨骼层级。当前没有替换场景枪械引用或制作两角色动作。
-未进行Unity/Play测试。
+已移除仅在 Blender 有效的 CTRL_Mechanism 和驱动依赖。
+Blender：选 Revolver_Rig → Pose Mode → 直接选对应骨骼旋转、插关键帧。
+Trigger：局部 Y，0 至约 -19.5 度表现后扣。
+Hammer：局部 Y，0 至约 +44.7 度表现待击。
+Cylinder：局部 X，每次增加 60 度；连续动作递增，不倒转复位。
+这些角度是本模型的演出参考，不是通用枪械尺寸或内部机械仿真。
+
+新增 Trigger_End、Hammer_End、Cylinder_End：只提供可见骨段末端，无蒙皮权重，不需要单独 K 帧。
+Cascadeur：使用 Joint 模式，在 Outliner 选择 Trigger / Hammer / Cylinder，按 Local 轴旋转并 K 帧；不是选择 Frame 或 End。
+Unity：沿用原 FBX 路径和 GUID，Generic、保留可编辑骨骼，不附带预设动画。
+原材质、贴图与挂点保留。没有新增保险、外摆或退壳动作。
