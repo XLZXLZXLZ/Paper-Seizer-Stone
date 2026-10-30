@@ -78,6 +78,7 @@ namespace PaperSeizerStone.Battle
     {
         public IReadOnlyList<ObservedCard> Hand { get; }
         public IReadOnlyList<ObservedCard> Board { get; }
+        public IReadOnlyList<ObservedCard> Discard { get; }
         public int DrawCount { get; }
         public int DiscardCount { get; }
         public int Life { get; }
@@ -105,6 +106,13 @@ namespace PaperSeizerStone.Battle
             }
             Hand = hand.AsReadOnly();
             Board = Array.AsReadOnly(board);
+            var discard = new List<ObservedCard>();
+            foreach (int id in fighter.DiscardPile)
+            {
+                CardRuntime card = state.Cards[id];
+                discard.Add(new ObservedCard(card, owner == observer || card.IsRevealed));
+            }
+            Discard = discard.AsReadOnly();
             DrawCount = fighter.DrawPile.Count;
             DiscardCount = fighter.DiscardPile.Count;
             Life = fighter.Life;

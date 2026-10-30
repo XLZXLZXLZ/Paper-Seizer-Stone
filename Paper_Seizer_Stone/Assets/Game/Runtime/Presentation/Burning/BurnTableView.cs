@@ -142,7 +142,8 @@ namespace PaperSeizerStone.Presentation
             if (controller == null || !controller.CanBurnInteract) return;
             if (Input.GetKeyDown(KeyCode.Escape)) { controller.CloseBurnTable(); return; }
             if (!Input.GetMouseButtonDown(0) || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())) return;
-            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100)) return;
+            int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
+            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
             CardView card = hit.collider.GetComponentInParent<CardView>();
             if (card == null || !records.ContainsKey(card)) return;
             if (selected != null)

@@ -11,11 +11,27 @@ namespace PaperSeizerStone.Presentation
     {
         [SerializeField] private Camera sceneCamera;
         [SerializeField] private BattleCameraDefinition definition;
+        [SerializeField, Tooltip("主相机是否显示完整玩家角色；第一人称默认关闭。")] private bool showPlayerModel;
+        public bool ShowPlayerModel
+        {
+            get => showPlayerModel;
+            set { showPlayerModel = value; ApplyPlayerVisibility(); }
+        }
+
+        private void OnEnable() { ApplyPlayerVisibility(); }
+        private void OnValidate() { ApplyPlayerVisibility(); }
+        private void ApplyPlayerVisibility()
+        {
+            if (sceneCamera == null) return;
+            int mask = 1 << Props.PlayerVisibilityLayer.Layer;
+            sceneCamera.cullingMask = showPlayerModel ? sceneCamera.cullingMask | mask : sceneCamera.cullingMask & ~mask;
+        }
         public Camera Camera => sceneCamera;
         public BattleCameraDefinition Definition => definition;
 
         public void Initialize()
         {
+            ApplyPlayerVisibility();
             if (sceneCamera == null || definition == null)
                 throw new System.InvalidOperationException("请配置相机预制体中的 MainCamera 与相机配置 SO。");
             Pose target = GetWorldPose(BattleCameraPose.Table);

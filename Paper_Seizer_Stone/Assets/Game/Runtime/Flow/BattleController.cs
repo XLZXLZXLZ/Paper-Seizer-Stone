@@ -152,10 +152,15 @@ namespace PaperSeizerStone.Flow
                     if (draftSlots[i] == 0) { tableView.Notify("还有空槽位，请先放好四张牌。"); return; }
                 ActionResult result = engine.CommitLayouts(draftSlots, enemy.ChooseLayout(engine.Observe(Side.Enemy)));
                 if (!result.Success) { tableView.Notify(result.Error); return; }
+                tableView.PressConfirm();
                 busy = true;
                 StartCoroutine(CommitAndReveal(result));
             }
-            else if (engine.State.Phase == BattlePhase.PlayerCheat) SubmitCheat(new CheatAction(CheatKind.Pass));
+            else if (engine.State.Phase == BattlePhase.PlayerCheat)
+            {
+                tableView.PressConfirm();
+                SubmitCheat(new CheatAction(CheatKind.Pass));
+            }
         }
 
         private IEnumerator CommitAndReveal(ActionResult committed)

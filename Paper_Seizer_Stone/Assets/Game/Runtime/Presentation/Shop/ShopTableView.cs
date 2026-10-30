@@ -187,7 +187,8 @@ namespace PaperSeizerStone.Presentation
         {
             if (controller == null || !controller.CanShopInteract) return;
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100)) return;
+            int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
+            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
             ShopOfferView offer = hit.collider.GetComponentInParent<ShopOfferView>();
             if (offer == null) return;
             Notify(offer.Details);

@@ -23,7 +23,8 @@ namespace PaperSeizerStone.InputControl
 
         private bool Hit(out RaycastHit hit)
         {
-            return Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out hit, 100);
+            int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
+            return Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out hit, 100, mask);
         }
 
         private Vector3 DragPosition()
@@ -35,6 +36,7 @@ namespace PaperSeizerStone.InputControl
         private void Update()
         {
             if (controller == null || controller.Camera == null || controller.View == null) return;
+            controller.View.SetConfirmInteraction(controller.CanInteract && dragging == null);
             if (dragging != null)
             {
                 dragging.transform.position = DragPosition() + grabOffset;

@@ -242,11 +242,7 @@ MonoBehaviour:
   defaultOpponent: {fileID: 3389391660633774729}
   confirmLabel: {fileID: 10197}
   roundLabel: {fileID: 0}
-  confirmButtonRenderer: {fileID: 10190}
-  activeButtonMaterial: {fileID: 2100000, guid: 440db14085b546efa3293ff07915c118,
-    type: 2}
-  inactiveButtonMaterial: {fileID: 2100000, guid: c55cbd37e56045d69af666c2dbd9b882,
-    type: 2}
+  confirmBell: {fileID: 83001}
   audioSource: {fileID: 10242}
   cardSound: {fileID: 0}
   shotSound: {fileID: 0}
@@ -257,6 +253,9 @@ MonoBehaviour:
   maximumHandWidth: 4.7
   handFanDepth: 0.2
   handFanAngle: 24
+  discardSpread: {x: 0.25, y: 0.2}
+  discardAngle: 38
+  discardLayerHeight: 0.032
   gunRaiseDuration: 0.3
   aimHoldDuration: 0.65
   enemyTremorPosition: 0.008
@@ -2356,7 +2355,7 @@ PrefabInstance:
     - target: {fileID: 1869784897404911031, guid: 5f4d04ae26c94d812d7792209ea81d4a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.12
+      value: 0.035
       objectReference: {fileID: 0}
     - target: {fileID: 1869784897404911031, guid: 5f4d04ae26c94d812d7792209ea81d4a,
         type: 3}
@@ -2484,7 +2483,7 @@ PrefabInstance:
     - target: {fileID: 2560391298886378615, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.08
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 2560391298886378615, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9,
         type: 3}
@@ -2538,12 +2537,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9, type: 3}
---- !u!23 &10190 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1453744201998929898, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1453744201998936100}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &10196 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 1453744201998929904, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9,
@@ -2638,7 +2631,7 @@ PrefabInstance:
     - target: {fileID: 1869784897404911031, guid: 5f4d04ae26c94d812d7792209ea81d4a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.12
+      value: 0.035
       objectReference: {fileID: 0}
     - target: {fileID: 1869784897404911031, guid: 5f4d04ae26c94d812d7792209ea81d4a,
         type: 3}
@@ -6040,3 +6033,14 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 9128854199871991333}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &83001 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 82003, guid: a9e27f9ab7b81a24dfca7c06bdb99ed9, type: 3}
+  m_PrefabInstance: {fileID: 1453744201998936100}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe0ed7fbc3cb4c62990341424cd232d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -22,9 +22,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
         [SerializeField, Tooltip("可选：未绑定时不显示桌面回合文字。")] private TMP_Text roundLabel;
-        [SerializeField] private Renderer confirmButtonRenderer;
-        [SerializeField] private Material activeButtonMaterial;
-        [SerializeField] private Material inactiveButtonMaterial;
+        [SerializeField] private Props.TableBellView confirmBell;
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip cardSound;
         [SerializeField] private AudioClip shotSound;
@@ -36,6 +34,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private float maximumHandWidth = 4.7f;
         [SerializeField] private float handFanDepth = 0.2f;
         [SerializeField] private float handFanAngle = 24;
+        [Header("弃牌散落（相对于弃牌定位点）")]
+        [SerializeField] private Vector2 discardSpread = new Vector2(0.25f, 0.2f);
+        [SerializeField, Range(0, 90)] private float discardAngle = 38;
+        [SerializeField, Min(0.03f)] private float discardLayerHeight = 0.032f;
         [Header("举枪与敌方紧张表现")]
         [SerializeField, Min(0.05f)] private float gunRaiseDuration = 0.3f;
         [SerializeField, Min(0)] private float aimHoldDuration = 0.65f;
@@ -68,8 +70,7 @@ namespace PaperSeizerStone.Presentation
             player.RequireAssigned("玩家");
             enemy.RequireAssigned("对手");
             if (prefab == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
-                || confirmLabel == null || confirmButtonRenderer == null
-                || activeButtonMaterial == null || inactiveButtonMaterial == null || audioSource == null)
+                || confirmLabel == null || confirmBell == null || audioSource == null)
                 throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点、按钮或声音节点。");
             chipArea.Initialize();
             definitions = definition.GetCardAssets();
@@ -120,6 +121,7 @@ namespace PaperSeizerStone.Presentation
             public ObservedCard Card;
             public Side Owner;
             public bool Board;
+            public bool Discard;
             public int Index;
             public int Count;
         }
@@ -131,6 +133,8 @@ namespace PaperSeizerStone.Presentation
             {
                 Side side = (Side)sideIndex;
                 FighterObservation fighter = displayed.Get(side);
+                for (int i = 0; i < fighter.Discard.Count; i++)
+                    result.Add(new Placement { Card = fighter.Discard[i], Owner = side, Discard = true, Index = i });
                 if (side == Side.Player && draftHand != null)
                 {
                     var available = new Dictionary<int, ObservedCard>();
@@ -156,6 +160,11 @@ namespace PaperSeizerStone.Presentation
         private Vector3 Position(Placement placement)
         {
             SideTableBindings side = Get(placement.Owner);
+            if (placement.Discard)
+                return side.DiscardAnchor.position + side.DiscardAnchor.rotation * new Vector3(
+                    Scatter(placement.Card.Id, 1) * discardSpread.x,
+                    placement.Index * discardLayerHeight,
+                    Scatter(placement.Card.Id, 2) * discardSpread.y);
             if (placement.Board) return side.Slots[placement.Index].position;
             float normalized = placement.Count < 2 ? 0 : (float)placement.Index / (placement.Count - 1) - 0.5f;
             float spacing = expandedHand && placement.Owner == Side.Player ? expandedSpacing : handSpacing;
@@ -166,10 +175,34 @@ namespace PaperSeizerStone.Presentation
         private Quaternion Rotation(Placement placement)
         {
             SideTableBindings side = Get(placement.Owner);
+            if (placement.Discard)
+                return side.DiscardAnchor.rotation * Quaternion.Euler(0, Scatter(placement.Card.Id, 3) * discardAngle, 0);
             if (placement.Board) return side.Slots[placement.Index].rotation;
             float normalized = placement.Count < 2 ? 0 : (float)placement.Index / (placement.Count - 1) - 0.5f;
             return side.HandAnchor.rotation * Quaternion.Euler(0, normalized * -handFanAngle, 0);
         }
+
+        // Stable scatter must not consume the rule engine's random sequence or change on every layout.
+        private static float Scatter(int id, int salt)
+        {
+            unchecked
+            {
+                uint hash = (uint)(id * 73856093 ^ salt * 19349663);
+                hash ^= hash >> 16;
+                hash *= 2246822519u;
+                hash ^= hash >> 13;
+                return (hash & 65535) / 32767.5f - 1;
+            }
+        }
+
+        public void SetConfirmInteraction(bool enabled)
+        {
+            if (confirmBell != null) confirmBell.SetAvailable(enabled && displayed != null &&
+                (displayed.Phase == BattlePhase.Planning || displayed.Phase == BattlePhase.PlayerCheat ||
+                 (displayed.Phase == BattlePhase.BattleEnd && !displayed.PlayerWon)));
+        }
+
+        public void PressConfirm() { confirmBell.Press(); }
 
         private void Layout(float duration)
         {
@@ -195,14 +228,16 @@ namespace PaperSeizerStone.Presentation
                 CardDefinition definition = null;
                 if (placement.Card.DefinitionId != null) definitions.TryGetValue(placement.Card.DefinitionId, out definition);
                 view.name = "Card_" + placement.Card.Id;
-                view.Display(placement.Card, definition, placement.Owner, placement.Board, interactive && placement.Owner == Side.Player);
+                view.Display(placement.Card, definition, placement.Owner, placement.Board, !placement.Discard && interactive && placement.Owner == Side.Player);
+                view.SetHitbox(!placement.Discard);
                 view.MoveTo(Position(placement), Rotation(placement), duration);
             }
             var removed = new List<int>();
             foreach (var pair in cards)
             {
                 if (active.Contains(pair.Key)) continue;
-                Transform discard = Get(pair.Value.Owner).DiscardAnchor;
+                // A card missing from all visible areas was shuffled into the draw pile.
+                Transform discard = Get(pair.Value.Owner).DrawAnchor;
                 pair.Value.SetHitbox(false);
                 pair.Value.MoveTo(discard.position, discard.rotation, duration);
                 retiring.Add(pair.Value);
@@ -235,8 +270,7 @@ namespace PaperSeizerStone.Presentation
             if (roundLabel != null) roundLabel.text = "第 " + snapshot.Round + " 回合   ·   揭牌 " + snapshot.RevealStep;
             confirmLabel.text = snapshot.Phase == BattlePhase.Planning ? "确认出牌"
                 : snapshot.Phase == BattlePhase.PlayerCheat ? "跳过作弊" : snapshot.Phase == BattlePhase.BattleEnd ? snapshot.PlayerWon ? "胜利" : "重新开始" : "请稍候";
-            bool active = snapshot.Phase == BattlePhase.Planning || snapshot.Phase == BattlePhase.PlayerCheat || snapshot.Phase == BattlePhase.BattleEnd;
-            confirmButtonRenderer.sharedMaterial = active ? activeButtonMaterial : inactiveButtonMaterial;
+            SetConfirmInteraction(false);
             return dropDuration;
         }
 
