@@ -15,8 +15,15 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Range(0, 90)] private float fanAngle = 36;
         [SerializeField, Min(0)] private float fanDrop = 0.08f;
         [SerializeField, Min(0.1f)] private float followSpeed = 16;
-        [SerializeField, Range(0, 0.5f)] private float pullOutThreshold = 0.22f;
-        [SerializeField, Range(0, 0.6f)] private float retractThreshold = 0.36f;
+        [Header("手牌响应扇区（相机视口坐标）")]
+        [SerializeField, Tooltip("扇区圆心，(0.5, 0) 为画面底部中央，可放到画面下方。")]
+        private Vector2 hoverCenter = new Vector2(0.5f, -0.08f);
+        [SerializeField, Tooltip("扇区水平与垂直半径，占相机视口宽高的比例。")]
+        private Vector2 hoverRadius = new Vector2(0.26f, 0.3f);
+        [SerializeField, Range(5, 90), Tooltip("相对向上方向的半张角，总张角为此值的两倍。")]
+        private float hoverHalfAngle = 70;
+        [SerializeField, Range(0, 0.1f), Tooltip("展开后在扇区边缘增加的视口余量，避免边界反复收放。")]
+        private float hoverExitPadding = 0.035f;
         private readonly List<Entry> entries = new List<Entry>();
         private Camera viewCamera;
         private CardView dragging;
@@ -28,9 +35,25 @@ namespace PaperSeizerStone.Presentation
         public void Clear() { entries.Clear(); }
         public void ResetHand() { Clear(); dragging = null; expanded = false; expansion = 0; }
         public void SetExpanded(bool value) { expanded = value; }
-        public bool WantsExpanded(float cursorHeight, bool current)
+        public bool WantsExpanded(Vector2 screenPoint, bool current)
         {
-            return cursorHeight < (current ? Mathf.Max(retractThreshold, pullOutThreshold) : pullOutThreshold);
+            if (viewCamera == null || entries.Count == 0) return false;
+            if (!viewCamera.pixelRect.Contains(screenPoint)) return false;
+            Vector3 viewport = viewCamera.ScreenToViewportPoint(screenPoint);
+            Vector2 delta = (Vector2)viewport - hoverCenter;
+            // Normalize an elliptical sector around the configured viewport center.
+            float rx = Mathf.Max(0.001f, hoverRadius.x);
+            float ry = Mathf.Max(0.001f, hoverRadius.y);
+            Vector2 normalized = new Vector2(delta.x / rx, delta.y / ry);
+            float angle = Mathf.Atan2(normalized.x, normalized.y) * Mathf.Rad2Deg;
+            float limit = Mathf.Clamp(hoverHalfAngle, 5, 90);
+            if (normalized.sqrMagnitude <= 1 && Mathf.Abs(angle) <= limit) return true;
+            if (!current || hoverExitPadding <= 0) return false;
+            // Expand the same sector slightly while the hand is open.
+            Vector2 expandedPoint = new Vector2(delta.x / (rx + hoverExitPadding), delta.y / (ry + hoverExitPadding));
+            float expandedAngle = Mathf.Abs(Mathf.Atan2(expandedPoint.x, expandedPoint.y) * Mathf.Rad2Deg);
+            float anglePadding = Mathf.Atan2(hoverExitPadding, Mathf.Min(rx, ry)) * Mathf.Rad2Deg;
+            return expandedPoint.sqrMagnitude <= 1 && expandedAngle <= Mathf.Min(90, limit + anglePadding);
         }
         public void SetDragging(CardView view) { dragging = view; }
         public void Register(CardView view, int index, int count)

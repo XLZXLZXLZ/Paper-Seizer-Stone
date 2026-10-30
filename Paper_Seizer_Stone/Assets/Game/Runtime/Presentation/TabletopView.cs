@@ -435,7 +435,16 @@ namespace PaperSeizerStone.Presentation
         }
 
         public void RestoreLayout() { Layout(moveDuration); }
-        public bool WantsHandExpanded(float cursorHeight) => firstPersonHand.WantsExpanded(cursorHeight, expandedHand);
+        public IEnumerable<TableTarget> PlayerDropSlots()
+        {
+            foreach (Transform slot in player.Slots)
+            {
+                var target = slot.GetComponentInParent<TableTarget>();
+                if (target != null && target.gameObject.activeInHierarchy) yield return target;
+            }
+        }
+
+        public bool WantsHandExpanded(Vector2 screenPoint) => firstPersonHand.WantsExpanded(screenPoint, expandedHand);
         public void SetDraggingCard(CardView view) { firstPersonHand.SetDragging(view); }
         public void SetHandExpanded(bool expanded)
         {

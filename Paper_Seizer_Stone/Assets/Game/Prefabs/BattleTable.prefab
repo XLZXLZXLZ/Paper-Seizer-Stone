@@ -5752,5 +5752,7 @@ MonoBehaviour:
   fanAngle: 36
   fanDrop: 0.08
   followSpeed: 16
-  pullOutThreshold: 0.22
-  retractThreshold: 0.36
+  hoverCenter: {x: 0.5, y: -0.08}
+  hoverRadius: {x: 0.26, y: 0.3}
+  hoverHalfAngle: 70
+  hoverExitPadding: 0.035

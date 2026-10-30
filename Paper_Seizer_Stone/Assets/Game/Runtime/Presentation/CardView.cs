@@ -21,7 +21,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private BoxCollider hitbox;
         [SerializeField] private Material playerBack;
         [SerializeField] private Material enemyBack;
-        [Tooltip("Use the artwork on one solid card; keep the owner's known face visible without extra text or ghost layers.")]
+        [Tooltip("图片已包含文字时不额外叠加说明，仍保留己方暗牌的半透明预览。")]
         [SerializeField] private bool textureOnly;
         [Header("编辑器卡面预览")]
         [Tooltip("选择 Game/art/card 下的美术 SO。运行时由实际卡牌定义覆盖正面；此 SO 同时提供统一卡背。")]
@@ -36,7 +36,18 @@ namespace PaperSeizerStone.Presentation
         private Color backColor;
         private Vector3 visualScale;
         private Quaternion visualRotation;
+        [SerializeField, Range(0, 1), Tooltip("己方场上暗牌的实际卡面透明度。")]
+        private float privatePreviewOpacity = 0.35f;
+        [SerializeField, Min(0.05f), Tooltip("落场盖牌与正式揭牌的翻面时长。")]
+        private float flipDuration = 0.22f;
+        private Tween flipTween;
+        private bool hasDisplay;
+        private bool displayedFaceUp;
         private bool highlighted;
+        public bool Known { get; private set; }
+        public Texture PreviewArtwork { get; private set; }
+        public string PreviewDescription { get; private set; }
+
 
         public int CardId { get; private set; }
         public bool Revealed { get; private set; }
@@ -83,6 +94,9 @@ namespace PaperSeizerStone.Presentation
 
         public void Display(ObservedCard card, CardDefinition definition, Side owner, bool onBoard, bool draggable)
         {
+            Known = card.Gesture.HasValue && definition != null;
+            PreviewArtwork = Known ? definition.Artwork : null;
+            PreviewDescription = Known ? definition.DisplayName + "\n" + definition.Description : "";
             CardId = card.Id;
             Owner = owner;
             IsOnBoard = onBoard;
@@ -96,9 +110,26 @@ namespace PaperSeizerStone.Presentation
             ApplyColors();
             bool known = card.Gesture.HasValue;
             bool showText = definition == null || definition.ShowText;
-            bool faceUp = known && (card.IsRevealed || (owner == Side.Player && (!onBoard || textureOnly)));
-            bool privatePreview = !textureOnly && known && onBoard && owner == Side.Player && !card.IsRevealed;
-            SetVisibility(faceUp, privatePreview, showText);
+            bool faceUp = known && (card.IsRevealed || (owner == Side.Player && !onBoard));
+            bool privatePreview = known && onBoard && owner == Side.Player && !card.IsRevealed;
+            // Formal reveal already has its own tilt animation in TabletopView.
+            if (card.IsRevealed && flipTween != null && flipTween.IsActive())
+            {
+                flipTween.Kill();
+                visual.localScale = visualScale;
+            }
+            if (hasDisplay && displayedFaceUp != faceUp && !card.IsRevealed)
+            {
+                flipTween?.Kill();
+                visual.localScale = visualScale;
+                flipTween = DOTween.Sequence()
+                    .Append(visual.DOScaleX(0.001f, flipDuration * 0.5f))
+                    .AppendCallback(() => SetVisibility(faceUp, privatePreview, showText))
+                    .Append(visual.DOScaleX(visualScale.x, flipDuration * 0.5f));
+            }
+            else if (flipTween == null || !flipTween.IsActive()) SetVisibility(faceUp, privatePreview, showText);
+            displayedFaceUp = faceUp;
+            hasDisplay = true;
         }
 
         public void SetHitbox(bool enabled) { if (hitbox != null) hitbox.enabled = enabled; }
@@ -176,6 +207,11 @@ namespace PaperSeizerStone.Presentation
             backProperties.SetColor("_Color", b);
             face.SetPropertyBlock(faceProperties);
             back.SetPropertyBlock(backProperties);
+            Color g = faceColor; g.a = privatePreviewOpacity;
+            if (ghostText != null) ghostText.alpha = privatePreviewOpacity;
+            if (ghostEffectText != null) ghostEffectText.alpha = privatePreviewOpacity;
+            ghostProperties.SetColor("_BaseColor", g);
+            ghostProperties.SetColor("_Color", g);
             if (ghostRenderer != null) ghostRenderer.SetPropertyBlock(ghostProperties);
         }
 
@@ -207,6 +243,11 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetForPool()
         {
+            flipTween?.Kill();
+            hasDisplay = false;
+            Known = false;
+            PreviewArtwork = null;
+            PreviewDescription = "";
             transform.DOKill();
             visual.DOKill();
             visual.localRotation = visualRotation;
@@ -220,6 +261,7 @@ namespace PaperSeizerStone.Presentation
         private void OnDestroy()
         {
             if (!Application.IsPlaying(gameObject)) return;
+            flipTween?.Kill();
             transform.DOKill();
             if (visual != null) visual.DOKill();
         }

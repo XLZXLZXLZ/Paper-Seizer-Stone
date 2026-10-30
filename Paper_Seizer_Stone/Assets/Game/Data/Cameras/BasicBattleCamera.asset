@@ -16,7 +16,7 @@ MonoBehaviour:
     localPosition: {x: 0, y: 3.54, z: -4.3}
     localRotation: {x: 0.19181989, y: 0, z: 0, w: 0.98143023}
   scoringPose:
-    localPosition: {x: 0, y: 9, z: -0.05}
+    localPosition: {x: 0, y: 6, z: -0.05}
     localRotation: {x: 0.7051399, y: 0, z: 0, w: 0.70906824}
   shootingPose:
     localPosition: {x: 0, y: 1.65, z: -3.7}
