@@ -33,7 +33,32 @@ namespace PaperSeizerStone.Presentation
                 || BulletArea == null || DrawPile == null)
                 throw new InvalidOperationException(name + "的桌面节点未完整配置。");
             foreach (Transform slot in Slots) if (slot == null) throw new InvalidOperationException(name + "缺少卡槽定位点。");
+            AlignGunModel();
             BulletArea.Initialize();
+        }
+
+        private void AlignGunModel()
+        {
+            Transform muzzle = null;
+            Transform grip = null;
+            Transform cylinder = null;
+            foreach (Transform node in Gun.GetComponentsInChildren<Transform>(true))
+            {
+                if (node.name == "Socket_Muzzle") muzzle = node;
+                else if (node.name == "Socket_Grip") grip = node;
+                else if (node.name == "Socket_Cylinder") cylinder = node;
+            }
+            if (muzzle == null || grip == null || cylinder == null) return;
+            Transform model = muzzle;
+            while (model.parent != null && model.parent != Gun) model = model.parent;
+            if (model.parent != Gun) return;
+            // Lay the side of the gun on the table; socket geometry avoids assumptions about FBX axes.
+            Vector3 forward = muzzle.position - cylinder.position;
+            Vector3 top = Vector3.ProjectOnPlane(cylinder.position - grip.position, forward);
+            Vector3 side = Vector3.Cross(forward, top);
+            if (forward.sqrMagnitude > 0.0001f && side.sqrMagnitude > 0.0001f)
+                model.rotation = Gun.rotation * Quaternion.Inverse(Quaternion.LookRotation(forward, side)) * model.rotation;
+            MuzzleFlash.transform.SetPositionAndRotation(muzzle.position, muzzle.rotation);
         }
     }
 }

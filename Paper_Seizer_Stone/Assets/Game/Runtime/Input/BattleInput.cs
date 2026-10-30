@@ -37,9 +37,11 @@ namespace PaperSeizerStone.InputControl
         {
             if (controller == null || controller.Camera == null || controller.View == null) return;
             controller.View.SetConfirmInteraction(controller.CanInteract && dragging == null);
+            controller.CameraRig.SetPrecisionMode(dragging != null);
             if (dragging != null)
             {
-                dragging.transform.position = DragPosition() + grabOffset;
+                dragging.transform.position = Vector3.Lerp(dragging.transform.position, DragPosition() + grabOffset,
+                    1 - Mathf.Exp(-25 * Time.deltaTime));
                 UpdateHighlight();
                 if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1)) { CancelDrag(); return; }
                 if (Input.GetMouseButtonUp(0))
@@ -53,6 +55,7 @@ namespace PaperSeizerStone.InputControl
                         target = drop.collider.GetComponentInParent<TableTarget>();
                     }
                     dragging = null;
+                    controller.View.SetDraggingCard(null);
                     source.SetHitbox(true);
                     source.SetHighlight(false);
                     ClearHighlight();
@@ -60,8 +63,11 @@ namespace PaperSeizerStone.InputControl
                 }
                 return;
             }
+            bool cursorInside = Application.isFocused && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height &&
+                Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width;
+            controller.View.SetHandExpanded(controller.CanDrag && cursorInside &&
+                controller.View.WantsHandExpanded(Input.mousePosition.y / Mathf.Max(1, Screen.height)));
             if (!controller.CanInteract) return;
-            if (controller.CanDrag) controller.View.SetHandExpanded(Input.mousePosition.y < Screen.height * 0.25f);
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
             {
                 controller.ConfirmOrPass();
@@ -73,8 +79,12 @@ namespace PaperSeizerStone.InputControl
             {
                 dragging = card;
                 dragging.transform.DOKill();
+                controller.View.SetDraggingCard(dragging);
+                controller.View.SetHandExpanded(true);
                 Vector3 lifted = dragPlane.ClosestPointOnPlane(dragging.transform.position);
-                grabOffset = lifted - DragPosition();
+                grabOffset = dragging.IsOnBoard ? lifted - DragPosition() : Vector3.zero;
+                dragging.transform.DORotateQuaternion(controller.View.DragAnchor.rotation, 0.16f);
+                dragging.transform.DOScale(Vector3.one, 0.16f);
                 dragging.SetHitbox(false);
                 dragging.SetHighlight(true);
                 return;
@@ -91,6 +101,8 @@ namespace PaperSeizerStone.InputControl
             dragging.SetHitbox(true);
             dragging.SetHighlight(false);
             dragging = null;
+            controller.View.SetDraggingCard(null);
+            controller.CameraRig.SetPrecisionMode(false);
             ClearHighlight();
             controller.View.RestoreLayout();
         }

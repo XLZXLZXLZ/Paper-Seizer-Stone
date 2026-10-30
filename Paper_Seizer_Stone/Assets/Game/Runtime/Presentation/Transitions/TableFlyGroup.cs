@@ -10,6 +10,8 @@ namespace PaperSeizerStone.Presentation
     public sealed class TableFlyGroup : MonoBehaviour
     {
         [SerializeField] private Transform[] parts;
+        [Tooltip("共享桌体等固定物件及其子层级始终不参与转场。")]
+        [SerializeField] private Transform[] stationaryRoots;
         [Tooltip("Direct active children are animated individually: live cards and physics tokens.")]
         [SerializeField] private Transform[] runtimeRoots;
         [SerializeField] private bool radialWorld = true;
@@ -46,9 +48,18 @@ namespace PaperSeizerStone.Presentation
             foreach (Transform part in parts)
             {
                 if (part == null) throw new InvalidOperationException(name + "有未绑定的转场物件。");
+                if (IsStationary(part)) continue;
                 authored.Add(new Pose { Part = part, Position = PositionOf(part), Rotation = part.localRotation });
             }
             initialized = true;
+        }
+
+        private bool IsStationary(Transform part)
+        {
+            if (stationaryRoots != null)
+                foreach (Transform root in stationaryRoots)
+                    if (root != null && (part == root || part.IsChildOf(root))) return true;
+            return false;
         }
 
         public void HideImmediately()
@@ -65,7 +76,7 @@ namespace PaperSeizerStone.Presentation
                 foreach (Transform root in runtimeRoots)
                     if (root != null)
                         foreach (Transform child in root)
-                            if (child.gameObject.activeInHierarchy && (child.GetComponent<CardView>() != null || child.GetComponent<Rigidbody>() != null))
+                            if (!IsStationary(child) && child.gameObject.activeInHierarchy && (child.GetComponent<CardView>() != null || child.GetComponent<Rigidbody>() != null))
                                 result.Add(new Pose { Part = child, Position = PositionOf(child), Rotation = child.localRotation });
             return result;
         }

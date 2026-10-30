@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 935a5ab0ee2f5587b6780e1b64144b0b, type: 3}
+  m_Name: 03_粗笔触油画
+  m_EditorClassIdentifier: 
+  description: 四象限保边平滑与淡表面纹理，将细碎纹理合并成绘画色块；实体牌面也会受到平滑影响。
+  parameters:
+    strength: 1
+    posterize: 0.12
+    levels: 18
+    dither: 0.05
+    ditherSize: 1
+    halftone: 0
+    dotSize: 5
+    dotAngle: 35
+    inkColor: {r: 0.16, g: 0.18, b: 0.2, a: 1}
+    oil: 0.65
+    oilRadius: 2
+    paper: 0.035
+    paperScale: 3
+    exposure: 0
+    contrast: 3
+    saturation: -3
+    temperature: 3
+    shadows: {r: 0.88, g: 0.94, b: 1, a: 1}
+    highlights: {r: 1, g: 0.97, b: 0.9, a: 1}
+    splitTone: 0.12
+    vignette: 0.12
+    vignetteSoftness: 0.6
+    vignetteColor: {r: 0.035, g: 0.04, b: 0.055, a: 1}
+    vignetteCenter: {x: 0.5, y: 0.5}

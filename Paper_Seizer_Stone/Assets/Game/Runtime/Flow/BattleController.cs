@@ -40,6 +40,7 @@ namespace PaperSeizerStone.Flow
         public event Action<BattleObservation> BattleFinished;
         public TabletopView View => tableView;
         public Camera Camera => cameraRig != null ? cameraRig.Camera : null;
+        public BattleCameraRig CameraRig => cameraRig;
         public string EnemyName => currentEnemy == null ? "对手" : currentEnemy.DisplayName;
         public int EncounterNumber => adventure == null ? 1 : adventure.EncounterIndex + 1;
         public bool CanInteract => !busy && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
@@ -58,7 +59,7 @@ namespace PaperSeizerStone.Flow
                     || shopView == null || burnView == null || battlePanel == null)
                     throw new InvalidOperationException("请在场景中绑定战斗、商店、烧牌 Panel、相机与输入组件。");
                 cameraRig.Initialize();
-                tableView.Initialize(definition, cardPrefab);
+                tableView.Initialize(definition, cardPrefab, cameraRig.Camera);
                 battleInput.Initialize(this);
                 shopView.gameObject.SetActive(true);
                 shopView.Initialize(this, definition.GetCardAssets());

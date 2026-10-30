@@ -18,6 +18,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Transform dragAnchor;
         [SerializeField] private PhysicsTokenArea chipArea;
         [SerializeField] private GameObject editorPreview;
+        [SerializeField] private FirstPersonHandView firstPersonHand;
         [SerializeField] private Transform opponentAnchor;
         [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
@@ -30,7 +31,6 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(0.05f)] private float moveDuration = 0.24f;
         [Header("手牌布局（相对于手牌定位点）")]
         [SerializeField] private float handSpacing = 0.58f;
-        [SerializeField] private float expandedSpacing = 0.85f;
         [SerializeField] private float maximumHandWidth = 4.7f;
         [SerializeField] private float handFanDepth = 0.2f;
         [SerializeField] private float handFanAngle = 24;
@@ -64,17 +64,21 @@ namespace PaperSeizerStone.Presentation
         public void Notify(string message) { Message = message; }
         private SideTableBindings Get(Side side) => side == Side.Player ? player : enemy;
 
-        public void Initialize(BattleDefinition definition, CardView prefab)
+        public void Initialize(BattleDefinition definition, CardView prefab, Camera camera)
         {
             if (player == null || enemy == null) throw new InvalidOperationException("请配置双方桌面节点。");
             player.RequireAssigned("玩家");
             enemy.RequireAssigned("对手");
-            if (prefab == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
+            if (prefab == null || camera == null || firstPersonHand == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
                 || confirmLabel == null || confirmBell == null || audioSource == null)
                 throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点、按钮或声音节点。");
             chipArea.Initialize();
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
+            firstPersonHand.Initialize(camera);
+            // Capture the authored gun pose before the first transition; scene overrides are intentional.
+            foreach (SideTableBindings side in new[] { player, enemy })
+                side.GunRestPose.SetPositionAndRotation(side.Gun.position, side.Gun.rotation);
             if (editorPreview != null) editorPreview.SetActive(false);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
@@ -82,6 +86,7 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetEncounter(EnemyDefinition opponent)
         {
+            firstPersonHand.ResetHand();
             foreach (CardView view in cards.Values) { view.ResetForPool(); pool.Push(view); }
             cards.Clear();
             ReleaseRetired();
@@ -110,6 +115,7 @@ namespace PaperSeizerStone.Presentation
 
         public void PrepareExit()
         {
+            firstPersonHand.Clear();
             foreach (CardView view in cards.Values) view.transform.DOKill();
             chipArea.Freeze();
             player.BulletArea.Freeze();
@@ -167,7 +173,7 @@ namespace PaperSeizerStone.Presentation
                     Scatter(placement.Card.Id, 2) * discardSpread.y);
             if (placement.Board) return side.Slots[placement.Index].position;
             float normalized = placement.Count < 2 ? 0 : (float)placement.Index / (placement.Count - 1) - 0.5f;
-            float spacing = expandedHand && placement.Owner == Side.Player ? expandedSpacing : handSpacing;
+            float spacing = handSpacing;
             float spread = Mathf.Min(placement.Count * spacing, maximumHandWidth);
             return side.HandAnchor.TransformPoint(new Vector3(normalized * spread, placement.Index * 0.008f, -Mathf.Abs(normalized) * handFanDepth));
         }
@@ -207,6 +213,7 @@ namespace PaperSeizerStone.Presentation
         private void Layout(float duration)
         {
             if (displayed == null) return;
+            firstPersonHand.Clear();
             var active = new HashSet<int>();
             bool interactive = displayed.Phase == BattlePhase.Planning
                 || (displayed.Phase == BattlePhase.PlayerCheat && displayed.Enemy.Bullets < BasicRules.Chambers);
@@ -230,7 +237,13 @@ namespace PaperSeizerStone.Presentation
                 view.name = "Card_" + placement.Card.Id;
                 view.Display(placement.Card, definition, placement.Owner, placement.Board, !placement.Discard && interactive && placement.Owner == Side.Player);
                 view.SetHitbox(!placement.Discard);
-                view.MoveTo(Position(placement), Rotation(placement), duration);
+                if (placement.Owner == Side.Player && !placement.Board && !placement.Discard)
+                    firstPersonHand.Register(view, placement.Index, placement.Count);
+                else
+                {
+                    view.MoveTo(Position(placement), Rotation(placement), duration);
+                    view.transform.DOScale(Vector3.one, duration);
+                }
             }
             var removed = new List<int>();
             foreach (var pair in cards)
@@ -240,6 +253,7 @@ namespace PaperSeizerStone.Presentation
                 Transform discard = Get(pair.Value.Owner).DrawAnchor;
                 pair.Value.SetHitbox(false);
                 pair.Value.MoveTo(discard.position, discard.rotation, duration);
+                pair.Value.transform.DOScale(Vector3.one, duration);
                 retiring.Add(pair.Value);
                 removed.Add(pair.Key);
             }
@@ -421,11 +435,13 @@ namespace PaperSeizerStone.Presentation
         }
 
         public void RestoreLayout() { Layout(moveDuration); }
+        public bool WantsHandExpanded(float cursorHeight) => firstPersonHand.WantsExpanded(cursorHeight, expandedHand);
+        public void SetDraggingCard(CardView view) { firstPersonHand.SetDragging(view); }
         public void SetHandExpanded(bool expanded)
         {
             if (expandedHand == expanded || displayed == null) return;
             expandedHand = expanded;
-            Layout(0.15f);
+            firstPersonHand.SetExpanded(expanded);
         }
 
         private void OnDestroy()

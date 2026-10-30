@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: 守门人
   life: 1
   deck: {fileID: 11400000, guid: 30d172c64f83b355321fce3de14e3099, type: 2}
-  appearance: {fileID: 10001, guid: 682d206a4994d1648810a3aec6779c30, type: 3}
+  appearance: {fileID: 0}

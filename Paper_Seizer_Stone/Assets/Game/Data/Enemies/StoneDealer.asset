@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: 重石客
   life: 1
   deck: {fileID: 11400000, guid: 8106afabfca9ddd63f93feeb92b1a8a5, type: 2}
-  appearance: {fileID: 10001, guid: 682d206a4994d1648810a3aec6779c30, type: 3}
+  appearance: {fileID: 0}

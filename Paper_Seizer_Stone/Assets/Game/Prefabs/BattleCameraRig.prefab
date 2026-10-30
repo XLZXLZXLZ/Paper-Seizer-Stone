@@ -45,6 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2ac905b6641e9c467f773067e0004b, type: 3}
   m_Name:
   m_EditorClassIdentifier:
+  subtleMotion: 1
+  breathPosition: 0.004
+  breathAngle: 0.12
+  breathFrequency: 0.22
+  mousePositionOffset: {x: 0.018, y: 0.012}
+  mouseAngleOffset: {x: 0.2, y: 0.35}
+  motionSmoothing: 8
   showPlayerModel: 0
   sceneCamera: {fileID: 10005}
   definition: {fileID: 11400000, guid: c20770b7561948d2b06fc5a641479c32, type: 2}
