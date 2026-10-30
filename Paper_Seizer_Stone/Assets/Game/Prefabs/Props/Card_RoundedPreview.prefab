@@ -71,6 +71,8 @@ MonoBehaviour:
   playerBack: {fileID: 2100000, guid: 05899c95ab5e4b9f96dd076737d31a46, type: 2}
   enemyBack: {fileID: 2100000, guid: 05899c95ab5e4b9f96dd076737d31a46, type: 2}
   textureOnly: 1
+  privatePreviewOpacity: 0.35
+  flipDuration: 0.22
   previewAppearance: {fileID: 11400000, guid: ac7d5c2ba6af4448b1116b7dce3d100b, type: 2}
   previewSide: 0
   previewFaceDown: 0
@@ -487,7 +489,7 @@ Transform:
   m_GameObject: {fileID: 10019}
   m_LocalRotation: {x: 0.70710677, y: 0, z: 0, w: 0.70710677}
   m_LocalPosition: {x: 0, y: 0.04, z: 0}
-  m_LocalScale: {x: 0.78, y: 1.03, z: 1}
+  m_LocalScale: {x: 0.72, y: 1.09, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 10005}
