@@ -44,6 +44,9 @@ namespace PaperSeizerStone.Flow
         public string EnemyName => currentEnemy == null ? "对手" : currentEnemy.DisplayName;
         public int EncounterNumber => adventure == null ? 1 : adventure.EncounterIndex + 1;
         public bool CanInteract => !busy && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
+        public bool CanCheatDraw => CanInteract && engine.State.Phase == BattlePhase.PlayerCheat
+            && engine.State.Get(Side.Enemy).Bullets + 2 <= BasicRules.Chambers
+            && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
         public bool CanShopInteract => !busy && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanBurnInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
@@ -108,6 +111,7 @@ namespace PaperSeizerStone.Flow
         private IEnumerator BeginRound()
         {
             busy = true;
+            tableView.RestoreOpponentForNextRound();
             yield return Play(engine.BeginRound());
             draftHand.Clear();
             draftHand.AddRange(engine.State.Get(Side.Player).Hand);
@@ -127,11 +131,24 @@ namespace PaperSeizerStone.Flow
                     var shots = new List<BattleEvent> { battleEvent };
                     while (i + 1 < result.Events.Count && result.Events[i + 1].Kind == BattleEventKind.ShotResolved)
                         shots.Add(result.Events[++i]);
-                    yield return tableView.PresentShots(shots);
+                    bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
+                    try
+                    {
+                        yield return tableView.PresentShots(shots);
+                        if (!playerKilled && shots.Exists(shot => shot.Hit))
+                        {
+                            yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
+                            yield return new WaitForSecondsRealtime(0.65f);
+                        }
+                        yield return cameraRig.MoveTo(BattleCameraPose.Table);
+                    }
+                    finally
+                    {
+                        tableView.EndPostShotPresentation();
+                    }
                 }
                 else
                 {
-                    if (battleEvent.Kind == BattleEventKind.RoundEnded) yield return MoveCamera(BattleCameraPose.Table);
                     yield return tableView.Present(battleEvent);
                 }
                 yield return new WaitForSeconds(battleEvent.Kind == BattleEventKind.PhaseChanged ? phasePause : actionPause);
@@ -221,7 +238,6 @@ namespace PaperSeizerStone.Flow
             BattleFinished?.Invoke(outcome);
             if (!outcome.PlayerWon)
             {
-                yield return MoveCamera(BattleCameraPose.Table);
                 busy = false;
                 yield break;
             }

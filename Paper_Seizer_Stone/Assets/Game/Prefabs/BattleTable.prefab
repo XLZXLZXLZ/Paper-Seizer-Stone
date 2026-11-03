@@ -244,6 +244,7 @@ MonoBehaviour:
   firstPersonHand: {fileID: 93001}
   editorPreview: {fileID: 10229}
   opponentAnchor: {fileID: 4502991734277502480}
+  scoreCounter: {fileID: 8689943813781724663}
   defaultOpponent: {fileID: 3389391660633774729}
   confirmLabel: {fileID: 10197}
   roundLabel: {fileID: 0}

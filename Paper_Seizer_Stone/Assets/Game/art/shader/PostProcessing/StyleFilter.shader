@@ -8,6 +8,7 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             float4 _StyleSourceTexelSize;
+            float4 _ShotImpact;
             float4 _Style, _Print, _Surface, _Grade, _Vignette;
             float4 _InkColor, _ShadowColor, _HighlightColor, _VignetteColor;
             float _SplitTone;
@@ -71,6 +72,12 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 float2 uv = input.texcoord;
+                if (_ShotImpact.x > 0)
+                {
+                    float stripe = floor(uv.y * 32);
+                    uv.x += (Hash(float2(stripe, floor(_Time.y * 48))) - 0.5) * 2 * _ShotImpact.x;
+                    uv = saturate(uv);
+                }
                 float4 source = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
                 float3 c = ToDisplay(source.rgb);
                 [branch] if (_Surface.x > 0.0001) c = lerp(c, Oil(uv), _Surface.x);
@@ -112,7 +119,14 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
                 offset.x *= _ScreenParams.x/_ScreenParams.y;
                 float vignette = smoothstep(0.35, 0.35+max(0.05,_Vignette.y)*1.7, length(offset));
                 c = lerp(c, _VignetteColor.rgb, vignette*_Vignette.x);
-                return float4(lerp(source.rgb, ToOutput(saturate(c)), _Style.x), source.a);
+                float3 color = lerp(source.rgb, ToOutput(saturate(c)), _Style.x);
+                if (_ShotImpact.w > 0)
+                {
+                    float brightness = smoothstep(0.05, 0.9, Luma(ToDisplay(color)));
+                    float3 redBlack = lerp(float3(0.012, 0.001, 0.002), float3(0.78, 0.055, 0.075), brightness);
+                    color = lerp(color, ToOutput(redBlack), _ShotImpact.w);
+                }
+                return float4(color, source.a);
             }
             float4 CopyFragment(Varyings input) : SV_Target
             {

@@ -16,6 +16,7 @@ namespace PaperSeizerStone.InputControl
         private Vector3 grabOffset;
         private CardView highlightedCard;
         private TableTarget highlightedTarget;
+        private DeckPileView hoveredDeck;
         private Plane dragPlane;
 
         public void Initialize(BattleController battle)
@@ -49,6 +50,7 @@ namespace PaperSeizerStone.InputControl
             controller.CameraRig.SetPrecisionMode(dragging != null);
             if (dragging != null)
             {
+                SetHoveredDeck(null);
                 if (preview != null) preview.Hide();
                 dragging.transform.position = Vector3.Lerp(dragging.transform.position, DragPosition() + grabOffset,
                     1 - Mathf.Exp(-25 * Time.deltaTime));
@@ -71,12 +73,14 @@ namespace PaperSeizerStone.InputControl
                 Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width;
             controller.View.SetHandExpanded(controller.CanDrag && cursorInside &&
                 controller.View.WantsHandExpanded(Input.mousePosition));
+            RaycastHit hoverHit = default;
+            bool hasHover = cursorInside && controller.CanInteract && Hit(out hoverHit);
             if (preview != null)
-            {
-                CardView hovered = cursorInside && controller.CanInteract && Hit(out RaycastHit hoverHit)
-                    ? hoverHit.collider.GetComponentInParent<CardView>() : null;
-                preview.Show(hovered, Input.mousePosition);
-            }
+                preview.Show(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null, Input.mousePosition);
+            TableTarget hoverTarget = hasHover && controller.CanCheatDraw
+                ? hoverHit.collider.GetComponentInParent<TableTarget>() : null;
+            SetHoveredDeck(hoverTarget != null && hoverTarget.Kind == TableTargetKind.PlayerDeck
+                ? hoverTarget.GetComponentInParent<DeckPileView>() : null);
             if (!controller.CanInteract) return;
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
             {
@@ -104,6 +108,14 @@ namespace PaperSeizerStone.InputControl
             if (tableTarget == null) return;
             if (tableTarget.Kind == TableTargetKind.Confirm) controller.ConfirmOrPass();
             else if (tableTarget.Kind == TableTargetKind.PlayerDeck) controller.DrawExtra();
+        }
+
+        private void SetHoveredDeck(DeckPileView deck)
+        {
+            if (deck == hoveredDeck) return;
+            if (hoveredDeck != null) hoveredDeck.SetHoverOutline(false);
+            hoveredDeck = deck;
+            if (hoveredDeck != null) hoveredDeck.SetHoverOutline(true);
         }
 
         private void CancelDrag()
@@ -179,12 +191,14 @@ namespace PaperSeizerStone.InputControl
         {
             if (!hasFocus)
             {
+                SetHoveredDeck(null);
                 if (preview != null) preview.Hide();
                 CancelDrag();
             }
         }
         private void OnDisable()
         {
+            SetHoveredDeck(null);
             if (preview != null) preview.Hide();
             if (controller != null && controller.View != null) CancelDrag();
         }

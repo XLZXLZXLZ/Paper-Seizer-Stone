@@ -10,6 +10,7 @@ namespace PaperSeizerStone.Presentation.PostProcessing
         public Shader filterShader;
         private Material material;
         private FilterPass pass;
+        private readonly StyleFilterParameters neutralStyle = new StyleFilterParameters { strength = 0 };
 
         public override void Create()
         {
@@ -22,16 +23,20 @@ namespace PaperSeizerStone.Presentation.PostProcessing
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            if (material == null || settings == null || !settings.filterEnabled || settings.parameters == null) return;
+            if (material == null) return;
             var camera = renderingData.cameraData;
             if (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.SceneView) return;
             if (camera.renderType != CameraRenderType.Base) return;
+            bool styled = settings != null && settings.filterEnabled && settings.parameters != null;
 #if UNITY_EDITOR
-            if (!StyleFilterSettings.PreviewEnabled || StyleFilterSettings.CompareOriginal) return;
-            if (camera.isSceneViewCamera && !StyleFilterSettings.PreviewSceneView) return;
+            styled &= StyleFilterSettings.PreviewEnabled && !StyleFilterSettings.CompareOriginal
+                && (!camera.isSceneViewCamera || StyleFilterSettings.PreviewSceneView);
 #endif
-            if (settings.parameters.strength <= 0) return;
-            pass.Setup(renderer, material, settings.parameters);
+            var rig = camera.cameraType == CameraType.Game ? camera.camera.GetComponentInParent<BattleCameraRig>() : null;
+            Vector4 impact = rig != null && rig.Camera == camera.camera ? rig.HitScreenEffect : Vector4.zero;
+            var parameters = styled ? settings.parameters : neutralStyle;
+            if (parameters.strength <= 0 && impact.x <= 0f && impact.w <= 0f) return;
+            pass.Setup(renderer, material, parameters, impact);
             renderer.EnqueuePass(pass);
         }
 
@@ -51,9 +56,10 @@ namespace PaperSeizerStone.Presentation.PostProcessing
             private ScriptableRenderer renderer;
             private Material material;
             private StyleFilterParameters parameters;
+            private Vector4 impact;
 
-            public void Setup(ScriptableRenderer target, Material effect, StyleFilterParameters values)
-            { renderer = target; material = effect; parameters = values; }
+            public void Setup(ScriptableRenderer target, Material effect, StyleFilterParameters values, Vector4 screenImpact)
+            { renderer = target; material = effect; parameters = values; impact = screenImpact; }
 
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
             {
@@ -72,6 +78,7 @@ namespace PaperSeizerStone.Presentation.PostProcessing
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 var p = parameters;
+                material.SetVector("_ShotImpact", impact);
                 material.SetVector("_Style", new Vector4(p.strength, p.posterize, Mathf.Max(3, p.levels), p.dither));
                 material.SetVector("_Print", new Vector4(p.halftone, p.dotSize, p.dotAngle * Mathf.Deg2Rad, p.ditherSize));
                 material.SetVector("_Surface", new Vector4(p.oil, Mathf.Clamp(p.oilRadius, 1, 4), p.paper, p.paperScale));

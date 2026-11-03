@@ -226,7 +226,8 @@ namespace PaperSeizerStone.Editor
             foreach (var body in visual.GetComponentsInChildren<Rigidbody>(true)) UnityEngine.Object.DestroyImmediate(body);
             foreach (var collider in visual.GetComponentsInChildren<Collider>(true)) UnityEngine.Object.DestroyImmediate(collider);
             Bounds bounds = LocalMeshBounds(visual);
-            float scale = length / Mathf.Max(0.000001f, bounds.size.y);
+            const float loadingBulletFitScale = 0.82f;
+            float scale = loadingBulletFitScale * length / Mathf.Max(0.000001f, bounds.size.y);
             Quaternion rotation = Quaternion.FromToRotation(Vector3.up, direction);
             visual.transform.localRotation = rotation;
             visual.transform.localScale = Vector3.one * scale;

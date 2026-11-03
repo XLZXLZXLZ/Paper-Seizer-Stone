@@ -35,7 +35,9 @@ namespace PaperSeizerStone.Presentation
         private Camera viewCamera;
         private CardView dragging;
         private bool expanded;
-        private bool presentationSuspended;
+        private bool shootingSuspended;
+        private bool postShotSuspended;
+        private bool presentationSuspended => shootingSuspended || postShotSuspended;
         private float expansion;
         private struct Entry { public CardView View; public int Index; public int Count; }
         private const float CardHeight = 1.11f;
@@ -61,13 +63,24 @@ namespace PaperSeizerStone.Presentation
 
         public void SetPresentationSuspended(bool value)
         {
-            presentationSuspended = value;
-            if (value)
+            shootingSuspended = value;
+            ApplyPresentationSuspension();
+        }
+
+        public void SetPostShotSuspended(bool value)
+        {
+            postShotSuspended = value;
+            ApplyPresentationSuspension();
+        }
+
+        private void ApplyPresentationSuspension()
+        {
+            if (presentationSuspended)
             {
                 foreach (Entry entry in entries) HideRenderers(entry.View);
             }
             else RestoreRenderers();
-            if (grip != null) grip.SetPresentationActive(!value && entries.Count > 0);
+            if (grip != null) grip.SetPresentationActive(!presentationSuspended && entries.Count > 0);
         }
 
         public bool WantsExpanded(Vector2 screenPoint, bool current)

@@ -510,6 +510,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstPersonArms: {fileID: 5789652374307244992}
+  useFullArmMeshes: 1
 --- !u!114 &8786084200981031998
 MonoBehaviour:
   m_ObjectHideFlags: 0

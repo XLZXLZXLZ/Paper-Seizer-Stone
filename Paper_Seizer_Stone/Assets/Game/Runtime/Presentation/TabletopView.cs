@@ -21,6 +21,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private FirstPersonHandView firstPersonHand;
         [SerializeField] private PlayerShootingSequence playerShooting;
         [SerializeField] private Transform opponentAnchor;
+        [SerializeField] private Transform scoreCounter;
         [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
         [SerializeField, Tooltip("可选：未绑定时不显示桌面回合文字。")] private TMP_Text roundLabel;
@@ -28,7 +29,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip cardSound;
         [SerializeField] private AudioClip shotSound;
-        [SerializeField] private AudioClip emptySound;
+        [SerializeField, Tooltip("未命中时的扳机机械轻响，可留空。")] private AudioClip emptySound;
         [SerializeField, Min(0.05f)] private float moveDuration = 0.24f;
         [Header("手牌布局（相对于手牌定位点）")]
         [SerializeField] private float handSpacing = 0.58f;
@@ -56,15 +57,23 @@ namespace PaperSeizerStone.Presentation
         private IReadOnlyList<int> draftSlots;
         private bool expandedHand;
         private GameObject opponentInstance;
+        private Transform fallenOpponent;
+        private Vector3 opponentStandingPosition;
+        private Quaternion opponentStandingRotation;
         private string shootingFallbackReason;
 
         public string Message { get; private set; }
+        public Transform ScoreCounter => scoreCounter;
         public BattleObservation Displayed => displayed;
         public Transform DragAnchor => dragAnchor;
         public bool HandExpanded => expandedHand;
         public CardView FindCard(int id) { cards.TryGetValue(id, out CardView view); return view; }
         public void Notify(string message) { Message = message; }
         private SideTableBindings Get(Side side) => side == Side.Player ? player : enemy;
+
+        private BattleCameraRig shotCameraRig;
+        private bool postShotPresentation;
+        private bool handsWereVisible;
 
         public void Initialize(BattleDefinition definition, CardView prefab, Camera camera)
         {
@@ -77,6 +86,7 @@ namespace PaperSeizerStone.Presentation
             chipArea.Initialize();
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
+            shotCameraRig = camera != null ? camera.GetComponentInParent<BattleCameraRig>() : null;
             firstPersonHand.Initialize(camera);
             PlayerShootingSequence gripShooting = firstPersonHand.Grip != null
                 ? firstPersonHand.Grip.GetComponent<PlayerShootingSequence>() : null;
@@ -92,6 +102,8 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetEncounter(EnemyDefinition opponent)
         {
+            RestoreOpponentPose();
+            EndPostShotPresentation();
             if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.ResetHand();
             foreach (CardView view in cards.Values) { view.ResetForPool(); pool.Push(view); }
@@ -352,6 +364,12 @@ namespace PaperSeizerStone.Presentation
             Message = CheatMessage(playerEvents) + "  " + CheatMessage(enemyEvents);
             draftHand = null;
             draftSlots = null;
+            foreach (BattleEvent action in playerEvents)
+                if (action.Kind == BattleEventKind.CardDrawn && action.Side == Side.Player)
+                {
+                    player.DrawPile.PulseOutline();
+                    break;
+                }
             float dropDuration = Apply(actionSnapshot);
             Layout(moveDuration);
             PulseTransforms(playerEvents);
@@ -430,32 +448,222 @@ namespace PaperSeizerStone.Presentation
 
         private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
 
+        public void RestoreOpponentForNextRound() => RestoreOpponentPose();
+
+        private void BeginPostShotPresentation()
+        {
+            if (postShotPresentation) return;
+            postShotPresentation = true;
+            firstPersonHand.SetPostShotSuspended(true);
+            if (shotCameraRig == null) return;
+            handsWereVisible = shotCameraRig.ShowPlayerHands;
+            shotCameraRig.ShowPlayerHands = false;
+        }
+
+        public void EndPostShotPresentation()
+        {
+            if (!postShotPresentation) return;
+            postShotPresentation = false;
+            firstPersonHand.SetPostShotSuspended(false);
+            if (shotCameraRig != null) shotCameraRig.ShowPlayerHands = handsWereVisible;
+        }
+
         public IEnumerator PresentShots(IReadOnlyList<BattleEvent> shots)
         {
             Apply(shots[0].Snapshot);
             Message = shots.Count == 2 ? shots[0].Message + "  " + shots[1].Message : shots[0].Message;
             bool animatedPlayer = playerShooting != null && playerShooting.IsActive;
+            bool hit = false;
+            float firstHitTime = 0f;
+            Coroutine knockdown = null;
+            bool playerHit = false;
+            foreach (BattleEvent shot in shots) playerHit |= shot.Side == Side.Enemy && shot.Hit;
+            bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
             foreach (BattleEvent shot in shots)
             {
-                SideTableBindings side = Get(shot.Side);
-                if (shot.Side == Side.Player && animatedPlayer)
-                    playerShooting.SetMuzzleFlash(shot.Hit);
-                else
+                if (!shot.Hit)
                 {
-                    side.Gun.DOPunchPosition(side.Gun.up * (shot.Hit ? 0.22f : 0.045f), 0.3f, 2, 0.3f);
-                    side.MuzzleFlash.SetActive(shot.Hit);
+                    PlaySound(emptySound);
+                    continue;
                 }
-                PlaySound(shot.Hit ? shotSound : emptySound);
+                SideTableBindings side = Get(shot.Side);
+                bool usesAnimatedGun = shot.Side == Side.Player && animatedPlayer;
+                GameObject muzzle = usesAnimatedGun ? playerShooting.MuzzleFlash : side.MuzzleFlash;
+                muzzle.SetActive(false);
+                if (!usesAnimatedGun)
+                    side.Gun.DOPunchPosition(side.Gun.up * 0.22f, 0.3f, 2, 0.3f);
+                Vector3 tracerTarget = shot.Side == Side.Player
+                    ? opponentAnchor.position + opponentAnchor.up * 0.55f
+                    : player.HandAnchor.position + player.HandAnchor.up * 0.35f;
+                StartCoroutine(ShowDischarge(muzzle, tracerTarget, shot.Side == Side.Enemy));
+                if (!hit)
+                {
+                    firstHitTime = Time.unscaledTime;
+                    if (!playerHit && shotCameraRig != null) shotCameraRig.ShakeForShot();
+                }
+                if (shot.Side == Side.Enemy && shotCameraRig != null)
+                {
+                    BeginPostShotPresentation();
+                    StartCoroutine(shotCameraRig.PlayPlayerFall(playerKilled));
+                }
+                hit = true;
+                if (shot.Side == Side.Player && knockdown == null)
+                {
+                    Message += "  对手中枪倒地。";
+                    knockdown = StartCoroutine(KnockDownOpponent());
+                    if (!playerHit && shotCameraRig != null) StartCoroutine(shotCameraRig.FollowOpponentFall());
+                }
+                PlaySound(shotSound);
             }
-            yield return new WaitForSeconds(0.08f);
+            yield return new WaitForSecondsRealtime(0.08f);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
+            if (animatedPlayer) playerShooting.SetMuzzleFlash(false);
+            BeginPostShotPresentation();
+
             if (animatedPlayer)
             {
-                playerShooting.SetMuzzleFlash(false);
                 yield return playerShooting.Finish();
             }
             else yield return new WaitForSeconds(0.92f);
+
+            if (knockdown != null && fallenOpponent != null && fallenOpponent.gameObject.activeSelf)
+                yield return knockdown;
+
+            if (hit && shotCameraRig != null)
+            {
+                float remaining = BattleCameraRig.HitBuildUpSeconds - (Time.unscaledTime - firstHitTime);
+                if (remaining > 0f) yield return new WaitForSecondsRealtime(remaining);
+                shotCameraRig.FlashHit();
+                while (shotCameraRig.IsHitEffectPlaying) yield return null;
+            }
+        }
+
+        private IEnumerator ShowDischarge(GameObject muzzle, Vector3 target, bool towardPlayer)
+        {
+            const float trailDuration = 0.033f;
+            const float flashDuration = 0.14f;
+            var effect = new GameObject("Muzzle Discharge");
+            effect.layer = gameObject.layer;
+            effect.transform.SetParent(muzzle.transform.parent, false);
+            effect.transform.SetPositionAndRotation(muzzle.transform.position, muzzle.transform.rotation);
+
+            var light = effect.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.69f, 0.32f);
+            light.range = 3.8f;
+            light.shadows = LightShadows.None;
+
+            LineRenderer trail = null;
+            LineRenderer burst = null;
+            var flash = muzzle.GetComponentInChildren<Renderer>(true);
+            Vector3 origin = muzzle.transform.position;
+            if (flash != null && flash.sharedMaterial != null && (target - origin).sqrMagnitude > 0.001f)
+            {
+                trail = effect.AddComponent<LineRenderer>();
+                trail.useWorldSpace = true;
+                trail.sharedMaterial = flash.sharedMaterial;
+                trail.positionCount = 2;
+                trail.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0.28f);
+                trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                trail.receiveShadows = false;
+                trail.SetPosition(0, origin);
+                // Stop the streak short of the victim so it cannot bloom across a near camera.
+                Vector3 direction = (target - origin).normalized;
+                trail.SetPosition(1, towardPlayer
+                    ? origin + direction * Mathf.Max(0.1f, Vector3.Distance(origin, target) - 0.65f)
+                    : target);
+
+                var flame = new GameObject("Muzzle Flame");
+                flame.layer = effect.layer;
+                flame.transform.SetParent(effect.transform, false);
+                burst = flame.AddComponent<LineRenderer>();
+                burst.useWorldSpace = true;
+                burst.sharedMaterial = flash.sharedMaterial;
+                burst.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0.55f);
+                burst.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                burst.receiveShadows = false;
+                Vector3 forward = direction;
+                Vector3 spread = Vector3.Cross(forward, Vector3.up).normalized;
+                if (spread.sqrMagnitude < 0.01f) spread = Vector3.right;
+                Vector3 rise = Vector3.Cross(spread, forward).normalized;
+                burst.positionCount = 9;
+                burst.SetPositions(new[]
+                {
+                    origin + forward * 0.12f + spread * 0.11f, origin, origin + forward * 0.31f,
+                    origin, origin + forward * 0.11f - spread * 0.10f,
+                    origin, origin + forward * 0.10f + rise * 0.095f,
+                    origin, origin + forward * 0.09f - rise * 0.08f
+                });
+            }
+
+            float start = Time.unscaledTime;
+            try
+            {
+                while (effect != null)
+                {
+                    float elapsed = Time.unscaledTime - start;
+                    if (elapsed >= flashDuration) break;
+                    float fade = 1f - elapsed / flashDuration;
+                    light.intensity = 7.5f * fade;
+                    if (burst != null) burst.widthMultiplier = 0.055f * fade;
+                    if (trail != null)
+                    {
+                        float progress = Mathf.Clamp01(elapsed / trailDuration);
+                        trail.SetPosition(0, Vector3.Lerp(origin, trail.GetPosition(1), progress));
+                        trail.widthMultiplier = 0.005f * (1f - progress);
+                        trail.enabled = progress < 1f;
+                    }
+                    yield return null;
+                }
+            }
+            finally
+            {
+                if (effect != null) Destroy(effect);
+            }
+        }
+
+        private IEnumerator KnockDownOpponent()
+        {
+            GameObject actor = opponentInstance != null ? opponentInstance : defaultOpponent;
+            fallenOpponent = actor.transform;
+            opponentStandingPosition = fallenOpponent.localPosition;
+            opponentStandingRotation = fallenOpponent.localRotation;
+
+            // Tip away from the player's side of the table and sink as the body lands.
+            const float duration = BattleCameraRig.OpponentFallSeconds;
+            Vector3 away = fallenOpponent.parent.InverseTransformDirection(
+                fallenOpponent.position - player.GunRestPose.position);
+            Vector3 backward = Vector3.ProjectOnPlane(away, Vector3.up).normalized;
+            if (backward.sqrMagnitude < 0.001f) backward = Vector3.back;
+            Vector3 fallAxis = Vector3.Cross(Vector3.up, backward);
+            float start = Time.unscaledTime;
+            while (fallenOpponent != null)
+            {
+                float progress = Mathf.Clamp01((Time.unscaledTime - start) / duration);
+                float recoil = Mathf.Sin(Mathf.PI * Mathf.Clamp01(progress / 0.25f));
+                float fall = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.15f, 0.88f, progress));
+                float settle = Mathf.Sin(Mathf.PI * Mathf.InverseLerp(0.82f, 1f, progress));
+                fallenOpponent.localPosition = opponentStandingPosition
+                    + backward * (0.3f * fall)
+                    - Vector3.up * (0.6f * fall - 0.035f * settle);
+                fallenOpponent.localRotation = Quaternion.AngleAxis(76f * fall + 9f * recoil - 3f * settle, fallAxis) * opponentStandingRotation;
+                if (progress >= 1f)
+                {
+                    fallenOpponent.gameObject.SetActive(false);
+                    yield break;
+                }
+                yield return null;
+            }
+        }
+
+        private void RestoreOpponentPose()
+        {
+            if (fallenOpponent == null) return;
+            fallenOpponent.localPosition = opponentStandingPosition;
+            fallenOpponent.localRotation = opponentStandingRotation;
+            fallenOpponent.gameObject.SetActive(true);
+            fallenOpponent = null;
         }
 
         public void ShowDraft(IReadOnlyList<int> hand, IReadOnlyList<int> slots)
@@ -485,7 +693,11 @@ namespace PaperSeizerStone.Presentation
             firstPersonHand.SetExpanded(expanded);
         }
 
-        private void OnDisable() { if (playerShooting != null) playerShooting.Cancel(); }
+        private void OnDisable()
+        {
+            if (playerShooting != null) playerShooting.Cancel();
+            EndPostShotPresentation();
+        }
 
         private void OnDestroy()
         {
