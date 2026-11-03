@@ -252,8 +252,7 @@ MonoBehaviour:
   fullScore: 8
   fillSeconds: 0.95
   scoreHoldSeconds: 0.55
-  installedFontFamily: PingFang SC
-  numberFont: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  numberFont: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   enemyNumberPosition: {x: 0.193, y: 0.205, z: 0.102}
   playerNumberPosition: {x: -0.193, y: 0.205, z: 0.102}
   numberEulerAngles: {x: 0, y: 180, z: 0}

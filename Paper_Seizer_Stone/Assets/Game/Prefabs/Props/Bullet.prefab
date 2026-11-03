@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 10002}
+  - component: {fileID: 842001}
   - component: {fileID: 2080286020081199533}
   - component: {fileID: 1379698094865274217}
   m_Layer: 2
@@ -205,3 +206,17 @@ CapsuleCollider:
   m_Height: 0.24
   m_Direction: 1
   m_Center: {x: 0, y: 0.025, z: 0}
+--- !u!114 &842001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7fba6316e225de59b0ff62d4bf992de, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  cue: 6
+  minimumSpeed: 0.35

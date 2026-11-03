@@ -1,4 +1,6 @@
 using UnityEngine;
+using PaperSeizerStone.Battle;
+using PaperSeizerStone.Configuration;
 
 namespace PaperSeizerStone.Presentation
 {
@@ -13,9 +15,42 @@ namespace PaperSeizerStone.Presentation
         private LineRenderer drawOutline;
         private float outlineUntil;
         private bool hoverOutline;
+        private CardView cardStyle;
+        private Side originalSide;
+        private MaterialPropertyBlock backProperties;
         private const float OutlineDuration = 0.42f;
         private const float OutlineWidth = 0.011f;
         private const float HoverWidth = 0.007f;
+
+        public void ConfigureBacks(CardView style, Side side)
+        {
+            cardStyle = style;
+            originalSide = side;
+            ApplyBackStyle();
+        }
+
+        private void OnEnable()
+        {
+            GameDisplaySettings.Changed += ApplyBackStyle;
+            ApplyBackStyle();
+        }
+
+        private void ApplyBackStyle()
+        {
+            if (!initialized || cardStyle == null) return;
+            cardStyle.ResolveBackStyle(originalSide, out Material material, out Texture texture, out Color color);
+            if (backProperties == null) backProperties = new MaterialPropertyBlock();
+            foreach (Renderer layer in layers)
+            {
+                if (material != null && layer.sharedMaterial != material) layer.sharedMaterial = material;
+                layer.GetPropertyBlock(backProperties);
+                backProperties.SetTexture("_BaseMap", texture);
+                backProperties.SetTexture("_MainTex", texture);
+                backProperties.SetColor("_BaseColor", color);
+                backProperties.SetColor("_Color", color);
+                layer.SetPropertyBlock(backProperties);
+            }
+        }
 
         public void PulseOutline()
         {
@@ -88,6 +123,7 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
+            GameDisplaySettings.Changed -= ApplyBackStyle;
             hoverOutline = false;
             outlineUntil = 0f;
             if (drawOutline != null) drawOutline.enabled = false;
@@ -110,6 +146,7 @@ namespace PaperSeizerStone.Presentation
                     }
                 }
                 initialized = true;
+                ApplyBackStyle();
             }
             for (int i = 0; i < layers.Length; i++) layers[i].gameObject.SetActive(i < count);
         }

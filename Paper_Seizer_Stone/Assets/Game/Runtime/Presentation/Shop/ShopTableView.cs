@@ -204,6 +204,7 @@ namespace PaperSeizerStone.Presentation
             Notify("正在收下新牌并支付筹码……");
             Coroutine payment = StartCoroutine(walletArea.Pay(price, paymentExit, transactionDuration, paymentStagger));
             yield return offers[index].Purchase(deckAnchor, transactionDuration);
+            PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.CardPlace);
             yield return payment;
         }
 

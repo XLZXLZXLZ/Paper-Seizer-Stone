@@ -152,6 +152,7 @@ namespace PaperSeizerStone.Presentation
                 selected.transform.DOMove(positions[selected], 0.15f);
             }
             selected = card;
+            PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.CardPickUp);
             selected.SetHighlight(true);
             selected.transform.DOKill();
             selected.transform.DOMove(positions[selected] + Vector3.up * 0.14f, 0.15f);
@@ -167,6 +168,7 @@ namespace PaperSeizerStone.Presentation
             burning.transform.DOKill();
             Coroutine payment = StartCoroutine(walletArea.Pay(price, paymentExit, burnDuration * 0.65f, 0.05f));
             yield return burning.transform.DOMove(burnAnchor.position, burnDuration * 0.4f).SetEase(Ease.InOutSine).WaitForCompletion();
+            PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.CardBurn);
             emberGlow.DOPunchScale(glowScale * 0.65f, burnDuration * 0.6f, 2, 0.4f);
             burning.transform.DORotate(new Vector3(0, 120, 0), burnDuration * 0.6f, RotateMode.LocalAxisAdd);
             yield return burning.transform.DOScale(Vector3.zero, burnDuration * 0.6f).SetEase(Ease.InCubic).WaitForCompletion();

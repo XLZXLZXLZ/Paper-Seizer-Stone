@@ -121,6 +121,7 @@ namespace PaperSeizerStone.Presentation
         {
             if (amount < 0 || amount > currentCount) throw new InvalidOperationException("支付实体筹码的数量无效。");
             if (amount == 0) yield break;
+            PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.ChipPay);
             if (dropping != null) StopCoroutine(dropping);
             dropping = null;
             var payment = new List<Rigidbody>();

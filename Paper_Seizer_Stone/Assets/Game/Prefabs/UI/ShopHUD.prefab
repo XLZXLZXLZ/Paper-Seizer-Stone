@@ -355,8 +355,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "战 后 整 备"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -460,8 +460,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "筹码  8"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -565,8 +565,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "剩余生命  2"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -670,8 +670,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "下一位对手  重石客"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -935,8 +935,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "我的牌组   12 张"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1040,8 +1040,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "点击列表查看牌面与能力"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1263,8 +1263,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1486,8 +1486,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1709,8 +1709,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1932,8 +1932,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2155,8 +2155,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2378,8 +2378,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2601,8 +2601,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2824,8 +2824,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "01  石头"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3047,8 +3047,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "上一页"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3152,8 +3152,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "1 / 2"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3375,8 +3375,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "下一页"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3480,8 +3480,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "选择一张持有牌\n最少保留五张"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3703,8 +3703,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "烧牌整备  ·  3 筹码"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3954,8 +3954,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "点击桌面商品购买，或前往烧牌桌面精简牌组。"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4177,8 +4177,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "下一场战斗 →"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

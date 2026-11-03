@@ -6,6 +6,7 @@ using PaperSeizerStone.Battle;
 using PaperSeizerStone.Configuration;
 using PaperSeizerStone.Presentation;
 using PaperSeizerStone.InputControl;
+using PaperSeizerStone.Audio;
 
 namespace PaperSeizerStone.Flow
 {
@@ -103,6 +104,7 @@ namespace PaperSeizerStone.Flow
 
         private IEnumerator EnterEncounter()
         {
+            AudioManager.SetMusic(MusicContext.Battle);
             busy = true;
             yield return MoveBattle(true);
             yield return BeginRound();
@@ -208,8 +210,15 @@ namespace PaperSeizerStone.Flow
             yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
             yield return tableView.RevealCounterScores();
             yield return MoveCamera(BattleCameraPose.Shooting);
-            yield return tableView.PrepareShooting();
-            yield return Play(engine.ExecuteShots());
+            try
+            {
+                yield return tableView.PrepareShooting();
+                yield return Play(engine.ExecuteShots());
+            }
+            finally
+            {
+                AudioManager.SetShootingFocus(false);
+            }
             if (engine.State.Phase == BattlePhase.BattleEnd)
             {
                 yield return FinishEncounter();
@@ -254,6 +263,7 @@ namespace PaperSeizerStone.Flow
             yield return new WaitForSeconds(victoryPause);
             yield return MoveCamera(BattleCameraPose.Table);
             yield return MoveBattle(false);
+            AudioManager.SetMusic(MusicContext.Shop);
             shopView.Prepare(adventure, definition.Shop, definition.GetEnemy(adventure.EncounterIndex + 1));
             yield return shopView.Show();
             yield return new WaitForSeconds(phasePause);
@@ -397,6 +407,7 @@ namespace PaperSeizerStone.Flow
             }
             if (engine.State.Phase == BattlePhase.Planning)
             {
+                if (IsLegalDrop(cardId, targetCard, target)) AudioManager.Play(AudioCue.CardPlace);
                 EditDraft(cardId, targetCard, target);
                 tableView.ShowDraft(draftHand, draftSlots);
                 return;

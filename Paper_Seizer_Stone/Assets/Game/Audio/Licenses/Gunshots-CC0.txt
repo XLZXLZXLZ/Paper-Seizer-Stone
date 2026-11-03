@@ -1,0 +1,5 @@
+Gunshots — kurt
+Source: https://opengameart.org/content/gunshots
+Downloaded recording: 22 Magnum.wav
+License: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+Project copy: MagnumShot.wav (silence trimmed, tail faded, level adjusted).

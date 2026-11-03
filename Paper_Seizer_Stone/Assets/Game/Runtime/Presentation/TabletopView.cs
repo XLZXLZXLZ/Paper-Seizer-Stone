@@ -6,6 +6,7 @@ using TMPro;
 using DG.Tweening;
 using PaperSeizerStone.Battle;
 using PaperSeizerStone.Configuration;
+using PaperSeizerStone.Audio;
 
 namespace PaperSeizerStone.Presentation
 {
@@ -26,10 +27,6 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text confirmLabel;
         [SerializeField, Tooltip("可选：未绑定时不显示桌面回合文字。")] private TMP_Text roundLabel;
         [SerializeField] private Props.TableBellView confirmBell;
-        [SerializeField] private AudioSource audioSource;
-        [SerializeField] private AudioClip cardSound;
-        [SerializeField] private AudioClip shotSound;
-        [SerializeField, Tooltip("未命中时的扳机机械轻响，可留空。")] private AudioClip emptySound;
         [SerializeField, Min(0.05f)] private float moveDuration = 0.24f;
         [Header("手牌布局（相对于手牌定位点）")]
         [SerializeField] private float handSpacing = 0.58f;
@@ -82,11 +79,13 @@ namespace PaperSeizerStone.Presentation
             player.RequireAssigned("玩家");
             enemy.RequireAssigned("对手");
             if (prefab == null || camera == null || firstPersonHand == null || cardRoot == null || dragAnchor == null || chipArea == null || opponentAnchor == null || defaultOpponent == null
-                || confirmLabel == null || confirmBell == null || audioSource == null)
-                throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点、按钮或声音节点。");
+                || confirmLabel == null || confirmBell == null)
+                throw new InvalidOperationException("桌面预制体缺少卡牌、筹码、定位点或按钮节点。");
             chipArea.Initialize();
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
+            player.DrawPile.ConfigureBacks(prefab, Side.Player);
+            enemy.DrawPile.ConfigureBacks(prefab, Side.Enemy);
             shotCameraRig = camera != null ? camera.GetComponentInParent<BattleCameraRig>() : null;
             scoreCounterView = scoreCounter != null ? scoreCounter.GetComponent<ScoreCounterView>() : null;
             firstPersonHand.Initialize(camera);
@@ -291,6 +290,9 @@ namespace PaperSeizerStone.Presentation
 
         private float Apply(BattleObservation snapshot, bool resetBullets = false)
         {
+            if (displayed != null && !resetBullets &&
+                (snapshot.Player.Bullets < displayed.Player.Bullets || snapshot.Enemy.Bullets < displayed.Enemy.Bullets))
+                AudioManager.Play(AudioCue.AmmunitionRemove);
             displayed = snapshot;
             if (scoreCounterView != null) scoreCounterView.Observe(snapshot);
             float dropDuration = 0;
@@ -312,11 +314,6 @@ namespace PaperSeizerStone.Presentation
             return dropDuration;
         }
 
-        private void PlaySound(AudioClip clip)
-        {
-            if (clip != null) audioSource.PlayOneShot(clip, PaperSeizerStone.Audio.GameAudioSettings.Effects);
-        }
-
         public IEnumerator Present(BattleEvent battleEvent)
         {
             Message = battleEvent.Message;
@@ -331,8 +328,14 @@ namespace PaperSeizerStone.Presentation
             float dropDuration = Apply(battleEvent.Snapshot, battleEvent.Kind == BattleEventKind.RoundStarted);
             Layout(moveDuration);
             if (flipping != null) flipping.Tilt(0, 0.14f);
-            if (battleEvent.Kind == BattleEventKind.CardDrawn || flipping != null || battleEvent.Kind == BattleEventKind.CardsSwapped)
-                PlaySound(cardSound);
+            if (flipping != null) AudioManager.Play(AudioCue.CardReveal);
+            else if (battleEvent.Kind == BattleEventKind.CardDrawn) AudioManager.Play(AudioCue.CardDraw);
+            else if (battleEvent.Kind == BattleEventKind.CardsSwapped || battleEvent.Kind == BattleEventKind.LayoutCommitted)
+                AudioManager.Play(AudioCue.CardPlace);
+            else if (battleEvent.Kind == BattleEventKind.DeckShuffled) AudioManager.Play(AudioCue.CardShuffle);
+            else if (battleEvent.Kind == BattleEventKind.RoundEnded) AudioManager.Play(AudioCue.CardPlace);
+            else if (battleEvent.Kind == BattleEventKind.BattleEnded)
+                AudioManager.Play(displayed.PlayerWon ? AudioCue.Victory : AudioCue.Defeat);
             if (battleEvent.Kind == BattleEventKind.RoundStarted)
                 foreach (SideTableBindings side in new[] { player, enemy })
                 {
@@ -341,11 +344,14 @@ namespace PaperSeizerStone.Presentation
                     side.Gun.DORotateQuaternion(side.GunRestPose.rotation, moveDuration);
                 }
             if (battleEvent.Kind == BattleEventKind.LaneScored)
+            {
+                AudioManager.Play(AudioCue.ScoreTick);
                 foreach (FighterObservation fighter in new[] { displayed.Player, displayed.Enemy })
                 {
                     CardView view = FindCard(fighter.Board[battleEvent.Lane].Id);
                     if (view != null) view.Pulse();
                 }
+            }
             if (battleEvent.Kind == BattleEventKind.AbilityTriggered || battleEvent.Kind == BattleEventKind.CardTransformed)
             {
                 CardView effectCard = FindCard(battleEvent.CardId);
@@ -381,7 +387,7 @@ namespace PaperSeizerStone.Presentation
             Layout(moveDuration);
             PulseTransforms(playerEvents);
             PulseTransforms(enemyEvents);
-            if (HasCardMotion(playerEvents) || HasCardMotion(enemyEvents)) PlaySound(cardSound);
+            PlayCheatSound(playerEvents, enemyEvents);
             yield return new WaitForSeconds(Mathf.Max(moveDuration, dropDuration));
             Apply(finalSnapshot);
             ReleaseRetired();
@@ -406,15 +412,24 @@ namespace PaperSeizerStone.Presentation
                 }
         }
 
-        private static bool HasCardMotion(IReadOnlyList<BattleEvent> events)
+        private static void PlayCheatSound(IReadOnlyList<BattleEvent> playerEvents, IReadOnlyList<BattleEvent> enemyEvents)
         {
-            foreach (BattleEvent action in events)
-                if (action.Kind == BattleEventKind.CardsSwapped || action.Kind == BattleEventKind.CardDrawn) return true;
-            return false;
+            bool draw = false;
+            bool swap = false;
+            foreach (IReadOnlyList<BattleEvent> events in new[] { playerEvents, enemyEvents })
+                foreach (BattleEvent action in events)
+                {
+                    draw |= action.Kind == BattleEventKind.CardDrawn;
+                    swap |= action.Kind == BattleEventKind.CardsSwapped;
+                    if (action.Kind == BattleEventKind.DeckShuffled) AudioManager.Play(AudioCue.CardShuffle);
+                }
+            if (draw) AudioManager.Play(AudioCue.CardDraw);
+            if (swap) AudioManager.Play(AudioCue.CardPlace);
         }
 
         public IEnumerator PrepareShooting()
         {
+            AudioManager.SetShootingFocus(true);
             bool playerFires = displayed.Player.Score >= displayed.Enemy.Score;
             bool enemyFires = displayed.Enemy.Score >= displayed.Player.Score;
             bool animatedPlayer = playerFires && playerShooting != null && playerShooting.isActiveAndEnabled && playerShooting.IsConfigured;
@@ -428,6 +443,7 @@ namespace PaperSeizerStone.Presentation
                 shootingFallbackReason = problem;
             }
             Coroutine playerPreparation = animatedPlayer ? StartCoroutine(playerShooting.Prepare(firstPersonHand, player.Gun)) : null;
+            if (enemyFires || (playerFires && !animatedPlayer)) AudioManager.Play(AudioCue.GunMechanism);
             foreach (SideTableBindings side in new[] { player, enemy })
             {
                 bool fires = side == enemy ? enemyFires : playerFires;
@@ -459,7 +475,9 @@ namespace PaperSeizerStone.Presentation
         {
             if (scoreCounterView == null || displayed == null) yield break;
             scoreCounterView.RevealScores(displayed);
-            yield return new WaitForSecondsRealtime(scoreCounterView.RevealSeconds);
+            yield return new WaitForSecondsRealtime(scoreCounterView.FillSeconds);
+            AudioManager.Play(AudioCue.ScoreReveal);
+            yield return new WaitForSecondsRealtime(scoreCounterView.RevealSeconds - scoreCounterView.FillSeconds);
         }
 
         public void RestoreOpponentForNextRound() => RestoreOpponentPose();
@@ -476,6 +494,7 @@ namespace PaperSeizerStone.Presentation
 
         public void EndPostShotPresentation()
         {
+            AudioManager.SetShootingFocus(false);
             if (!postShotPresentation) return;
             postShotPresentation = false;
             firstPersonHand.SetPostShotSuspended(false);
@@ -497,7 +516,7 @@ namespace PaperSeizerStone.Presentation
             {
                 if (!shot.Hit)
                 {
-                    PlaySound(emptySound);
+                    AudioManager.Play(AudioCue.GunEmpty);
                     continue;
                 }
                 SideTableBindings side = Get(shot.Side);
@@ -527,9 +546,10 @@ namespace PaperSeizerStone.Presentation
                     knockdown = StartCoroutine(KnockDownOpponent());
                     if (!playerHit && shotCameraRig != null) StartCoroutine(shotCameraRig.FollowOpponentFall());
                 }
-                PlaySound(shotSound);
+                AudioManager.Play(AudioCue.GunFire);
             }
             yield return new WaitForSecondsRealtime(0.08f);
+            if (hit) AudioManager.Play(AudioCue.Hit);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
             if (animatedPlayer) playerShooting.SetMuzzleFlash(false);
@@ -699,7 +719,11 @@ namespace PaperSeizerStone.Presentation
         }
 
         public bool WantsHandExpanded(Vector2 screenPoint) => firstPersonHand.WantsExpanded(screenPoint, expandedHand);
-        public void SetDraggingCard(CardView view) { firstPersonHand.SetDragging(view); }
+        public void SetDraggingCard(CardView view)
+        {
+            firstPersonHand.SetDragging(view);
+            if (view != null) AudioManager.Play(AudioCue.CardPickUp);
+        }
         public void SetHandExpanded(bool expanded)
         {
             if (expandedHand == expanded || displayed == null) return;

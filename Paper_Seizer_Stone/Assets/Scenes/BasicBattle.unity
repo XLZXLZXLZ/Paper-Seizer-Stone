@@ -2505,3 +2505,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f451dfcf5f08686d47e83e6ae25ad445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &862911001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 10002, guid: 13ac943b52b659eaa41da77be2340fce, type: 3}
+      propertyPath: m_RootOrder
+      value: 50
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 13ac943b52b659eaa41da77be2340fce, type: 3}
+--- !u!4 &862911002 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 10002, guid: 13ac943b52b659eaa41da77be2340fce, type: 3}
+  m_PrefabInstance: {fileID: 862911001}
+  m_PrefabAsset: {fileID: 0}

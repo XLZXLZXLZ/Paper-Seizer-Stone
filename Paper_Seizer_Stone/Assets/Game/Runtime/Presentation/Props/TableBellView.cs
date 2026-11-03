@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using PaperSeizerStone.Audio;
 
 namespace PaperSeizerStone.Presentation.Props
 {
@@ -46,6 +47,7 @@ namespace PaperSeizerStone.Presentation.Props
         public void Press()
         {
             if (!available) return;
+            AudioManager.Play(AudioCue.Bell);
             bellVisual.DOKill();
             bellVisual.localScale = restScale;
             // The single-mesh bell compresses above its base instead of sinking into the table.

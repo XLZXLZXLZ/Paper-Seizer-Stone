@@ -1,0 +1,33 @@
+当前游戏字体：01 马善政毛笔楷书
+
+已应用到主菜单、战斗、商店、烧牌、桌面标签、卡牌可编辑文字及计分数字。
+TMP 字体资源：MaShanZheng/MaShanZheng-Regular SDF.asset
+该资源开启 Dynamic 多图集，引用原始 TTF，按需生成字形；缺字回退到原 ResourceHanRoundedCN-Bold SDF。
+TMP 全局默认字体也已更新，计分器不再优先使用系统苹方字体。
+卡牌图片中已经绘制的文字属于贴图内容，不由 TMP 字体设置控制。
+
+保留以下三套源字体，供后续美术调整：
+
+1. 马善政毛笔楷书 / Ma Shan Zheng Regular
+文件：MaShanZheng/MaShanZheng-Regular.ttf
+用途建议：游戏主标题、章节名与大型结算标题；不建议大段小字号正文。
+来源：https://github.com/google/fonts/tree/main/ofl/mashanzheng
+
+2. 站酷小薇体 / ZCOOL XiaoWei Regular
+文件：ZCOOLXiaoWei/ZCOOLXiaoWei-Regular.ttf
+用途建议：卡牌名称、道具标签与短标题；装饰性较强。
+来源：https://github.com/google/fonts/tree/main/ofl/zcoolxiaowei
+
+3. 霞鹜文楷 / LXGW WenKai Regular
+文件：LXGWWenKai/LXGWWenKai-Regular.ttf
+用途建议：卡牌能力、商店说明与正文；与手绘暗色桌面风格相配。
+来源：https://github.com/lxgw/LxgwWenKai
+
+三套均为静态 TTF，原字体文件未做修改，各目录保存完整 OFL.txt。
+选型时的预览：Previews/ChineseFontComparison.png，包含原 ResourceHanRoundedCN-Bold 作为对照。
+马善政与小薇的字符集不包含中间点“·”，实际应用时应设置现有圆体或文楷为缺字回退字体。
+
+以上均按 SIL OFL 1.1 分发；随软件嵌入/分发时保留各字体版权与 OFL 文本。
+Unity / TextMeshPro 可直接使用已保存的 MaShanZheng-Regular SDF.asset；初始图集为空，由 TMP 在编辑或运行时按需填充。
+替换过程未启动 Unity 编译、测试或试玩，也未操作电脑屏幕。
+字体版权与授权也已收入 Assets/StreamingAssets/ThirdPartyNotices.txt，供后续构建保留。

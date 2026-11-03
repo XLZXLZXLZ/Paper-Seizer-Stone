@@ -97,6 +97,8 @@ namespace PaperSeizerStone.Presentation
         public string PlaybackStatus => playbackStatus;
         public bool IsConfigured => string.IsNullOrEmpty(ConfigurationProblem);
         public bool IsActive => active;
+        private bool mechanismSoundPlayed;
+        private bool loadSoundPlayed;
 
         public string ConfigurationProblem
         {
@@ -129,6 +131,7 @@ namespace PaperSeizerStone.Presentation
             if (hand == null || restingGun == null)
                 throw new InvalidOperationException("玩家射击缺少手牌表现组件或桌面枪械引用。");
             Cancel();
+            mechanismSoundPlayed = loadSoundPlayed = false;
             int run = ++revision;
             bool prepared = false;
             try
@@ -308,6 +311,19 @@ namespace PaperSeizerStone.Presentation
                 characterMixer.SetInputWeight(0, 1 - characterWeight);
                 characterMixer.SetInputWeight(1, characterWeight);
                 graph.Evaluate(Time.deltaTime);
+                if (Application.isPlaying)
+                {
+                    if (!mechanismSoundPlayed && clock >= definition.GunStart)
+                    {
+                        mechanismSoundPlayed = true;
+                        PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunMechanism);
+                    }
+                    if (!loadSoundPlayed && clock >= definition.BulletStart)
+                    {
+                        loadSoundPlayed = true;
+                        PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunLoad);
+                    }
+                }
                 ApplyOffset(placementBaselines[0], characterPlacement, characterWeight, null);
                 ApplyOffset(placementBaselines[1], gunPlacement, 1, GunPivot);
                 ApplyOffset(placementBaselines[2], bulletPlacement, 1, BulletPivot);

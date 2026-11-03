@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 10002}
+  - component: {fileID: 842001}
   - component: {fileID: 4407316377644058192}
   m_Layer: 2
   m_Name: "Chip"
@@ -185,3 +186,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d62590d31a3e4051ac9fd30d884fea17, type: 3}
   m_PrefabInstance: {fileID: 81001}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &842001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7fba6316e225de59b0ff62d4bf992de, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  cue: 17
+  minimumSpeed: 0.35

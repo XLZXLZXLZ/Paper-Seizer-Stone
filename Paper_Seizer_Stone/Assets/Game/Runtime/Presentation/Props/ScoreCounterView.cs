@@ -13,8 +13,6 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(1)] private int fullScore = 8;
         [SerializeField, Min(0.05f)] private float fillSeconds = 0.95f;
         [SerializeField, Min(0)] private float scoreHoldSeconds = 0.55f;
-        [SerializeField, Tooltip("优先尝试已安装的苹方字体；清空后直接使用下方字体资源。")]
-        private string installedFontFamily = "PingFang SC";
         [SerializeField] private TMP_FontAsset numberFont;
         [SerializeField] private Vector3 enemyNumberPosition;
         [SerializeField] private Vector3 playerNumberPosition;
@@ -27,9 +25,6 @@ namespace PaperSeizerStone.Presentation
         private static readonly int EnemyDamaged = Shader.PropertyToID("_EnemyDamaged");
         private static readonly int PlayerDamaged = Shader.PropertyToID("_PlayerDamaged");
 
-        private Font installedFont;
-        private TMP_FontAsset generatedFont;
-        private bool installedDigitsAvailable;
         private MaterialPropertyBlock properties;
         private TextMeshPro enemyNumber;
         private TextMeshPro playerNumber;
@@ -46,12 +41,12 @@ namespace PaperSeizerStone.Presentation
         private MeshRenderer effectsRenderer;
 
         public float RevealSeconds => fillSeconds + scoreHoldSeconds;
+        public float FillSeconds => fillSeconds;
 
         private void Awake()
         {
             properties = new MaterialPropertyBlock();
             CreateScreenEffects();
-            ResolveNumberFont();
             enemyNumber = CreateNumber("Enemy Score", enemyNumberPosition);
             playerNumber = CreateNumber("Player Score", playerNumberPosition);
             Draw(0f);
@@ -146,46 +141,21 @@ namespace PaperSeizerStone.Presentation
             if (playerNumber != null) playerNumber.text = Mathf.RoundToInt(playerScore * progress).ToString();
         }
 
-        private void ResolveNumberFont()
-        {
-            if (string.IsNullOrWhiteSpace(installedFontFamily)) return;
-            string[] names = Font.GetOSInstalledFontNames();
-            string family = System.Array.Find(names, name =>
-                string.Equals(name, installedFontFamily, System.StringComparison.OrdinalIgnoreCase));
-            if (family == null && installedFontFamily == "PingFang SC")
-                family = System.Array.Find(names, name => name.StartsWith("PingFang", System.StringComparison.OrdinalIgnoreCase));
-            if (family == null) return;
-            installedFont = Font.CreateDynamicFontFromOSFont(family, 48);
-            if (installedFont != null)
-                generatedFont = TMP_FontAsset.CreateFontAsset(installedFont, 48, 5,
-                    UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 256, 256);
-            installedDigitsAvailable = generatedFont != null && generatedFont.TryAddCharacters("0123456789");
-        }
-
         private void OnDestroy()
         {
             if (effectsMesh != null) Destroy(effectsMesh);
-            if (generatedFont != null)
-            {
-                foreach (Texture2D texture in generatedFont.atlasTextures)
-                    if (texture != null) Destroy(texture);
-                if (generatedFont.material != null) Destroy(generatedFont.material);
-                Destroy(generatedFont);
-            }
-            if (installedFont != null) Destroy(installedFont);
         }
 
         private TextMeshPro CreateNumber(string label, Vector3 position)
         {
-            TMP_FontAsset font = installedDigitsAvailable ? generatedFont : numberFont;
-            if (font == null) return null;
+            if (numberFont == null) return null;
             var node = new GameObject(label, typeof(RectTransform));
             node.layer = gameObject.layer;
             node.transform.SetParent(transform, false);
             node.transform.localPosition = position;
             node.transform.localRotation = Quaternion.Euler(numberEulerAngles);
             var number = node.AddComponent<TextMeshPro>();
-            number.font = font;
+            number.font = numberFont;
             number.fontSize = numberSize;
             number.color = numberColor;
             number.alignment = TextAlignmentOptions.Center;

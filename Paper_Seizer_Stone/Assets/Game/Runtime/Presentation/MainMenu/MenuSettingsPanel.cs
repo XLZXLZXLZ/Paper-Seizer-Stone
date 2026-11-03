@@ -1,5 +1,6 @@
 using System.Collections;
 using PaperSeizerStone.Audio;
+using PaperSeizerStone.Configuration;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,6 +14,8 @@ namespace PaperSeizerStone.Presentation.MainMenu
         [SerializeField] private Slider master;
         [SerializeField] private Slider music;
         [SerializeField] private Slider effects;
+        [SerializeField] private Toggle transparentCards;
+        [SerializeField] private Toggle distinctCardBacks;
         [SerializeField] private TMP_Text masterValue;
         [SerializeField] private TMP_Text musicValue;
         [SerializeField] private TMP_Text effectsValue;
@@ -31,9 +34,13 @@ namespace PaperSeizerStone.Presentation.MainMenu
             master.SetValueWithoutNotify(GameAudioSettings.Master);
             music.SetValueWithoutNotify(GameAudioSettings.Music);
             effects.SetValueWithoutNotify(GameAudioSettings.Effects);
+            RefreshDisplayToggles();
             master.onValueChanged.AddListener(ChangeMaster);
             music.onValueChanged.AddListener(ChangeMusic);
             effects.onValueChanged.AddListener(ChangeEffects);
+            transparentCards.onValueChanged.AddListener(ChangeTransparency);
+            distinctCardBacks.onValueChanged.AddListener(ChangeCardBacks);
+            GameDisplaySettings.Changed += RefreshDisplayToggles;
             close.onClick.AddListener(Hide);
             RefreshValues();
         }
@@ -41,6 +48,14 @@ namespace PaperSeizerStone.Presentation.MainMenu
         private void ChangeMaster(float value) { GameAudioSettings.SetMaster(value); RefreshValues(); }
         private void ChangeMusic(float value) { GameAudioSettings.SetMusic(value); RefreshValues(); }
         private void ChangeEffects(float value) { GameAudioSettings.SetEffects(value); RefreshValues(); }
+        private void ChangeTransparency(bool value) => GameDisplaySettings.SetTransparentPlayerCards(value);
+        private void ChangeCardBacks(bool value) => GameDisplaySettings.SetDistinctCardBacks(value);
+
+        private void RefreshDisplayToggles()
+        {
+            transparentCards.SetIsOnWithoutNotify(GameDisplaySettings.TransparentPlayerCards);
+            distinctCardBacks.SetIsOnWithoutNotify(GameDisplaySettings.DistinctCardBacks);
+        }
         private void RefreshValues()
         {
             masterValue.text = Mathf.RoundToInt(master.value * 100) + "%";
@@ -98,6 +113,9 @@ namespace PaperSeizerStone.Presentation.MainMenu
             master.onValueChanged.RemoveListener(ChangeMaster);
             music.onValueChanged.RemoveListener(ChangeMusic);
             effects.onValueChanged.RemoveListener(ChangeEffects);
+            transparentCards.onValueChanged.RemoveListener(ChangeTransparency);
+            distinctCardBacks.onValueChanged.RemoveListener(ChangeCardBacks);
+            GameDisplaySettings.Changed -= RefreshDisplayToggles;
             close.onClick.RemoveListener(Hide);
         }
     }

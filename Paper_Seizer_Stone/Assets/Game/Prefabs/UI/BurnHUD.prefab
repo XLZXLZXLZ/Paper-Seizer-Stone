@@ -351,8 +351,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "烧 牌 整 备"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -456,8 +456,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "筹码  8    ·    持有牌 12 张"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -709,8 +709,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "选 择 一 张 牌"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -814,8 +814,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "点选桌上的一张牌查看能力"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1037,8 +1037,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "确认烧牌  ·  3 筹码"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1288,8 +1288,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "选择一张持有牌，确认后将其烧毁。"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1511,8 +1511,8 @@ MonoBehaviour:
   m_Maskable: 1
   m_text: "返回商店  [Esc]"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
-  m_sharedMaterial: {fileID: -7093195072476364256, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
+  m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

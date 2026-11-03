@@ -1,0 +1,3 @@
+Bell.wav: shortened and faded from Kenney Impact Sounds / impactBell_heavy_001.ogg (CC0).
+ScoreReveal.wav, Victory.wav, Defeat.wav, CardBurn.wav: original procedural sound designs made for this project; no third-party samples.
+Other audio files retain their original filenames. Their source packs are documented in the adjacent licenses.
