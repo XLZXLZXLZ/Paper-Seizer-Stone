@@ -19,6 +19,6 @@ MonoBehaviour:
     localPosition: {x: 0, y: 6, z: -0.05}
     localRotation: {x: 0.7051399, y: 0, z: 0, w: 0.70906824}
   shootingPose:
-    localPosition: {x: 0, y: 1.65, z: -3.7}
-    localRotation: {x: 0.042140882, y: 0, z: 0, w: 0.99911165}
+    localPosition: {x: -0.504, y: 2.803, z: -4.3}
+    localRotation: {x: 0.19181989, y: 0, z: 0, w: 0.98143023}
   transitionDuration: 0.3
