@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "石头可以克制剪刀。"
   frontArtwork: {fileID: 2800000, guid: 7f784e07f86c68340b6f257e36afe8fb, type: 3}
   artworkIncludesText: 1
-  faceTint: {r: 1, g: 1, b: 1, a: 1}
+  faceTint: {r: 1.35, g: 1.35, b: 1.35, a: 1}
   backArtwork: {fileID: 2800000, guid: d316035bff0d2d543b8076d9aa91f132, type: 3}
   playerBackTint: {r: 0.5, g: 0.72, b: 1, a: 1}
   enemyBackTint: {r: 1, g: 0.55, b: 0.42, a: 1}

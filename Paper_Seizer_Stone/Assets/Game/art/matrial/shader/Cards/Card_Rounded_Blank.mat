@@ -52,15 +52,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ArtworkStrength: 0
     - _AdditionalLightStrength: 0.35
     - _AmbientStrength: 0.8
+    - _ArtworkStrength: 0
     - _Brightness: 1
     - _EdgeStrength: 1
     - _LightingStrength: 0.25
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _BaseColor: {r: 0.84, g: 0.8, b: 0.71, a: 1}
-    - _EdgeColor: {r: 0.8, g: 0.74, b: 0.64, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "剪刀可以克制布。"
   frontArtwork: {fileID: 2800000, guid: 913a66098d843b146b6d9c7c83d374e9, type: 3}
   artworkIncludesText: 1
-  faceTint: {r: 1, g: 1, b: 1, a: 1}
+  faceTint: {r: 1.35, g: 1.35, b: 1.35, a: 1}
   backArtwork: {fileID: 2800000, guid: d316035bff0d2d543b8076d9aa91f132, type: 3}
   playerBackTint: {r: 0.5, g: 0.72, b: 1, a: 1}
   enemyBackTint: {r: 1, g: 0.55, b: 0.42, a: 1}
