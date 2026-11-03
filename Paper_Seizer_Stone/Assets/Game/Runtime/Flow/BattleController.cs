@@ -155,6 +155,14 @@ namespace PaperSeizerStone.Flow
             }
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        public void DebugBoostNextScore()
+        {
+            if (!CanInteract || !engine.QueueDebugScoreBonus()) return;
+            tableView.Notify("调试已启用：下一次计分额外 +1000（仅一次，重复按下不叠加）。");
+        }
+#endif
+
         public void ConfirmOrPass()
         {
             if (!CanInteract) return;

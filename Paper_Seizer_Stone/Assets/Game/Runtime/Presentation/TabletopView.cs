@@ -312,7 +312,10 @@ namespace PaperSeizerStone.Presentation
             return dropDuration;
         }
 
-        private void PlaySound(AudioClip clip) { if (clip != null) audioSource.PlayOneShot(clip); }
+        private void PlaySound(AudioClip clip)
+        {
+            if (clip != null) audioSource.PlayOneShot(clip, PaperSeizerStone.Audio.GameAudioSettings.Effects);
+        }
 
         public IEnumerator Present(BattleEvent battleEvent)
         {

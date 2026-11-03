@@ -9,6 +9,16 @@ namespace PaperSeizerStone.Battle
         private readonly Random random;
         private readonly Dictionary<string, CardSpec> catalog = new Dictionary<string, CardSpec>();
         private BattleObservation enemyCheatStart;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private bool debugScoreBonusPending;
+
+        public bool QueueDebugScoreBonus()
+        {
+            if (State.Phase != BattlePhase.Planning && State.Phase != BattlePhase.PlayerCheat) return false;
+            debugScoreBonusPending = true;
+            return true;
+        }
+#endif
         // Reveal effects survive returning the source card to hand until this round ends.
         private readonly Dictionary<int, Side> trailingScorePenalties = new Dictionary<int, Side>();
         public BattleState State { get; }
@@ -323,6 +333,14 @@ namespace PaperSeizerStone.Battle
                 if (result != 0) WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
             }
             ResolveTrailingScorePenalties(events);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (debugScoreBonusPending)
+            {
+                debugScoreBonusPending = false;
+                player.Score += 1000;
+                Emit(events, BattleEventKind.AbilityTriggered, "调试：本次计分额外增加 1000 分。");
+            }
+#endif
             State.Phase = BattlePhase.Shooting;
             Emit(events, BattleEventKind.PhaseChanged, player.Score == enemy.Score ? "总分相同，双方同时开枪。" : player.Score > enemy.Score ? "你赢下了总分，举枪吧。" : "对手赢下了总分，即将开枪。");
             return ActionResult.Ok(events);

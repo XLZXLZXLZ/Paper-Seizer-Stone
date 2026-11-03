@@ -23,6 +23,7 @@ namespace PaperSeizerStone.Presentation
     public sealed class ShopTableView : MonoBehaviour
     {
         [SerializeField] private TablePanel panel;
+        [SerializeField] private ShopRugView rug;
         [SerializeField] private PhysicsTokenArea walletArea;
         [SerializeField] private ShopOfferView[] offers;
         [SerializeField] private CardView selectedCard;
@@ -54,7 +55,7 @@ namespace PaperSeizerStone.Presentation
 
         public void Initialize(BattleController owner, Dictionary<string, CardDefinition> cards)
         {
-            if (panel == null || walletArea == null || selectedCard == null || paymentExit == null
+            if (panel == null || rug == null || walletArea == null || selectedCard == null || paymentExit == null
                 || deckAnchor == null || offers == null || offers.Length < 3
                 || ownedSlots == null || ownedSlots.Length == 0 || previousPage == null || nextPage == null
                 || removeButton == null || continueButton == null || walletLabel == null || lifeLabel == null
@@ -80,6 +81,7 @@ namespace PaperSeizerStone.Presentation
             removeButton.onClick.AddListener(() => controller.OpenBurnTable());
             continueButton.onClick.AddListener(() => controller.LeaveShop());
             panel.Initialize();
+            rug.Initialize();
         }
 
         public void Prepare(AdventureState state, ShopDefinition definition, EnemyDefinition nextEnemy)
@@ -96,6 +98,7 @@ namespace PaperSeizerStone.Presentation
 
         public IEnumerator Show()
         {
+            yield return rug.Show();
             yield return panel.Show();
             float delay = walletArea.SetCount(adventure.Wallet);
             if (delay > 0) yield return new WaitForSeconds(delay);
@@ -107,6 +110,7 @@ namespace PaperSeizerStone.Presentation
             walletArea.Freeze();
             yield return panel.Hide();
             walletArea.SetCount(0, true);
+            yield return rug.Hide();
         }
 
         public void Notify(string message) { messageLabel.text = message; }
