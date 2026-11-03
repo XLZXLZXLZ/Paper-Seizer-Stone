@@ -5752,7 +5752,12 @@ MonoBehaviour:
   fanAngle: 36
   fanDrop: 0.08
   followSpeed: 16
+  grip: {fileID: 0}
+  gripCardScale: 0.48
+  gripCollapsedFanAngle: 36
+  gripExpandedFanAngle: 60
+  gripStackDepth: 0.003
   hoverCenter: {x: 0.5, y: -0.08}
-  hoverRadius: {x: 0.26, y: 0.3}
+  hoverRadius: {x: 0.2, y: 0.2}
   hoverHalfAngle: 70
   hoverExitPadding: 0.035

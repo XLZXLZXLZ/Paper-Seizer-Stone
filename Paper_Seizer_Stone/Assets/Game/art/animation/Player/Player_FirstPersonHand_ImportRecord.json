@@ -1,0 +1,34 @@
+{
+    "player": "Assets/Game/art/act/Player/Prefabs/Player_Hair.prefab",
+    "clip": "Assets/Game/art/animation/Player/Clips/Player_Idle1.anim",
+    "mesh": "Assets/Game/art/act/Player/Meshes/Player_LeftForearm_Hand.asset",
+    "playback": "Imported idle1 motion, repeated by two Animator states with 0.12 second boundary transitions",
+    "cards": "Existing LiveCards follow the animated Left_Hand/CardGripAnchor; hover changes card fan only",
+    "visibility": "PlayerCharacter layer 8 stays hidden; PlayerHands layer 9 shows the extracted left forearm and hand",
+    "vertices": 2369,
+    "triangles": 4256,
+    "animationBindings": 670,
+    "loopBlendSeconds": 0.0,
+    "anchorLocalPosition": {
+        "x": 0.003459850326180458,
+        "y": 0.052168890833854678,
+        "z": -0.02241300605237484
+    },
+    "anchorLocalEulerAngles": {
+        "x": 358.60357666015627,
+        "y": 308.60546875,
+        "z": 357.0218505859375
+    },
+    "loop": true,
+    "playModeRun": false,
+    "poseAuthority": "Animator only; no IK, finger locks, screen positioning or procedural hand motion",
+    "loopDriver": "Animator: Idle1 <-> Idle1_Return",
+    "controllerTransitionSeconds": 0.11999999731779099,
+    "source": "Assets/Game/art/animation/idle1.fbx",
+    "sourceSha256": "3c467302a4f6b0481c9ec4a3ca26c7634677b362e0d5804c406692ad682a8711",
+    "animationLength": 2.2833335399627687,
+    "animationSamples": 138,
+    "animationFrameRate": 60.0,
+    "synchronizedLocal": "2026-11-03T00:51:56.0671016+08:00",
+    "gripEditor": "PlayerCardGrip Inspector edits existing CardGripAnchor local position and rotation with Undo; size and fan settings remain on FirstPersonHandView."
+}

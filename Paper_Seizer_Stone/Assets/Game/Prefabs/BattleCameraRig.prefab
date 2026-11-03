@@ -53,6 +53,7 @@ MonoBehaviour:
   mouseAngleOffset: {x: 0.2, y: 0.35}
   motionSmoothing: 8
   showPlayerModel: 0
+  showPlayerHands: 1
   sceneCamera: {fileID: 10005}
   definition: {fileID: 11400000, guid: c20770b7561948d2b06fc5a641479c32, type: 2}
 --- !u!1 &10003

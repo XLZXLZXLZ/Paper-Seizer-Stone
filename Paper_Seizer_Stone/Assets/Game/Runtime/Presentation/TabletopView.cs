@@ -19,6 +19,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private PhysicsTokenArea chipArea;
         [SerializeField] private GameObject editorPreview;
         [SerializeField] private FirstPersonHandView firstPersonHand;
+        [SerializeField] private PlayerShootingSequence playerShooting;
         [SerializeField] private Transform opponentAnchor;
         [SerializeField] private GameObject defaultOpponent;
         [SerializeField] private TMP_Text confirmLabel;
@@ -55,6 +56,7 @@ namespace PaperSeizerStone.Presentation
         private IReadOnlyList<int> draftSlots;
         private bool expandedHand;
         private GameObject opponentInstance;
+        private string shootingFallbackReason;
 
         public string Message { get; private set; }
         public BattleObservation Displayed => displayed;
@@ -76,6 +78,10 @@ namespace PaperSeizerStone.Presentation
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
             firstPersonHand.Initialize(camera);
+            PlayerShootingSequence gripShooting = firstPersonHand.Grip != null
+                ? firstPersonHand.Grip.GetComponent<PlayerShootingSequence>() : null;
+            if (gripShooting != null) playerShooting = gripShooting;
+            else if (playerShooting == null) playerShooting = FindObjectOfType<PlayerShootingSequence>(true);
             // Capture the authored gun pose before the first transition; scene overrides are intentional.
             foreach (SideTableBindings side in new[] { player, enemy })
                 side.GunRestPose.SetPositionAndRotation(side.Gun.position, side.Gun.rotation);
@@ -86,6 +92,7 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetEncounter(EnemyDefinition opponent)
         {
+            if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.ResetHand();
             foreach (CardView view in cards.Values) { view.ResetForPool(); pool.Push(view); }
             cards.Clear();
@@ -115,6 +122,7 @@ namespace PaperSeizerStone.Presentation
 
         public void PrepareExit()
         {
+            if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.Clear();
             foreach (CardView view in cards.Values) view.transform.DOKill();
             chipArea.Freeze();
@@ -382,12 +390,24 @@ namespace PaperSeizerStone.Presentation
 
         public IEnumerator PrepareShooting()
         {
+            bool playerFires = displayed.Player.Score >= displayed.Enemy.Score;
             bool enemyFires = displayed.Enemy.Score >= displayed.Player.Score;
+            bool animatedPlayer = playerFires && playerShooting != null && playerShooting.isActiveAndEnabled && playerShooting.IsConfigured;
+            if (playerFires)
+            {
+                string problem = playerShooting == null ? "未找到玩家 PlayerShootingSequence。"
+                    : !playerShooting.isActiveAndEnabled ? "玩家 PlayerShootingSequence 或其对象未启用。"
+                    : playerShooting.ConfigurationProblem;
+                if (!string.IsNullOrEmpty(problem) && problem != shootingFallbackReason)
+                    Debug.LogWarning("玩家开枪动画未接管：" + problem + "本次使用原枪械表现。", this);
+                shootingFallbackReason = problem;
+            }
+            Coroutine playerPreparation = animatedPlayer ? StartCoroutine(playerShooting.Prepare(firstPersonHand, player.Gun)) : null;
             foreach (SideTableBindings side in new[] { player, enemy })
             {
-                bool fires = side == enemy ? enemyFires : displayed.Player.Score >= displayed.Enemy.Score;
+                bool fires = side == enemy ? enemyFires : playerFires;
                 side.Gun.DOKill();
-                if (!fires) continue;
+                if (!fires || (side == player && animatedPlayer)) continue;
                 side.Gun.DOMove(side.GunAimPose.position, gunRaiseDuration);
                 side.Gun.DORotateQuaternion(side.GunAimPose.rotation, gunRaiseDuration);
             }
@@ -405,6 +425,7 @@ namespace PaperSeizerStone.Presentation
                 yield return null;
             }
             if (enemyFires) enemy.Gun.SetPositionAndRotation(enemy.GunAimPose.position, enemy.GunAimPose.rotation);
+            if (playerPreparation != null) yield return playerPreparation;
         }
 
         private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
@@ -413,17 +434,28 @@ namespace PaperSeizerStone.Presentation
         {
             Apply(shots[0].Snapshot);
             Message = shots.Count == 2 ? shots[0].Message + "  " + shots[1].Message : shots[0].Message;
+            bool animatedPlayer = playerShooting != null && playerShooting.IsActive;
             foreach (BattleEvent shot in shots)
             {
                 SideTableBindings side = Get(shot.Side);
-                side.Gun.DOPunchPosition(side.Gun.up * (shot.Hit ? 0.22f : 0.045f), 0.3f, 2, 0.3f);
+                if (shot.Side == Side.Player && animatedPlayer)
+                    playerShooting.SetMuzzleFlash(shot.Hit);
+                else
+                {
+                    side.Gun.DOPunchPosition(side.Gun.up * (shot.Hit ? 0.22f : 0.045f), 0.3f, 2, 0.3f);
+                    side.MuzzleFlash.SetActive(shot.Hit);
+                }
                 PlaySound(shot.Hit ? shotSound : emptySound);
-                side.MuzzleFlash.SetActive(shot.Hit);
             }
             yield return new WaitForSeconds(0.08f);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
-            yield return new WaitForSeconds(0.92f);
+            if (animatedPlayer)
+            {
+                playerShooting.SetMuzzleFlash(false);
+                yield return playerShooting.Finish();
+            }
+            else yield return new WaitForSeconds(0.92f);
         }
 
         public void ShowDraft(IReadOnlyList<int> hand, IReadOnlyList<int> slots)
@@ -453,8 +485,11 @@ namespace PaperSeizerStone.Presentation
             firstPersonHand.SetExpanded(expanded);
         }
 
+        private void OnDisable() { if (playerShooting != null) playerShooting.Cancel(); }
+
         private void OnDestroy()
         {
+            if (playerShooting != null) playerShooting.Cancel();
             if (player != null && player.Gun != null) player.Gun.DOKill();
             if (enemy != null && enemy.Gun != null) enemy.Gun.DOKill();
         }

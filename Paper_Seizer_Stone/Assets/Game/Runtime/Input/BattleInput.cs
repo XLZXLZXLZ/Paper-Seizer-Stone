@@ -49,7 +49,7 @@ namespace PaperSeizerStone.InputControl
             controller.CameraRig.SetPrecisionMode(dragging != null);
             if (dragging != null)
             {
-                preview?.Hide();
+                if (preview != null) preview.Hide();
                 dragging.transform.position = Vector3.Lerp(dragging.transform.position, DragPosition() + grabOffset,
                     1 - Mathf.Exp(-25 * Time.deltaTime));
                 UpdateHighlight();
@@ -87,7 +87,7 @@ namespace PaperSeizerStone.InputControl
             CardView card = hit.collider.GetComponentInParent<CardView>();
             if (controller.CanDrag && card != null && card.CanDrag)
             {
-                preview?.Hide();
+                if (preview != null) preview.Hide();
                 dragging = card;
                 dragging.transform.DOKill();
                 controller.View.SetDraggingCard(dragging);
@@ -175,10 +175,17 @@ namespace PaperSeizerStone.InputControl
             highlightedTarget = null;
         }
 
-        private void OnApplicationFocus(bool hasFocus) { if (!hasFocus) { preview?.Hide(); CancelDrag(); } }
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+            {
+                if (preview != null) preview.Hide();
+                CancelDrag();
+            }
+        }
         private void OnDisable()
         {
-            preview?.Hide();
+            if (preview != null) preview.Hide();
             if (controller != null && controller.View != null) CancelDrag();
         }
         private void OnDestroy() { if (preview != null) Destroy(preview.gameObject); }

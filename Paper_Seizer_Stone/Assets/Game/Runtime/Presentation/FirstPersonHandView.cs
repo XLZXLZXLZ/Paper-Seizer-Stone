@@ -15,6 +15,12 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Range(0, 90)] private float fanAngle = 36;
         [SerializeField, Min(0)] private float fanDrop = 0.08f;
         [SerializeField, Min(0.1f)] private float followSpeed = 16;
+        [Header("左手握牌")]
+        [SerializeField] private Props.PlayerCardGrip grip;
+        [SerializeField, Range(0.1f, 1)] private float gripCardScale = 0.55f;
+        [SerializeField, Range(0, 90)] private float gripCollapsedFanAngle = 24;
+        [SerializeField, Range(0, 90)] private float gripExpandedFanAngle = 54;
+        [SerializeField, Min(0)] private float gripStackDepth = 0.003f;
         [Header("手牌响应扇区（相机视口坐标）")]
         [SerializeField, Tooltip("扇区圆心，(0.5, 0) 为画面底部中央，可放到画面下方。")]
         private Vector2 hoverCenter = new Vector2(0.5f, -0.08f);
@@ -25,48 +31,94 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Range(0, 0.1f), Tooltip("展开后在扇区边缘增加的视口余量，避免边界反复收放。")]
         private float hoverExitPadding = 0.035f;
         private readonly List<Entry> entries = new List<Entry>();
+        private readonly Dictionary<Renderer, bool> suspendedRenderers = new Dictionary<Renderer, bool>();
         private Camera viewCamera;
         private CardView dragging;
         private bool expanded;
+        private bool presentationSuspended;
         private float expansion;
         private struct Entry { public CardView View; public int Index; public int Count; }
+        private const float CardHeight = 1.11f;
+        public Props.PlayerCardGrip Grip => grip;
 
-        public void Initialize(Camera camera) { viewCamera = camera; }
-        public void Clear() { entries.Clear(); }
+        public void Initialize(Camera camera)
+        {
+            viewCamera = camera;
+            if (grip == null) grip = FindObjectOfType<Props.PlayerCardGrip>(true);
+            if (grip != null) grip.Initialize(camera);
+        }
+
+        public void Clear()
+        {
+            // Layout may move these same card instances to the board or discard.
+            RestoreRenderers();
+            entries.Clear();
+            if (grip != null) grip.SetPresentationActive(false);
+        }
+
         public void ResetHand() { Clear(); dragging = null; expanded = false; expansion = 0; }
         public void SetExpanded(bool value) { expanded = value; }
+
+        public void SetPresentationSuspended(bool value)
+        {
+            presentationSuspended = value;
+            if (value)
+            {
+                foreach (Entry entry in entries) HideRenderers(entry.View);
+            }
+            else RestoreRenderers();
+            if (grip != null) grip.SetPresentationActive(!value && entries.Count > 0);
+        }
+
         public bool WantsExpanded(Vector2 screenPoint, bool current)
         {
-            if (viewCamera == null || entries.Count == 0) return false;
+            if (presentationSuspended || viewCamera == null || entries.Count == 0) return false;
             if (!viewCamera.pixelRect.Contains(screenPoint)) return false;
             Vector3 viewport = viewCamera.ScreenToViewportPoint(screenPoint);
-            Vector2 delta = (Vector2)viewport - hoverCenter;
-            // Normalize an elliptical sector around the configured viewport center.
+            Vector2 center = hoverCenter;
+            bool held = grip != null && grip.Anchor != null;
+            if (held)
+            {
+                Transform anchor = grip.Anchor;
+                Vector3 handCenter = viewCamera.WorldToViewportPoint(
+                    anchor.position + anchor.up * (CardHeight * gripCardScale * 0.5f));
+                if (handCenter.z <= viewCamera.nearClipPlane) return false;
+                center = (Vector2)handCenter;
+            }
+            Vector2 delta = (Vector2)viewport - center;
+            // Held cards use the full ellipse; the camera layout keeps its upward sector.
             float rx = Mathf.Max(0.001f, hoverRadius.x);
             float ry = Mathf.Max(0.001f, hoverRadius.y);
             Vector2 normalized = new Vector2(delta.x / rx, delta.y / ry);
             float angle = Mathf.Atan2(normalized.x, normalized.y) * Mathf.Rad2Deg;
             float limit = Mathf.Clamp(hoverHalfAngle, 5, 90);
-            if (normalized.sqrMagnitude <= 1 && Mathf.Abs(angle) <= limit) return true;
+            if (normalized.sqrMagnitude <= 1 && (held || Mathf.Abs(angle) <= limit)) return true;
             if (!current || hoverExitPadding <= 0) return false;
             // Expand the same sector slightly while the hand is open.
             Vector2 expandedPoint = new Vector2(delta.x / (rx + hoverExitPadding), delta.y / (ry + hoverExitPadding));
             float expandedAngle = Mathf.Abs(Mathf.Atan2(expandedPoint.x, expandedPoint.y) * Mathf.Rad2Deg);
             float anglePadding = Mathf.Atan2(hoverExitPadding, Mathf.Min(rx, ry)) * Mathf.Rad2Deg;
-            return expandedPoint.sqrMagnitude <= 1 && expandedAngle <= Mathf.Min(90, limit + anglePadding);
+            return expandedPoint.sqrMagnitude <= 1 && (held || expandedAngle <= Mathf.Min(90, limit + anglePadding));
         }
         public void SetDragging(CardView view) { dragging = view; }
         public void Register(CardView view, int index, int count)
         {
             if (view != dragging) view.transform.DOKill();
             entries.Add(new Entry { View = view, Index = index, Count = count });
+            if (presentationSuspended) HideRenderers(view);
+            if (grip != null) grip.SetPresentationActive(!presentationSuspended);
         }
 
         private void LateUpdate()
         {
-            if (viewCamera == null || entries.Count == 0) return;
+            if (presentationSuspended || viewCamera == null || entries.Count == 0) return;
             float blend = 1 - Mathf.Exp(-followSpeed * Time.deltaTime);
             expansion = Mathf.Lerp(expansion, expanded ? 1 : 0, blend);
+            if (grip != null && grip.Anchor != null)
+            {
+                LayoutHeldCards(grip.Anchor);
+                return;
+            }
             float depth = Mathf.Max(distance, viewCamera.nearClipPlane + 0.5f);
             float height = 2 * depth * Mathf.Tan(viewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f);
             float available = Mathf.Max(0, height * viewCamera.aspect * 0.84f - 0.9f * cardScale);
@@ -87,5 +139,49 @@ namespace PaperSeizerStone.Presentation
                 card.localScale = Vector3.Lerp(card.localScale, Vector3.one * cardScale, blend);
             }
         }
+
+        private void LayoutHeldCards(Transform anchor)
+        {
+            float angle = Mathf.Lerp(gripCollapsedFanAngle, gripExpandedFanAngle, expansion);
+            Vector3 halfCard = Vector3.up * (CardHeight * gripCardScale * 0.5f);
+            foreach (Entry entry in entries)
+            {
+                if (entry.View == null || entry.View == dragging || !entry.View.gameObject.activeInHierarchy) continue;
+                float normalized = entry.Count < 2 ? 0 : (float)entry.Index / (entry.Count - 1) - 0.5f;
+                Quaternion fan = Quaternion.Euler(0, 0, -normalized * angle);
+                Transform card = entry.View.transform;
+                // Keep every lower edge at the grip without inheriting the character's scale.
+                card.position = anchor.position + anchor.rotation *
+                    (fan * halfCard - Vector3.forward * (entry.Index * gripStackDepth));
+                card.rotation = anchor.rotation * fan * Quaternion.Euler(-90, 0, 0);
+                card.localScale = Vector3.one * gripCardScale;
+            }
+        }
+
+        private void HideRenderers(CardView view)
+        {
+            if (view == null) return;
+            foreach (Renderer renderer in view.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!suspendedRenderers.ContainsKey(renderer))
+                    suspendedRenderers.Add(renderer, renderer.forceRenderingOff);
+                renderer.forceRenderingOff = true;
+            }
+        }
+
+        private void RestoreRenderers()
+        {
+            foreach (KeyValuePair<Renderer, bool> entry in suspendedRenderers)
+                if (entry.Key != null) entry.Key.forceRenderingOff = entry.Value;
+            suspendedRenderers.Clear();
+        }
+
+        private void OnEnable()
+        {
+            if (presentationSuspended)
+                foreach (Entry entry in entries) HideRenderers(entry.View);
+        }
+
+        private void OnDisable() { RestoreRenderers(); }
     }
 }

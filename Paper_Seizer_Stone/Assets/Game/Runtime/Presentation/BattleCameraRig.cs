@@ -13,6 +13,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Camera sceneCamera;
         [SerializeField] private BattleCameraDefinition definition;
         [SerializeField, Tooltip("主相机是否显示完整玩家角色；第一人称默认关闭。")] private bool showPlayerModel;
+        [SerializeField, Tooltip("主相机是否显示第一人称手臂；默认开启，与完整角色显示独立控制。")] private bool showPlayerHands = true;
         [Header("第一人称微动")]
         [SerializeField] private bool subtleMotion = true;
         [SerializeField, Min(0)] private float breathPosition = 0.004f;
@@ -60,13 +61,22 @@ namespace PaperSeizerStone.Presentation
             set { showPlayerModel = value; ApplyPlayerVisibility(); }
         }
 
+        public bool ShowPlayerHands
+        {
+            get => showPlayerHands;
+            set { showPlayerHands = value; ApplyPlayerVisibility(); }
+        }
+
         private void OnEnable() { ApplyPlayerVisibility(); }
         private void OnValidate() { ApplyPlayerVisibility(); }
         private void ApplyPlayerVisibility()
         {
             if (sceneCamera == null) return;
-            int mask = 1 << Props.PlayerVisibilityLayer.Layer;
-            sceneCamera.cullingMask = showPlayerModel ? sceneCamera.cullingMask | mask : sceneCamera.cullingMask & ~mask;
+            int playerMask = 1 << Props.PlayerVisibilityLayer.Layer;
+            int handsMask = 1 << Props.PlayerVisibilityLayer.HandsLayer;
+            int mask = sceneCamera.cullingMask;
+            mask = showPlayerModel ? mask | playerMask : mask & ~playerMask;
+            sceneCamera.cullingMask = showPlayerHands ? mask | handsMask : mask & ~handsMask;
         }
         public Camera Camera => sceneCamera;
         public BattleCameraDefinition Definition => definition;

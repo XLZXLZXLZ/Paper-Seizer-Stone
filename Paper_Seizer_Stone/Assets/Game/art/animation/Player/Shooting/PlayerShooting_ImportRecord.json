@@ -1,0 +1,33 @@
+{
+    "sourceFire": "Assets/Game/art/animation/Player/Shooting/Sources/fire1.fbx",
+    "sourceGun": "Assets/Game/art/animation/Player/Shooting/Sources/gun1.fbx",
+    "sourceBullet": "Assets/Game/art/animation/Player/Shooting/Sources/bullet1.fbx",
+    "fireSha256": "1e0df4f67bbb24a1513bc9edda52b928a9cf452b7d1ed260620a814634950542",
+    "gunSha256": "f17d91dd23d2b190090ab728cecacd94a2785e5c6381b75e7125d26aacfe1053",
+    "bulletSha256": "f51089719e06310717d08eb9587b872568b586d9fa545298ebd93868d94f0051",
+    "length": 5.583333492279053,
+    "frameRate": 24.0,
+    "gunStart": 0.3333333432674408,
+    "bulletStart": 3.0,
+    "bulletEnd": 3.6666667461395265,
+    "fireTime": 5.583333492279053,
+    "samples": 135,
+    "boneLengthRatio": 1.0000001192092896,
+    "gunRigScale": {
+        "x": 0.1287529170513153,
+        "y": 0.1287529170513153,
+        "z": 0.1287529170513153
+    },
+    "characterBindings": 670,
+    "gunBindings": 180,
+    "bulletBindings": 20,
+    "characterClip": "Assets/Game/art/animation/Player/Shooting/Clips/Player_Fire1.anim",
+    "gunClip": "Assets/Game/art/animation/Player/Shooting/Clips/Player_Gun1.anim",
+    "bulletClip": "Assets/Game/art/animation/Player/Shooting/Clips/Player_BulletLoad1.anim",
+    "definition": "Assets/Game/art/animation/Player/Shooting/PlayerShooting.asset",
+    "prefab": "Assets/Game/Prefabs/Props/PlayerShootingProps.prefab",
+    "player": "Assets/Game/art/act/Player/Prefabs/Player_Hair.prefab",
+    "synchronizedLocal": "2026-11-03T07:43:49.5439343+08:00",
+    "bulletRole": "Load into cylinder; visual prop only, independent of hit/empty result",
+    "playModeRun": false
+}

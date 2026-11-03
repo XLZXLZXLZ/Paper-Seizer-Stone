@@ -13,7 +13,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Vector2 cursorOffset = new Vector2(24, 20);
         [SerializeField, Min(0)] private float screenMargin = 12;
 
-        public void Hide() => panel.gameObject.SetActive(false);
+        public void Hide()
+        {
+            if (panel != null) panel.gameObject.SetActive(false);
+        }
 
         public void Show(CardView card, Vector2 cursor)
         {
