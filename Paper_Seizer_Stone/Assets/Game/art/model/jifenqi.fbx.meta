@@ -3,7 +3,17 @@ guid: 84faed53ad24e3149b48f78aeec7925d
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_e907ac52_549e_4ade_82d1_109493793dfe
+    second: {fileID: 2100000, guid: cac7d4c89a757084d8fca37e2de78b34, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ScoreCounterScreen
+    second: {fileID: 2100000, guid: 0e68e4288cbf4c7cbdb389fd39f39934, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -32,7 +42,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 0
+    isReadable: 1
   meshes:
     lODScreenPercentages: []
     globalScale: 1

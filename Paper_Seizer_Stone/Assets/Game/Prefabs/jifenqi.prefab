@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6852970795845402299}
+  - component: {fileID: 922006751822764032}
   m_Layer: 0
   m_Name: jifenqi
   m_TagString: Untagged
@@ -210,6 +211,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: cac7d4c89a757084d8fca37e2de78b34, type: 2}
+  - {fileID: 2100000, guid: 0e68e4288cbf4c7cbdb389fd39f39934, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -231,3 +233,29 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+
+--- !u!114 &922006751822764032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6075764974918951937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44915b77caa94da0924a42ade4616146, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  screen: {fileID: 7479109688059748658}
+  screenMaterialIndex: 1
+  screenEffectsMaterial: {fileID: 2100000, guid: 34e46fde8e4d4ab8915f771c86c10257, type: 2}
+  fullScore: 8
+  fillSeconds: 0.95
+  scoreHoldSeconds: 0.55
+  installedFontFamily: PingFang SC
+  numberFont: {fileID: 11400000, guid: 2ddedc8782b661a479d0f2c7856a8357, type: 2}
+  enemyNumberPosition: {x: 0.193, y: 0.205, z: 0.102}
+  playerNumberPosition: {x: -0.193, y: 0.205, z: 0.102}
+  numberEulerAngles: {x: 0, y: 180, z: 0}
+  numberSize: 0.95
+  numberColor: {r: 1, g: 0.88, b: 0.62, a: 1}

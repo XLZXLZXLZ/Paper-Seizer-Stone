@@ -64,6 +64,7 @@ namespace PaperSeizerStone.Presentation
 
         public string Message { get; private set; }
         public Transform ScoreCounter => scoreCounter;
+        private ScoreCounterView scoreCounterView;
         public BattleObservation Displayed => displayed;
         public Transform DragAnchor => dragAnchor;
         public bool HandExpanded => expandedHand;
@@ -87,6 +88,7 @@ namespace PaperSeizerStone.Presentation
             definitions = definition.GetCardAssets();
             cardPrefab = prefab;
             shotCameraRig = camera != null ? camera.GetComponentInParent<BattleCameraRig>() : null;
+            scoreCounterView = scoreCounter != null ? scoreCounter.GetComponent<ScoreCounterView>() : null;
             firstPersonHand.Initialize(camera);
             PlayerShootingSequence gripShooting = firstPersonHand.Grip != null
                 ? firstPersonHand.Grip.GetComponent<PlayerShootingSequence>() : null;
@@ -103,6 +105,7 @@ namespace PaperSeizerStone.Presentation
         public void ResetEncounter(EnemyDefinition opponent)
         {
             RestoreOpponentPose();
+            if (scoreCounterView != null) scoreCounterView.ResetDisplay();
             EndPostShotPresentation();
             if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.ResetHand();
@@ -289,6 +292,7 @@ namespace PaperSeizerStone.Presentation
         private float Apply(BattleObservation snapshot, bool resetBullets = false)
         {
             displayed = snapshot;
+            if (scoreCounterView != null) scoreCounterView.Observe(snapshot);
             float dropDuration = 0;
             for (int i = 0; i < 2; i++)
             {
@@ -447,6 +451,13 @@ namespace PaperSeizerStone.Presentation
         }
 
         private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
+
+        public IEnumerator RevealCounterScores()
+        {
+            if (scoreCounterView == null || displayed == null) yield break;
+            scoreCounterView.RevealScores(displayed);
+            yield return new WaitForSecondsRealtime(scoreCounterView.RevealSeconds);
+        }
 
         public void RestoreOpponentForNextRound() => RestoreOpponentPose();
 

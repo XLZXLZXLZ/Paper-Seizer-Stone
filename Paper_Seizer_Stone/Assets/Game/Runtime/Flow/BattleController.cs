@@ -197,6 +197,8 @@ namespace PaperSeizerStone.Flow
             }
             yield return MoveCamera(BattleCameraPose.Scoring);
             yield return Play(engine.ScoreRound());
+            yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
+            yield return tableView.RevealCounterScores();
             yield return MoveCamera(BattleCameraPose.Shooting);
             yield return tableView.PrepareShooting();
             yield return Play(engine.ExecuteShots());
