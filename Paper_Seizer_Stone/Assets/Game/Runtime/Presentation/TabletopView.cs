@@ -564,7 +564,7 @@ namespace PaperSeizerStone.Presentation
             if (knockdown != null && fallenOpponent != null && fallenOpponent.gameObject.activeSelf)
                 yield return knockdown;
 
-            if (hit && shotCameraRig != null)
+            if (playerHit && shotCameraRig != null)
             {
                 float remaining = BattleCameraRig.HitBuildUpSeconds - (Time.unscaledTime - firstHitTime);
                 if (remaining > 0f) yield return new WaitForSecondsRealtime(remaining);
