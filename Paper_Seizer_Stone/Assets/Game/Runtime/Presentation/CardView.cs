@@ -160,6 +160,9 @@ namespace PaperSeizerStone.Presentation
 
         public void DisplayShop(CardDefinition definition, bool clickable)
         {
+            Known = true;
+            PreviewArtwork = definition.Artwork;
+            PreviewDescription = definition.DisplayName + "\n" + definition.Description;
             transform.DOKill();
             visual.DOKill();
             visual.localRotation = visualRotation;

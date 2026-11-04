@@ -40,17 +40,18 @@ namespace PaperSeizerStone.Presentation
         private float shakeStart = float.NegativeInfinity;
         private float hitStart = float.NegativeInfinity;
 
-        public const float HitBuildUpSeconds = 1.85f;
+        private const float HitBuildUpSeconds = 1.85f;
 
         public void ShakeForShot()
         {
             shakeStart = Time.unscaledTime;
-            hitStart = float.NegativeInfinity;
         }
         private UnityEngine.UI.Image hitOverlay;
 
-        public void FlashHit()
+        // One call owns the entire buildup, flash, blackout and recovery timeline.
+        public void PlayHitScreenEffect()
         {
+            if (!isActiveAndEnabled) return;
             hitStart = Time.unscaledTime;
             if (hitOverlay != null) return;
 
@@ -71,28 +72,40 @@ namespace PaperSeizerStone.Presentation
             hitOverlay.rectTransform.offsetMax = Vector2.zero;
         }
 
-        public bool IsHitEffectPlaying => isActiveAndEnabled && Time.unscaledTime - hitStart < hitSequenceDuration;
+        public bool IsHitEffectPlaying => isActiveAndEnabled
+            && Time.unscaledTime - hitStart < HitBuildUpSeconds + hitSequenceDuration;
+
+        public void ResetShotEffects()
+        {
+            shakeStart = hitStart = float.NegativeInfinity;
+            if (hitOverlay != null)
+            {
+                hitOverlay.color = Color.clear;
+                hitOverlay.enabled = false;
+            }
+        }
 
         public Vector4 HitScreenEffect
         {
             get
             {
-                float t = (Time.unscaledTime - hitStart) / hitSequenceDuration;
-                if (!isActiveAndEnabled) return Vector4.zero;
-                if (float.IsNegativeInfinity(hitStart))
+                if (!IsHitEffectPlaying) return Vector4.zero;
+                float elapsed = Time.unscaledTime - hitStart;
+                if (elapsed < HitBuildUpSeconds)
                 {
-                    if (float.IsNegativeInfinity(shakeStart)) return Vector4.zero;
-                    float buildup = Mathf.Clamp01((Time.unscaledTime - shakeStart) / 0.42f);
+                    float buildup = Mathf.Clamp01(elapsed / 0.42f);
                     return new Vector4(0f, 0f, 0f, Mathf.SmoothStep(0f, 1f, buildup));
                 }
-                if (t >= 1f) return Vector4.zero;
+                float impactElapsed = elapsed - HitBuildUpSeconds;
+                float t = impactElapsed / hitSequenceDuration;
                 const float flashDuration = 0.09f;
                 const float recoveryStart = 3f / 5.5f;
-                float flashProgress = Mathf.Clamp01((Time.unscaledTime - hitStart) / flashDuration);
+                float flashProgress = Mathf.Clamp01(impactElapsed / flashDuration);
                 float flash = 0.8f * (1f - flashProgress);
                 float black = flashProgress < 1f ? 0f
                     : 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(recoveryStart, 1f, t));
-                return new Vector4(hitDistortion * (1f - flashProgress), flash, black, black > 0f ? black : 1f);
+                float red = flashProgress < 1f ? 1f : black;
+                return new Vector4(hitDistortion * (1f - flashProgress), flash, black, red);
             }
         }
 
@@ -100,6 +113,7 @@ namespace PaperSeizerStone.Presentation
 
         private void LateUpdate()
         {
+            if (!IsHitEffectPlaying) hitStart = float.NegativeInfinity;
             if (hitOverlay != null)
             {
                 Vector4 effect = HitScreenEffect;
@@ -164,6 +178,7 @@ namespace PaperSeizerStone.Presentation
 
         public void Initialize()
         {
+            ResetShotEffects();
             ApplyPlayerVisibility();
             if (sceneCamera == null || definition == null)
                 throw new System.InvalidOperationException("请配置相机预制体中的 MainCamera 与相机配置 SO。");
@@ -288,8 +303,7 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
-            shakeStart = hitStart = float.NegativeInfinity;
-            if (hitOverlay != null) hitOverlay.enabled = false;
+            ResetShotEffects();
             DOTween.Kill(this);
             transitioning = false;
             if (initialized && sceneCamera != null)

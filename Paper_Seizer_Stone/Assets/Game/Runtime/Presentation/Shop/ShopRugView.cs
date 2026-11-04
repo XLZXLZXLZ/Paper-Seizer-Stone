@@ -51,7 +51,7 @@ namespace PaperSeizerStone.Presentation
             animator.ResetTrigger("Close");
             animator.Play(RolledIdle, 0, 0);
             animator.Update(0);
-            movement = transform.DOLocalMove(homePosition, placementDuration).SetEase(Ease.OutCubic);
+            movement = transform.DOLocalMove(homePosition, placementDuration).SetEase(Ease.InCubic);
             yield return movement.WaitForCompletion();
             animator.Play(Unroll, 0, 0);
             animator.Update(0);

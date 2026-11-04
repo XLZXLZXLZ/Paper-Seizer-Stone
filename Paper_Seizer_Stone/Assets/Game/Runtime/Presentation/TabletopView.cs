@@ -495,6 +495,7 @@ namespace PaperSeizerStone.Presentation
         public void EndPostShotPresentation()
         {
             AudioManager.SetShootingFocus(false);
+            if (shotCameraRig != null) shotCameraRig.ResetShotEffects();
             if (!postShotPresentation) return;
             postShotPresentation = false;
             firstPersonHand.SetPostShotSuspended(false);
@@ -507,7 +508,6 @@ namespace PaperSeizerStone.Presentation
             Message = shots.Count == 2 ? shots[0].Message + "  " + shots[1].Message : shots[0].Message;
             bool animatedPlayer = playerShooting != null && playerShooting.IsActive;
             bool hit = false;
-            float firstHitTime = 0f;
             Coroutine knockdown = null;
             bool playerHit = false;
             foreach (BattleEvent shot in shots) playerHit |= shot.Side == Side.Enemy && shot.Hit;
@@ -531,12 +531,12 @@ namespace PaperSeizerStone.Presentation
                 StartCoroutine(ShowDischarge(muzzle, tracerTarget, shot.Side == Side.Enemy));
                 if (!hit)
                 {
-                    firstHitTime = Time.unscaledTime;
                     if (!playerHit && shotCameraRig != null) shotCameraRig.ShakeForShot();
                 }
                 if (shot.Side == Side.Enemy && shotCameraRig != null)
                 {
                     BeginPostShotPresentation();
+                    shotCameraRig.PlayHitScreenEffect();
                     StartCoroutine(shotCameraRig.PlayPlayerFall(playerKilled));
                 }
                 hit = true;
@@ -566,9 +566,6 @@ namespace PaperSeizerStone.Presentation
 
             if (playerHit && shotCameraRig != null)
             {
-                float remaining = BattleCameraRig.HitBuildUpSeconds - (Time.unscaledTime - firstHitTime);
-                if (remaining > 0f) yield return new WaitForSecondsRealtime(remaining);
-                shotCameraRig.FlashHit();
                 while (shotCameraRig.IsHitEffectPlaying) yield return null;
             }
         }

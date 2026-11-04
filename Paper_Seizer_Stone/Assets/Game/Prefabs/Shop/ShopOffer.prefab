@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Color: {r: 0.94, g: 0.91, b: 0.82, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
-  m_text: "2 筹码\n点击购买"
+  m_text: "X筹码"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}

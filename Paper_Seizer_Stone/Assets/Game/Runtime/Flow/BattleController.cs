@@ -34,6 +34,7 @@ namespace PaperSeizerStone.Flow
         private readonly int[] draftSlots = new int[BasicRules.Slots];
         private bool busy = true;
         private bool burningDeck;
+        private bool inspectingDeck;
         private int actualSeed;
         private string initializationError;
         public string InitializationError => initializationError;
@@ -49,7 +50,8 @@ namespace PaperSeizerStone.Flow
             && engine.State.Get(Side.Enemy).Bullets + 2 <= BasicRules.Chambers
             && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
         public bool CanShopInteract => !busy && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
-        public bool CanBurnInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanDeckTableInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanBurnInteract => CanDeckTableInteract && !inspectingDeck;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
             || (engine.State.Phase == BattlePhase.PlayerCheat && engine.State.Get(Side.Enemy).Bullets < BasicRules.Chambers));
 
@@ -264,7 +266,7 @@ namespace PaperSeizerStone.Flow
             yield return MoveCamera(BattleCameraPose.Table);
             yield return MoveBattle(false);
             AudioManager.SetMusic(MusicContext.Shop);
-            shopView.Prepare(adventure, definition.Shop, definition.GetEnemy(adventure.EncounterIndex + 1));
+            shopView.Prepare(adventure);
             yield return shopView.Show();
             yield return new WaitForSeconds(phasePause);
             busy = false;
@@ -310,18 +312,29 @@ namespace PaperSeizerStone.Flow
 
         public void OpenBurnTable()
         {
+            OpenDeckTable(false);
+        }
+
+        public void OpenDeckInspection()
+        {
+            OpenDeckTable(true);
+        }
+
+        private void OpenDeckTable(bool inspectOnly)
+        {
             if (!CanShopInteract) return;
             busy = true;
             shopView.SetInteractable(false);
-            StartCoroutine(EnterBurnTable());
+            StartCoroutine(EnterBurnTable(inspectOnly));
         }
 
-        private IEnumerator EnterBurnTable()
+        private IEnumerator EnterBurnTable(bool inspectOnly)
         {
-            yield return shopView.Hide();
+            yield return shopView.Hide(hideRug: false);
             yield return new WaitForSeconds(phasePause);
             burningDeck = true;
-            burnView.Prepare(adventure, definition.Shop);
+            inspectingDeck = inspectOnly;
+            burnView.Prepare(adventure, inspectOnly);
             yield return burnView.Show();
             yield return new WaitForSeconds(phasePause);
             busy = false;
@@ -330,7 +343,7 @@ namespace PaperSeizerStone.Flow
 
         public void CloseBurnTable()
         {
-            if (!CanBurnInteract) return;
+            if (!CanDeckTableInteract) return;
             busy = true;
             burnView.SetInteractable(false);
             StartCoroutine(ReturnFromBurnTable());
@@ -341,8 +354,9 @@ namespace PaperSeizerStone.Flow
             yield return burnView.Hide();
             yield return new WaitForSeconds(phasePause);
             burningDeck = false;
-            shopView.Prepare(adventure, definition.Shop, definition.GetEnemy(adventure.EncounterIndex + 1));
-            yield return shopView.Show();
+            inspectingDeck = false;
+            shopView.Prepare(adventure);
+            yield return shopView.Show(showRug: false);
             yield return new WaitForSeconds(phasePause);
             busy = false;
             shopView.Refresh();

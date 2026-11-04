@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using TMPro;
 using DG.Tweening;
 using PaperSeizerStone.Battle;
 using PaperSeizerStone.Configuration;
@@ -25,19 +23,17 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Transform emberGlow;
         [SerializeField] private PhysicsTokenArea walletArea;
         [SerializeField] private Transform paymentExit;
-        [SerializeField] private TMP_Text walletLabel;
-        [SerializeField] private TMP_Text selectionLabel;
-        [SerializeField] private TMP_Text messageLabel;
-        [SerializeField] private TMP_Text priceLabel;
-        [SerializeField] private Button burnButton;
-        [SerializeField] private Button backButton;
+        [SerializeField] private Transform brazierRoot;
+        [SerializeField] private CardHoverPreview previewPrefab;
+        private CardHoverPreview preview;
+        private bool inspectOnly;
+        private bool interactable;
         [SerializeField, Min(0.05f)] private float burnDuration = 0.8f;
         private readonly Dictionary<CardView, string> records = new Dictionary<CardView, string>();
         private readonly Dictionary<CardView, Vector3> positions = new Dictionary<CardView, Vector3>();
         private readonly List<CardView> cards = new List<CardView>();
         private Dictionary<string, CardDefinition> catalog;
         private AdventureState adventure;
-        private ShopDefinition shop;
         private BattleController controller;
         private CardView selected;
         private Vector3 glowScale;
@@ -45,23 +41,22 @@ namespace PaperSeizerStone.Presentation
         public void Initialize(BattleController owner, Dictionary<string, CardDefinition> definitions)
         {
             if (panel == null || cardPrefab == null || cardRoot == null || spreadAnchor == null || burnAnchor == null
-                || emberGlow == null || walletArea == null || paymentExit == null || walletLabel == null
-                || selectionLabel == null || messageLabel == null || priceLabel == null || burnButton == null || backButton == null)
-                throw new InvalidOperationException("请完整绑定烧牌 Panel 的卡牌、摊牌范围、火盆、钱包与按钮。");
+                || emberGlow == null || walletArea == null || paymentExit == null || brazierRoot == null || previewPrefab == null)
+                throw new InvalidOperationException("请完整绑定卡组桌面的摊牌范围、火盆、钱包与悬停预览。");
             controller = owner;
             catalog = definitions;
             if (editorPreview != null) editorPreview.SetActive(false);
             walletArea.Initialize();
             glowScale = emberGlow.localScale;
-            burnButton.onClick.AddListener(() => { if (selected != null) controller.RemoveCard(records[selected]); });
-            backButton.onClick.AddListener(() => controller.CloseBurnTable());
+            preview = Instantiate(previewPrefab);
+            preview.Hide();
             panel.Initialize();
         }
 
-        public void Prepare(AdventureState state, ShopDefinition definition)
+        public void Prepare(AdventureState state, bool inspection = false)
         {
+            inspectOnly = inspection;
             adventure = state;
-            shop = definition;
             foreach (CardView card in cards) { card.gameObject.SetActive(false); Destroy(card.gameObject); }
             cards.Clear();
             records.Clear();
@@ -87,13 +82,12 @@ namespace PaperSeizerStone.Presentation
                 cards.Add(card);
             }
             emberGlow.localScale = glowScale;
-            Notify("点选桌上的一张牌，再确认烧牌；返回商店可以继续买牌。");
             Refresh();
         }
 
         public IEnumerator Show()
         {
-            yield return panel.Show();
+            yield return panel.Show(inspectOnly ? brazierRoot : null);
             float delay = walletArea.SetCount(adventure.Wallet);
             if (delay > 0) yield return new WaitForSeconds(delay);
         }
@@ -109,42 +103,43 @@ namespace PaperSeizerStone.Presentation
 
         public void Refresh()
         {
-            walletLabel.text = "筹码  " + adventure.Wallet + "    ·    持有牌 " + adventure.Deck.Count + " 张";
-            priceLabel.text = "确认烧牌   ·   " + shop.RemovePrice + " 筹码";
-            selectionLabel.text = selected == null ? "点选一张牌查看能力\n至少保留 " + shop.MinimumDeckSize + " 张牌" : SelectionText();
-            if (adventure.Deck.Count <= shop.MinimumDeckSize) Notify("牌组已达到下限，至少保留 " + shop.MinimumDeckSize + " 张。可以返回商店。");
-            else if (adventure.Wallet < shop.RemovePrice) Notify("筹码不足，烧牌需要 " + shop.RemovePrice + " 筹码。可以查看牌组或返回商店。");
-            SetInteractable(controller.CanBurnInteract);
+            SetInteractable(controller.CanDeckTableInteract);
         }
 
-        private string SelectionText()
+        public void SetInteractable(bool value)
         {
-            string recordId = records[selected];
-            foreach (DeckCardRecord record in adventure.Deck)
-                if (record.RecordId == recordId)
-                {
-                    CardDefinition definition = catalog[record.DefinitionId];
-                    return "「" + definition.DisplayName + "」\n" + definition.Description + "\n烧毁后永久移出本次冒险牌组";
-                }
-            return "卡牌已烧毁";
+            interactable = value;
+            if (!value && preview != null) preview.Hide();
         }
 
-        public void SetInteractable(bool enabled)
+        public void Notify(string message)
         {
-            burnButton.interactable = enabled && selected != null && adventure.Deck.Count > shop.MinimumDeckSize && adventure.Wallet >= shop.RemovePrice;
-            backButton.interactable = enabled;
+            if (!inspectOnly && emberGlow != null)
+            {
+                emberGlow.DOKill();
+                emberGlow.localScale = glowScale;
+                emberGlow.DOPunchScale(glowScale * 0.2f, 0.3f, 2, 0.4f);
+            }
         }
-
-        public void Notify(string message) { messageLabel.text = message; }
 
         private void Update()
         {
-            if (controller == null || !controller.CanBurnInteract) return;
+            if (controller == null || !interactable || !controller.CanDeckTableInteract) return;
+            if (preview != null) preview.Hide();
             if (Input.GetKeyDown(KeyCode.Escape)) { controller.CloseBurnTable(); return; }
-            if (!Input.GetMouseButtonDown(0) || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())) return;
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
             int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
             if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
             CardView card = hit.collider.GetComponentInParent<CardView>();
+            if (card != null && records.ContainsKey(card) && preview != null) preview.Show(card, Input.mousePosition);
+            if (!Input.GetMouseButtonDown(0)) return;
+            var action = hit.collider.GetComponentInParent<PaperSeizerStone.Presentation.Props.ShopTableAction>();
+            if (!inspectOnly && action != null && action.Kind == PaperSeizerStone.Presentation.Props.ShopTableActionKind.Burn)
+            {
+                if (selected != null) controller.RemoveCard(records[selected]);
+                else Notify("请先选择卡牌。");
+                return;
+            }
             if (card == null || !records.ContainsKey(card)) return;
             if (selected != null)
             {
@@ -177,8 +172,11 @@ namespace PaperSeizerStone.Presentation
             yield return payment;
         }
 
+        private void OnDisable() { if (preview != null) preview.Hide(); }
+
         private void OnDestroy()
         {
+            if (preview != null) Destroy(preview.gameObject);
             foreach (CardView card in cards) if (card != null) card.transform.DOKill();
             if (emberGlow != null) emberGlow.DOKill();
         }
