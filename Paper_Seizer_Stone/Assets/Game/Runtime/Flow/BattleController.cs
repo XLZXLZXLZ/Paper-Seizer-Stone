@@ -26,6 +26,7 @@ namespace PaperSeizerStone.Flow
         [SerializeField, Min(0)] private float actionPause = 0.15f;
         [SerializeField, Min(0)] private float phasePause = 0.3f;
         [SerializeField, Min(0)] private float victoryPause = 0.8f;
+        [SerializeField, Min(0), Tooltip("中枪结算后积分器箭头机位的停留秒数。")] private float postShotScoreHold = 1.5f;
 
         private BattleEngine engine;
         private BasicEnemyPolicy enemy;
@@ -224,7 +225,7 @@ namespace PaperSeizerStone.Flow
                         if (!playerKilled && shots.Exists(shot => shot.Hit))
                         {
                             yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
-                            yield return new WaitForSecondsRealtime(0.65f);
+                            yield return new WaitForSecondsRealtime(postShotScoreHold);
                         }
                         yield return cameraRig.MoveTo(BattleCameraPose.Table);
                     }

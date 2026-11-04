@@ -20,4 +20,4 @@ MonoBehaviour:
   fireMoment: -1
   enterBlend: 0.12
   returnBlend: 0.18
-  postShotHold: 0.12
+  postShotHold: 0

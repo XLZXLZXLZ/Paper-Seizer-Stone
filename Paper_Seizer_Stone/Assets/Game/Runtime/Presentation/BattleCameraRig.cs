@@ -40,6 +40,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Range(0, 0.08f)] private float hitDistortion = 0.024f;
         private float shakeStart = float.NegativeInfinity;
         private float hitStart = float.NegativeInfinity;
+        [Header("玩家击发白光")]
+        [SerializeField, Range(0, 1)] private float playerShotFlashStrength = 0.95f;
+        [SerializeField, Min(0.01f)] private float playerShotFlashSeconds = 0.18f;
+        private float playerShotFlashStart = float.NegativeInfinity;
 
         private const float HitBuildUpSeconds = 1.85f;
 
@@ -54,6 +58,18 @@ namespace PaperSeizerStone.Presentation
         {
             if (!isActiveAndEnabled) return;
             hitStart = Time.unscaledTime;
+            EnsureHitOverlay();
+        }
+
+        public void PlayPlayerShotFlash()
+        {
+            if (!isActiveAndEnabled) return;
+            EnsureHitOverlay();
+            playerShotFlashStart = Time.unscaledTime;
+        }
+
+        private void EnsureHitOverlay()
+        {
             if (hitOverlay != null) return;
 
             var overlay = new GameObject("Hit Screen Overlay", typeof(RectTransform), typeof(Canvas));
@@ -79,6 +95,7 @@ namespace PaperSeizerStone.Presentation
         public void ResetShotEffects()
         {
             shakeStart = hitStart = float.NegativeInfinity;
+            playerShotFlashStart = float.NegativeInfinity;
             if (hitOverlay != null)
             {
                 hitOverlay.color = Color.clear;
@@ -122,6 +139,17 @@ namespace PaperSeizerStone.Presentation
                     ? new Color(1f, 0.88f, 0.68f, effect.y)
                     : new Color(0f, 0f, 0f, effect.z);
                 hitOverlay.enabled = effect.y > 0f || effect.z > 0f;
+                float shotFlash = playerShotFlashStrength * (1f - Mathf.Clamp01(
+                    (Time.unscaledTime - playerShotFlashStart) / Mathf.Max(0.01f, playerShotFlashSeconds)));
+                if (shotFlash > 0f)
+                {
+                    Color background = hitOverlay.color;
+                    float alpha = shotFlash + background.a * (1f - shotFlash);
+                    Color white = (Color.white * shotFlash + background * (background.a * (1f - shotFlash))) / alpha;
+                    white.a = alpha;
+                    hitOverlay.color = white;
+                    hitOverlay.enabled = true;
+                }
             }
             if (!initialized || sceneCamera == null) return;
             float blend = 1 - Mathf.Exp(-motionSmoothing * Time.unscaledDeltaTime);

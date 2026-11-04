@@ -12,7 +12,7 @@ namespace PaperSeizerStone.Configuration
         [SerializeField, Tooltip("击发时刻，单位秒；负数使用人物动作末帧。")] private float fireMoment = -1f;
         [SerializeField, Min(0)] private float enterBlend = 0.12f;
         [SerializeField, Min(0)] private float returnBlend = 0.18f;
-        [SerializeField, Min(0)] private float postShotHold = 0.12f;
+        [SerializeField, Min(0)] private float postShotHold = 0f;
 
         public bool IsConfigured => HasDuration(characterClip) && HasDuration(gunClip) && HasDuration(loadingBulletClip)
             && IsFinite(gunStart) && IsFinite(bulletStart) && IsFinite(fireMoment)

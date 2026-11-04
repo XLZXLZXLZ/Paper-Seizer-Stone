@@ -42,6 +42,11 @@ namespace PaperSeizerStone.Presentation
         [Header("举枪与敌方紧张表现")]
         [SerializeField, Min(0.05f)] private float gunRaiseDuration = 0.3f;
         [SerializeField, Min(0)] private float aimHoldDuration = 0.65f;
+        [SerializeField, Min(0), Tooltip("玩家举枪完成后、击发前额外停留秒数。")] private float playerExtraAimHold = 1.5f;
+        [Header("玩家枪口火光")]
+        [SerializeField, Min(1)] private float playerMuzzleScale = 1.8f;
+        [SerializeField, Min(0)] private float playerMuzzleIntensity = 15f;
+        [SerializeField, Min(0.01f)] private float playerMuzzleDuration = 0.22f;
         [SerializeField, Min(0)] private float enemyTremorPosition = 0.008f;
         [SerializeField, Min(0)] private float enemyTremorAngle = 0.65f;
         [SerializeField, Min(0.1f)] private float enemyTremorFrequency = 13;
@@ -212,8 +217,10 @@ namespace PaperSeizerStone.Presentation
                 }
                 else
                 {
-                    for (int i = 0; i < fighter.Hand.Count; i++)
-                        result.Add(new Placement { Card = fighter.Hand[i], Owner = side, Index = i, Count = fighter.Hand.Count });
+                    // Enemy cards stay in the draw pile visually until committed to a board slot.
+                    if (side != Side.Enemy)
+                        for (int i = 0; i < fighter.Hand.Count; i++)
+                            result.Add(new Placement { Card = fighter.Hand[i], Owner = side, Index = i, Count = fighter.Hand.Count });
                     for (int i = 0; i < fighter.Board.Count; i++)
                         if (fighter.Board[i] != null)
                             result.Add(new Placement { Card = fighter.Board[i], Owner = side, Board = true, Index = i });
@@ -528,6 +535,7 @@ namespace PaperSeizerStone.Presentation
             if (enemyFires && !animatedEnemy) enemy.Gun.SetPositionAndRotation(enemy.GunAimPose.position, enemy.GunAimPose.rotation);
             if (playerPreparation != null) yield return playerPreparation;
             if (enemyPreparation != null) yield return enemyPreparation;
+            if (playerFires) yield return new WaitForSecondsRealtime(playerExtraAimHold);
         }
 
         private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
@@ -576,6 +584,8 @@ namespace PaperSeizerStone.Presentation
             Coroutine lastWords = null;
             bool monsterWasHit = false;
             bool playerHit = false;
+            bool playerFired = false;
+            foreach (BattleEvent shot in shots) playerFired |= shot.Side == Side.Player;
             foreach (BattleEvent shot in shots) playerHit |= shot.Side == Side.Enemy && shot.Hit;
             bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
             bool enemyKilled = shots[shots.Count - 1].Snapshot.Enemy.Life <= 0;
@@ -597,6 +607,7 @@ namespace PaperSeizerStone.Presentation
                     ? opponentAnchor.position + opponentAnchor.up * 0.55f
                     : player.HandAnchor.position + player.HandAnchor.up * 0.35f;
                 StartCoroutine(ShowDischarge(muzzle, tracerTarget, shot.Side == Side.Enemy));
+                if (shot.Side == Side.Player && shotCameraRig != null) shotCameraRig.PlayPlayerShotFlash();
                 if (!hit)
                 {
                     if (!playerHit && shotCameraRig != null) shotCameraRig.ShakeForShot();
@@ -640,7 +651,7 @@ namespace PaperSeizerStone.Presentation
             {
                 yield return playerShooting.Finish();
             }
-            else yield return new WaitForSeconds(0.92f);
+            else if (!playerFired) yield return new WaitForSeconds(0.92f);
             if (enemyReturn != null) yield return enemyReturn;
             if (hitReaction != null) yield return hitReaction;
 
@@ -656,7 +667,8 @@ namespace PaperSeizerStone.Presentation
         private IEnumerator ShowDischarge(GameObject muzzle, Vector3 target, bool towardPlayer)
         {
             const float trailDuration = 0.033f;
-            const float flashDuration = 0.14f;
+            float flashDuration = towardPlayer ? 0.14f : Mathf.Max(0.01f, playerMuzzleDuration);
+            float flameScale = towardPlayer ? 1f : playerMuzzleScale;
             var effect = new GameObject("Muzzle Discharge");
             effect.layer = gameObject.layer;
             effect.transform.SetParent(muzzle.transform.parent, false);
@@ -709,6 +721,8 @@ namespace PaperSeizerStone.Presentation
                     origin, origin + forward * 0.10f + rise * 0.095f,
                     origin, origin + forward * 0.09f - rise * 0.08f
                 });
+                for (int i = 0; i < burst.positionCount; i++)
+                    burst.SetPosition(i, origin + (burst.GetPosition(i) - origin) * flameScale);
             }
 
             float start = Time.unscaledTime;
@@ -719,8 +733,8 @@ namespace PaperSeizerStone.Presentation
                     float elapsed = Time.unscaledTime - start;
                     if (elapsed >= flashDuration) break;
                     float fade = 1f - elapsed / flashDuration;
-                    light.intensity = 7.5f * fade;
-                    if (burst != null) burst.widthMultiplier = 0.055f * fade;
+                    light.intensity = (towardPlayer ? 7.5f : playerMuzzleIntensity) * fade;
+                    if (burst != null) burst.widthMultiplier = 0.055f * flameScale * fade;
                     if (trail != null)
                     {
                         float progress = Mathf.Clamp01(elapsed / trailDuration);
