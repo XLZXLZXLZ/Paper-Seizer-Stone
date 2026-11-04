@@ -32,7 +32,9 @@ namespace PaperSeizerStone.Presentation
             card.transform.localRotation = rotation;
             card.gameObject.SetActive(!offer.Sold);
             if (!offer.Sold) card.DisplayShop(definition, true);
-            priceLabel.text = offer.Sold ? "已售罄" : definition.DisplayName + "   ·   " + offer.Price + " 筹码" + (wallet < offer.Price ? "\n筹码不足" : "\n点击卡牌购买");
+            priceLabel.gameObject.SetActive(!offer.Sold);
+            priceLabel.text = offer.Price + "筹码";
+            card.SetHitbox(!offer.Sold);
             Details = offer.Sold ? "这张商品已经售罄。" : "「" + definition.DisplayName + "」  " + offer.Price + " 筹码   ·   " + definition.Description.Replace("\n", " ");
         }
 

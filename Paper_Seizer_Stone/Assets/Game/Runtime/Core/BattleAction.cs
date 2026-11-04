@@ -32,17 +32,21 @@ namespace PaperSeizerStone.Battle
         public int CardId { get; }
         public int Lane { get; }
         public bool Hit { get; }
+        public int PlayerPoints { get; }
+        public int EnemyPoints { get; }
         public string Message { get; }
         public BattleObservation Snapshot { get; }
 
         internal BattleEvent(BattleState state, BattleEventKind kind, Side side, string message,
-            int cardId = 0, int lane = -1, bool hit = false)
+            int cardId = 0, int lane = -1, bool hit = false, int playerPoints = 0, int enemyPoints = 0)
         {
             Kind = kind;
             Side = side;
             CardId = cardId;
             Lane = lane;
             Hit = hit;
+            PlayerPoints = playerPoints;
+            EnemyPoints = enemyPoints;
             Message = message;
             Snapshot = new BattleObservation(state, Side.Player);
         }

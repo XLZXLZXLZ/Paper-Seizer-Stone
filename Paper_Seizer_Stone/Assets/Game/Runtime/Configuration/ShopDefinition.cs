@@ -18,10 +18,25 @@ namespace PaperSeizerStone.Configuration
         [SerializeField, Range(1, 3)] private int offerCount = 3;
         [SerializeField] private bool guaranteeSpecialCard = true;
         [SerializeField, Min(0)] private int removePrice = 3;
+        [SerializeField] private CardTagCatalog engravings;
+        public CardTagCatalog Engravings => engravings;
         [SerializeField, Min(5)] private int minimumDeckSize = 5;
         public IReadOnlyList<ShopEntry> CardPool => cardPool;
         public int RemovePrice => removePrice;
         public int MinimumDeckSize => Math.Max(5, minimumDeckSize);
+
+        public CardTag CreateEngraving(int encounterIndex, int seed)
+        {
+            if (encounterIndex == 0 || engravings == null) return CardTag.None;
+            var candidates = new List<CardTag>();
+            for (CardTag tag = CardTag.Violence; tag <= CardTag.Balance; tag++)
+            {
+                CardTagAppearance entry = engravings.Find(tag);
+                if (entry != null && entry.price >= 0) candidates.Add(tag);
+            }
+            // A separate stream: visiting the service never rerolls card stock or battle RNG.
+            return candidates.Count == 0 ? CardTag.None : candidates[new System.Random(seed).Next(candidates.Count)];
+        }
 
         public List<ShopOffer> CreateStock(int seed)
         {

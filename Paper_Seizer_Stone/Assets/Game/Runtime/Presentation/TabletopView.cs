@@ -76,6 +76,8 @@ namespace PaperSeizerStone.Presentation
         private BattleCameraRig shotCameraRig;
         private bool postShotPresentation;
         private bool handsWereVisible;
+        private TableTarget hoveredOpponentSlot;
+        private CardView draggedFeedbackCard;
 
         public void Initialize(BattleDefinition definition, CardView prefab, Camera camera)
         {
@@ -107,6 +109,7 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetEncounter(EnemyDefinition opponent)
         {
+            SetHoveredPlayerCard(null);
             RestoreOpponentPose();
             if (scoreCounterView != null) scoreCounterView.ResetDisplay();
             EndPostShotPresentation();
@@ -164,10 +167,18 @@ namespace PaperSeizerStone.Presentation
 
         public void PrepareExit()
         {
+<<<<<<< HEAD
             if (OpponentCombat != null) OpponentCombat.Cancel();
+=======
+            SetHoveredPlayerCard(null);
+>>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
             if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.Clear();
-            foreach (CardView view in cards.Values) view.transform.DOKill();
+            foreach (CardView view in cards.Values)
+            {
+                view.ClearFeedback();
+                view.transform.DOKill();
+            }
             chipArea.Freeze();
             player.BulletArea.Freeze();
             enemy.BulletArea.Freeze();
@@ -287,6 +298,18 @@ namespace PaperSeizerStone.Presentation
                 if (placement.Card.DefinitionId != null) definitions.TryGetValue(placement.Card.DefinitionId, out definition);
                 view.name = "Card_" + placement.Card.Id;
                 view.Display(placement.Card, definition, placement.Owner, placement.Board, !placement.Discard && interactive && placement.Owner == Side.Player);
+                int outcome = 0;
+                bool previewPhase = displayed.Phase == BattlePhase.Planning || displayed.Phase == BattlePhase.Revealing
+                    || displayed.Phase == BattlePhase.PlayerCheat || displayed.Phase == BattlePhase.EnemyCheat
+                    || displayed.Phase == BattlePhase.Scoring;
+                if (previewPhase && placement.Owner == Side.Player && placement.Board && placement.Card.Spec != null)
+                {
+                    ObservedCard opposing = displayed.Enemy.Board[placement.Index];
+                    // Only the player's filtered observation is used; unknown enemy definitions stay private.
+                    if (opposing != null && opposing.IsRevealed && opposing.Spec != null)
+                        outcome = CardRules.Compare(placement.Card.Spec, opposing.Spec);
+                }
+                view.SetOutcomeHint(outcome);
                 view.SetHitbox(!placement.Discard);
                 if (placement.Owner == Side.Player && !placement.Board && !placement.Discard)
                     firstPersonHand.Register(view, placement.Index, placement.Count);
@@ -302,6 +325,7 @@ namespace PaperSeizerStone.Presentation
                 if (active.Contains(pair.Key)) continue;
                 // A card missing from all visible areas was shuffled into the draw pile.
                 Transform discard = Get(pair.Value.Owner).DrawAnchor;
+                pair.Value.SetOutcomeHint(0);
                 pair.Value.SetHitbox(false);
                 pair.Value.MoveTo(discard.position, discard.rotation, duration);
                 pair.Value.transform.DOScale(Vector3.one, duration);
@@ -375,16 +399,23 @@ namespace PaperSeizerStone.Presentation
             if (battleEvent.Kind == BattleEventKind.LaneScored)
             {
                 AudioManager.Play(AudioCue.ScoreTick);
-                foreach (FighterObservation fighter in new[] { displayed.Player, displayed.Enemy })
+                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
                 {
+                    int points = sideIndex == 0 ? battleEvent.PlayerPoints : battleEvent.EnemyPoints;
+                    if (points == 0) continue;
+                    FighterObservation fighter = displayed.Get((Side)sideIndex);
                     CardView view = FindCard(fighter.Board[battleEvent.Lane].Id);
-                    if (view != null) view.Pulse();
+                    if (view != null) view.PresentScore(points, shotCameraRig != null ? shotCameraRig.Camera : null);
                 }
             }
             if (battleEvent.Kind == BattleEventKind.AbilityTriggered || battleEvent.Kind == BattleEventKind.CardTransformed)
             {
                 CardView effectCard = FindCard(battleEvent.CardId);
-                if (effectCard != null) effectCard.Pulse();
+                if (effectCard != null)
+                {
+                    if (displayed.Phase == BattlePhase.Scoring) effectCard.FlashAbility();
+                    else effectCard.Pulse();
+                }
             }
             float duration = battleEvent.Kind == BattleEventKind.LaneScored ? 0.55f
                 : battleEvent.Kind == BattleEventKind.RoundEnded ? 0.6f : moveDuration;
@@ -528,6 +559,7 @@ namespace PaperSeizerStone.Presentation
         public void EndPostShotPresentation()
         {
             AudioManager.SetShootingFocus(false);
+            if (shotCameraRig != null) shotCameraRig.ResetShotEffects();
             if (!postShotPresentation) return;
             postShotPresentation = false;
             firstPersonHand.SetPostShotSuspended(false);
@@ -542,7 +574,6 @@ namespace PaperSeizerStone.Presentation
             GuaiwuCombatSequence monster = OpponentCombat;
             bool animatedEnemy = monster != null && monster.IsShooting;
             bool hit = false;
-            float firstHitTime = 0f;
             Coroutine knockdown = null;
             Coroutine hitReaction = null;
             bool monsterWasHit = false;
@@ -569,12 +600,12 @@ namespace PaperSeizerStone.Presentation
                 StartCoroutine(ShowDischarge(muzzle, tracerTarget, shot.Side == Side.Enemy));
                 if (!hit)
                 {
-                    firstHitTime = Time.unscaledTime;
                     if (!playerHit && shotCameraRig != null) shotCameraRig.ShakeForShot();
                 }
                 if (shot.Side == Side.Enemy && shotCameraRig != null)
                 {
                     BeginPostShotPresentation();
+                    shotCameraRig.PlayHitScreenEffect();
                     StartCoroutine(shotCameraRig.PlayPlayerFall(playerKilled));
                 }
                 hit = true;
@@ -618,9 +649,6 @@ namespace PaperSeizerStone.Presentation
 
             if (playerHit && shotCameraRig != null)
             {
-                float remaining = BattleCameraRig.HitBuildUpSeconds - (Time.unscaledTime - firstHitTime);
-                if (remaining > 0f) yield return new WaitForSecondsRealtime(remaining);
-                shotCameraRig.FlashHit();
                 while (shotCameraRig.IsHitEffectPlaying) yield return null;
             }
         }
@@ -774,8 +802,30 @@ namespace PaperSeizerStone.Presentation
         public bool WantsHandExpanded(Vector2 screenPoint) => firstPersonHand.WantsExpanded(screenPoint, expandedHand);
         public void SetDraggingCard(CardView view)
         {
+            if (draggedFeedbackCard != null) draggedFeedbackCard.SuppressFeedback(false);
+            draggedFeedbackCard = view;
+            if (view != null) view.SuppressFeedback(true);
             firstPersonHand.SetDragging(view);
             if (view != null) AudioManager.Play(AudioCue.CardPickUp);
+        }
+
+        public void SetHoveredPlayerCard(CardView card)
+        {
+            int lane = -1;
+            if (card != null && card.Owner == Side.Player && card.IsOnBoard && displayed != null)
+            {
+                for (int i = 0; i < BasicRules.Slots; i++)
+                {
+                    int id = draftSlots != null ? draftSlots[i]
+                        : displayed.Player.Board[i] != null ? displayed.Player.Board[i].Id : 0;
+                    if (id == card.CardId) { lane = i; break; }
+                }
+            }
+            TableTarget next = lane >= 0 ? enemy.Slots[lane].GetComponentInParent<TableTarget>() : null;
+            if (next == hoveredOpponentSlot) return;
+            if (hoveredOpponentSlot != null) hoveredOpponentSlot.SetHighlight(false);
+            hoveredOpponentSlot = next;
+            if (hoveredOpponentSlot != null) hoveredOpponentSlot.SetHighlight(true);
         }
         public void SetHandExpanded(bool expanded)
         {
@@ -786,7 +836,12 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
+<<<<<<< HEAD
             if (OpponentCombat != null) OpponentCombat.Cancel();
+=======
+            SetHoveredPlayerCard(null);
+            foreach (CardView view in cards.Values) view.ClearFeedback();
+>>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
             if (playerShooting != null) playerShooting.Cancel();
             EndPostShotPresentation();
         }

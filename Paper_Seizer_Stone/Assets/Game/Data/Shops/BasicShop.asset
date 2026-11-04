@@ -39,3 +39,4 @@ MonoBehaviour:
   guaranteeSpecialCard: 1
   removePrice: 3
   minimumDeckSize: 5
+  engravings: {fileID: 11400000, guid: fe397cddba8951a5873a18bd1eec9691, type: 2}

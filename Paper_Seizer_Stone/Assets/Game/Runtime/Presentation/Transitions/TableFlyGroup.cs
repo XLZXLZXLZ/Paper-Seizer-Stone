@@ -6,7 +6,7 @@ using DG.Tweening;
 
 namespace PaperSeizerStone.Presentation
 {
-    // World props travel in world space away from the table, UI in its own anchored space.
+    // World props fall vertically onto the table and fly outward on exit; UI keeps its anchored motion.
     public sealed class TableFlyGroup : MonoBehaviour
     {
         [SerializeField] private Transform[] parts;
@@ -24,6 +24,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Vector3 travelRotation = new Vector3(25, 30, 12);
         [SerializeField, Min(0.05f)] private float duration = 0.55f;
         [SerializeField, Min(0)] private float stagger = 0.025f;
+        [SerializeField, Min(0)] private float entryHeight = 4f;
+        [SerializeField, Min(0)] private float phaseVariation = 0.65f;
+        [SerializeField, Range(0, 0.5f)] private float entryDurationVariation = 0.18f;
+        private readonly System.Random motionRandom = new System.Random();
         private readonly List<Pose> authored = new List<Pose>();
         private Sequence sequence;
         private bool initialized;
@@ -69,9 +73,14 @@ namespace PaperSeizerStone.Presentation
             foreach (Pose pose in authored) pose.Part.gameObject.SetActive(false);
         }
 
-        private List<Pose> Collect()
+        private List<Pose> Collect(bool enter, Transform excludedRoot, Transform secondaryExcludedRoot)
         {
-            var result = new List<Pose>(authored);
+            var result = new List<Pose>();
+            foreach (Pose pose in authored)
+                if ((enter || pose.Part.gameObject.activeInHierarchy)
+                    && (excludedRoot == null || (pose.Part != excludedRoot && !pose.Part.IsChildOf(excludedRoot)))
+                    && (secondaryExcludedRoot == null || (pose.Part != secondaryExcludedRoot && !pose.Part.IsChildOf(secondaryExcludedRoot))))
+                    result.Add(pose);
             if (runtimeRoots != null)
                 foreach (Transform root in runtimeRoots)
                     if (root != null)
@@ -87,6 +96,11 @@ namespace PaperSeizerStone.Presentation
             Transform part = pose.Part;
             Vector3 position = enter ? pose.Position : PositionOf(part);
             Vector3 home = part.parent == null ? position : part.parent.TransformPoint(position);
+            if (enter)
+            {
+                Vector3 above = home + Vector3.up * entryHeight;
+                return part.parent == null ? above : part.parent.InverseTransformPoint(above);
+            }
             Vector3 center = tableCenter == null ? transform.TransformPoint(centerOffset) : tableCenter.TransformPoint(centerOffset);
             Vector3 outward = Vector3.ProjectOnPlane(home - center, Vector3.up);
             if (outward.sqrMagnitude < 0.001f) outward = UnityEngine.Random.onUnitSphere;
@@ -98,11 +112,11 @@ namespace PaperSeizerStone.Presentation
             return part.parent == null ? target : part.parent.InverseTransformPoint(target);
         }
 
-        public IEnumerator Play(bool enter)
+        public IEnumerator Play(bool enter, Transform excludedRoot = null, Transform secondaryExcludedRoot = null)
         {
             Initialize();
             if (sequence != null) sequence.Kill();
-            List<Pose> moving = Collect();
+            List<Pose> moving = Collect(enter, excludedRoot, secondaryExcludedRoot);
             sequence = DOTween.Sequence();
             for (int i = 0; i < moving.Count; i++)
             {
@@ -111,15 +125,18 @@ namespace PaperSeizerStone.Presentation
                 part.DOKill();
                 part.gameObject.SetActive(true);
                 Vector3 away = AwayPosition(pose, enter);
-                Quaternion awayRotation = pose.Rotation * Quaternion.Euler(Vector3.Scale(travelRotation,
-                    new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), i % 2 == 0 ? 1 : -1)));
-                if (enter) { SetPosition(part, away); part.localRotation = awayRotation; }
+                Quaternion awayRotation = enter && radialWorld ? pose.Rotation
+                    : pose.Rotation * Quaternion.Euler(Vector3.Scale(travelRotation,
+                        new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), i % 2 == 0 ? 1 : -1)));
+                if (enter) { SetPosition(part, away); part.localRotation = radialWorld ? pose.Rotation : awayRotation; }
                 Vector3 target = enter ? pose.Position : away;
-                Tween movement = !radialWorld && part is RectTransform ui ? ui.DOAnchorPos3D(target, duration) : part.DOLocalMove(target, duration);
+                float seconds = enter && radialWorld
+                    ? duration * Mathf.Lerp(1f - entryDurationVariation, 1f + entryDurationVariation, (float)motionRandom.NextDouble()) : duration;
+                Tween movement = !radialWorld && part is RectTransform ui ? ui.DOAnchorPos3D(target, seconds) : part.DOLocalMove(target, seconds);
                 // Large decks still finish the transition within a bounded interval.
-                float delay = Mathf.Min(i * stagger, 0.35f);
-                sequence.Insert(delay, movement.SetEase(enter ? Ease.OutCubic : Ease.InCubic));
-                sequence.Insert(delay, part.DOLocalRotateQuaternion(enter ? pose.Rotation : awayRotation, duration));
+                float delay = radialWorld ? (float)motionRandom.NextDouble() * phaseVariation : Mathf.Min(i * stagger, 0.35f);
+                sequence.Insert(delay, movement.SetEase(radialWorld ? Ease.InCubic : enter ? Ease.OutCubic : Ease.InCubic));
+                sequence.Insert(delay, part.DOLocalRotateQuaternion(enter ? pose.Rotation : awayRotation, seconds));
             }
             yield return sequence.WaitForCompletion();
             if (!enter)

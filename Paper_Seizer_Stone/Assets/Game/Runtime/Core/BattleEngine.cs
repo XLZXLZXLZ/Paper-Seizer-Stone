@@ -79,9 +79,9 @@ namespace PaperSeizerStone.Battle
         }
 
         private void Emit(List<BattleEvent> events, BattleEventKind kind, string message,
-            Side side = Side.Player, int cardId = 0, int lane = -1, bool hit = false)
+            Side side = Side.Player, int cardId = 0, int lane = -1, bool hit = false, int playerPoints = 0, int enemyPoints = 0)
         {
-            events.Add(new BattleEvent(State, kind, side, message, cardId, lane, hit));
+            events.Add(new BattleEvent(State, kind, side, message, cardId, lane, hit, playerPoints, enemyPoints));
         }
 
         public ActionResult BeginRound()
@@ -325,11 +325,12 @@ namespace PaperSeizerStone.Battle
                 CardRuntime a = State.CardMap[player.Slots[lane]];
                 CardRuntime b = State.CardMap[enemy.Slots[lane]];
                 int result = CardRules.Compare(a.Definition, b.Definition);
-                int p = CardRules.Points(a.Definition, result);
-                int e = CardRules.Points(b.Definition, -result);
+                int p = CardRules.Points(a.Definition, result, a.Tag);
+                int e = CardRules.Points(b.Definition, -result, b.Tag);
                 player.Score += p;
                 enemy.Score += e;
-                Emit(events, BattleEventKind.LaneScored, "第 " + (lane + 1) + " 组对位    你 +" + p + " 分    ·    对手 +" + e + " 分", lane: lane);
+                Emit(events, BattleEventKind.LaneScored, "第 " + (lane + 1) + " 组对位    你 " + p.ToString("+0;-0;0") + " 分    ·    对手 " + e.ToString("+0;-0;0") + " 分",
+                    lane: lane, playerPoints: p, enemyPoints: e);
                 if (result != 0) WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
             }
             ResolveTrailingScorePenalties(events);
@@ -366,6 +367,14 @@ namespace PaperSeizerStone.Battle
 
         private void WinAbility(CardRuntime card, Side side, List<BattleEvent> events)
         {
+            if (card.Tag == CardTag.Violence)
+            {
+                FighterState owner = State.Get(side);
+                bool full = owner.Bullets >= BasicRules.Chambers;
+                owner.Bullets = Math.Min(BasicRules.Chambers, owner.Bullets + 1);
+                // Ordinary ammunition refresh only: tags have no extra ability flash or pulse.
+                Emit(events, BattleEventKind.AmmunitionChanged, SideName(side) + (full ? "的暴力刻印获胜，但己方弹巢已满。" : "的暴力刻印获胜，己方增加一发子弹。"), side, card.InstanceId);
+            }
             if (card.Definition.Ability == CardAbility.GunpowderPaper)
             {
                 FighterState fighter = State.Get(side);
