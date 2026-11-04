@@ -26,7 +26,6 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(0)] private float stagger = 0.025f;
         [SerializeField, Min(0)] private float entryHeight = 4f;
         [SerializeField, Min(0)] private float phaseVariation = 0.65f;
-        [SerializeField, Min(0)] private float entryPhaseVariation = 1.2f;
         [SerializeField, Range(0, 0.5f)] private float entryDurationVariation = 0.18f;
         private readonly System.Random motionRandom = new System.Random();
         private readonly List<Pose> authored = new List<Pose>();
@@ -74,12 +73,13 @@ namespace PaperSeizerStone.Presentation
             foreach (Pose pose in authored) pose.Part.gameObject.SetActive(false);
         }
 
-        private List<Pose> Collect(bool enter, Transform excludedRoot)
+        private List<Pose> Collect(bool enter, Transform excludedRoot, Transform secondaryExcludedRoot)
         {
             var result = new List<Pose>();
             foreach (Pose pose in authored)
                 if ((enter || pose.Part.gameObject.activeInHierarchy)
-                    && (excludedRoot == null || (pose.Part != excludedRoot && !pose.Part.IsChildOf(excludedRoot))))
+                    && (excludedRoot == null || (pose.Part != excludedRoot && !pose.Part.IsChildOf(excludedRoot)))
+                    && (secondaryExcludedRoot == null || (pose.Part != secondaryExcludedRoot && !pose.Part.IsChildOf(secondaryExcludedRoot))))
                     result.Add(pose);
             if (runtimeRoots != null)
                 foreach (Transform root in runtimeRoots)
@@ -112,11 +112,11 @@ namespace PaperSeizerStone.Presentation
             return part.parent == null ? target : part.parent.InverseTransformPoint(target);
         }
 
-        public IEnumerator Play(bool enter, Transform excludedRoot = null)
+        public IEnumerator Play(bool enter, Transform excludedRoot = null, Transform secondaryExcludedRoot = null)
         {
             Initialize();
             if (sequence != null) sequence.Kill();
-            List<Pose> moving = Collect(enter, excludedRoot);
+            List<Pose> moving = Collect(enter, excludedRoot, secondaryExcludedRoot);
             sequence = DOTween.Sequence();
             for (int i = 0; i < moving.Count; i++)
             {
@@ -134,8 +134,7 @@ namespace PaperSeizerStone.Presentation
                     ? duration * Mathf.Lerp(1f - entryDurationVariation, 1f + entryDurationVariation, (float)motionRandom.NextDouble()) : duration;
                 Tween movement = !radialWorld && part is RectTransform ui ? ui.DOAnchorPos3D(target, seconds) : part.DOLocalMove(target, seconds);
                 // Large decks still finish the transition within a bounded interval.
-                float delay = radialWorld ? (float)motionRandom.NextDouble() * (enter ? entryPhaseVariation : phaseVariation)
-                    : Mathf.Min(i * stagger, 0.35f);
+                float delay = radialWorld ? (float)motionRandom.NextDouble() * phaseVariation : Mathf.Min(i * stagger, 0.35f);
                 sequence.Insert(delay, movement.SetEase(radialWorld ? Ease.InCubic : enter ? Ease.OutCubic : Ease.InCubic));
                 sequence.Insert(delay, part.DOLocalRotateQuaternion(enter ? pose.Rotation : awayRotation, seconds));
             }

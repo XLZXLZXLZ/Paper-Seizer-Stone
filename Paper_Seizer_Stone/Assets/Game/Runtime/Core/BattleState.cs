@@ -61,6 +61,8 @@ namespace PaperSeizerStone.Battle
         public string DefinitionId { get; }
         public Gesture? Gesture { get; }
         public CardSpec Spec { get; }
+        public CardTag Tag { get; }
+        public int AppearanceSeed { get; }
         public bool IsRevealed { get; }
 
         internal ObservedCard(CardRuntime card, bool visible)
@@ -71,6 +73,8 @@ namespace PaperSeizerStone.Battle
             DefinitionId = visible ? card.Definition.Id : null;
             Gesture = visible ? (Gesture?)card.Definition.Gesture : null;
             Spec = visible ? card.Definition : null;
+            Tag = visible ? card.Tag : CardTag.None;
+            AppearanceSeed = visible ? CardTags.VisualSeed(card.SourceRecordId) : 0;
         }
     }
 

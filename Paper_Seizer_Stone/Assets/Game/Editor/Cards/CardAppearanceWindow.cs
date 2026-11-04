@@ -46,7 +46,7 @@ namespace PaperSeizerStone.Editor
                 using (new EditorGUI.DisabledScope(appearance == null || previewCard == null || EditorUtility.IsPersistent(previewCard)))
                     if (GUILayout.Button("应用到选定的预览卡牌")) BindPreview();
             }
-            EditorGUILayout.HelpBox("在 Prefab 模式或场景中选择圆角卡牌根节点，可直接修改 CardView 的 Preview Appearance、Preview Side 和 Preview Face Down。运行时由真实卡牌定义提供正面，统一卡背取自预览 SO。", MessageType.None);
+            EditorGUILayout.HelpBox("在 Prefab 模式或场景中选择圆角卡牌根节点，可直接修改 CardView 的 Preview Appearance、Preview Side、Preview Face Down 和 Preview Tag。运行时由真实卡牌定义提供正面，统一卡背取自预览 SO。", MessageType.None);
             if (appearance != null)
             {
                 UnityEditor.Editor.CreateCachedEditor(appearance, null, ref appearanceEditor);

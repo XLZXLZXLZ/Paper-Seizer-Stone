@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using TMPro;
 using DG.Tweening;
 using PaperSeizerStone.Battle;
@@ -19,6 +20,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text ghostEffectText;
         [SerializeField] private Renderer back;
         [SerializeField] private BoxCollider hitbox;
+        [SerializeField] private CardFeedbackView feedback;
         [SerializeField] private Material playerBack;
         [SerializeField] private Material enemyBack;
         [SerializeField, Tooltip("关闭卡背分色时，双方共用此基础卡背材质。")]
@@ -30,6 +32,17 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private CardAppearanceDefinition previewAppearance;
         [SerializeField] private Side previewSide;
         [SerializeField] private bool previewFaceDown;
+        [SerializeField] private CardTagCatalog tagCatalog;
+        [SerializeField] private CardTag previewTag;
+        private Vector4 tagData;
+        private int visualSeed;
+        private Color tagColor = Color.white;
+        private Vector4 tagRect = new Vector4(0.07f, 0.19f, 0.93f, 0.78f);
+        private string baseDescription;
+        public string PreviewName { get; private set; }
+        public string PreviewRulesDescription { get; private set; }
+        public CardTag Tag { get; private set; }
+        public string TagDescription { get; private set; }
         private MaterialPropertyBlock faceProperties;
         private MaterialPropertyBlock backProperties;
         private MaterialPropertyBlock ghostProperties;
@@ -90,6 +103,7 @@ namespace PaperSeizerStone.Presentation
             highlighted = false;
             ApplyArtwork(previewAppearance.FrontArtwork, previewAppearance.FaceTint,
                 previewAppearance.DisplayName, previewAppearance.Description);
+            SetTag(previewTag, previewAppearance);
             ApplyBack(previewSide);
             SetVisibility(!previewFaceDown, previewAppearance.ShowText);
             ApplyColors();
@@ -120,6 +134,7 @@ namespace PaperSeizerStone.Presentation
             PreviewArtwork = Known ? definition.Artwork : null;
             PreviewDescription = Known ? definition.DisplayName + "\n" + definition.Description : "";
             CardId = card.Id;
+            visualSeed = card.AppearanceSeed;
             Owner = owner;
             IsOnBoard = onBoard;
             CanDrag = draggable;
@@ -130,6 +145,7 @@ namespace PaperSeizerStone.Presentation
                 definition == null ? Color.white : definition.FaceColor,
                 definition == null ? "" : definition.DisplayName,
                 definition == null ? "" : definition.Description);
+            SetTag(Known ? card.Tag : CardTag.None, definition == null ? null : definition.Appearance);
             ApplyColors();
             bool known = card.Gesture.HasValue;
             bool showText = definition == null || definition.ShowText;
@@ -158,8 +174,9 @@ namespace PaperSeizerStone.Presentation
 
         public void SetHitbox(bool enabled) { if (hitbox != null) hitbox.enabled = enabled; }
 
-        public void DisplayShop(CardDefinition definition, bool clickable)
+        public void DisplayShop(CardDefinition definition, bool clickable, CardTag tag = CardTag.None, string recordId = null)
         {
+            if (feedback != null) feedback.ClearImmediately();
             Known = true;
             PreviewArtwork = definition.Artwork;
             PreviewDescription = definition.DisplayName + "\n" + definition.Description;
@@ -168,6 +185,7 @@ namespace PaperSeizerStone.Presentation
             visual.localRotation = visualRotation;
             visual.localScale = visualScale;
             CardId = 0;
+            visualSeed = CardTags.VisualSeed(recordId);
             Owner = Side.Player;
             IsOnBoard = false;
             CanDrag = false;
@@ -178,6 +196,7 @@ namespace PaperSeizerStone.Presentation
             hasDisplay = true;
             ApplyBack(Side.Player);
             ApplyArtwork(definition.Artwork, definition.FaceColor, definition.DisplayName, definition.Description);
+            SetTag(tag, definition.Appearance);
             SetVisibility(true, definition.ShowText);
             highlighted = false;
             ApplyColors();
@@ -188,6 +207,9 @@ namespace PaperSeizerStone.Presentation
         {
             EnsureProperties();
             faceColor = color;
+            PreviewName = label;
+            PreviewRulesDescription = description;
+            baseDescription = label + "\n" + description;
             // Clear the previous pooled card's artwork, including art-less transformations.
             bool hasArtwork = texture != null;
             if (!hasArtwork) texture = Texture2D.whiteTexture;
@@ -246,6 +268,13 @@ namespace PaperSeizerStone.Presentation
             faceProperties.SetColor("_Color", f);
             backProperties.SetColor("_BaseColor", b);
             backProperties.SetColor("_Color", b);
+            faceProperties.SetVector("_TagData", tagData);
+            faceProperties.SetColor("_TagColor", tagColor);
+            faceProperties.SetVector("_TagArtworkRect", tagRect);
+            ghostProperties.SetVector("_TagData", tagData);
+            ghostProperties.SetColor("_TagColor", tagColor);
+            ghostProperties.SetVector("_TagArtworkRect", tagRect);
+            ghostProperties.SetFloat("_ArtworkStrength", PreviewArtwork != null ? 1f : 0f);
             face.SetPropertyBlock(faceProperties);
             back.SetPropertyBlock(backProperties);
             Color g = faceColor;
@@ -257,10 +286,67 @@ namespace PaperSeizerStone.Presentation
             if (ghostEffectText != null) ghostEffectText.alpha = privatePreviewOpacity;
         }
 
+        public void SetTag(CardTag tag, CardAppearanceDefinition appearance = null)
+        {
+            EnsureProperties();
+            Tag = tag;
+            if (appearance != null) tagRect = appearance.EngravingRect;
+            CardTagAppearance entry = tagCatalog != null ? tagCatalog.Find(tag) : null;
+            tagData = entry == null ? Vector4.zero : new Vector4((int)tag, entry.strength, (visualSeed % 997) * 0.0137f, entry.patternScale);
+            tagColor = entry == null ? Color.white : entry.color;
+            TagDescription = entry == null ? "" : entry.displayName + "刻印：" + entry.description;
+            PreviewDescription = baseDescription + (string.IsNullOrEmpty(TagDescription) ? "" : "\n\n" + TagDescription);
+            ApplyColors();
+        }
+
+        public void CopyTagTo(Material material)
+        {
+            material.SetVector("_TagData", tagData);
+            material.SetColor("_TagColor", tagColor);
+            material.SetVector("_TagArtworkRect", tagRect);
+        }
+
+        // Only a visual rotation; never changes public/reveal state in the rules.
+        public IEnumerator Engrave(CardTag tag, float seconds)
+        {
+            bool applied = false;
+            SetHighlight(false);
+            if (feedback != null) feedback.ClearImmediately();
+            yield return DOTween.To(() => 0f, angle =>
+            {
+                visual.localRotation = visualRotation * Quaternion.AngleAxis(angle, Vector3.forward);
+                SetVisibility(angle < 90f || angle > 270f, displayedShowText);
+                if (!applied && angle >= 180f) { applied = true; SetTag(tag); }
+            }, 360f, seconds).SetTarget(visual).SetEase(Ease.InOutSine).WaitForCompletion();
+            visual.localRotation = visualRotation;
+            if (!applied) SetTag(tag);
+            SetVisibility(true, displayedShowText);
+        }
+
         public void SetHighlight(bool value)
         {
             highlighted = value;
             if (faceProperties != null) ApplyColors();
+        }
+
+        public void SetOutcomeHint(int result) { if (feedback != null) feedback.SetOutcome(result, CardId); }
+        public void SuppressFeedback(bool value) { if (feedback != null) feedback.SetSuppressed(value); }
+        public void FlashAbility() { if (feedback != null) feedback.FlashAbility(); }
+        public void ClearFeedback() { if (feedback != null) feedback.ClearImmediately(); }
+
+        public void PresentScore(int points, Camera camera)
+        {
+            if (points == 0) return;
+            visual.DOKill();
+            visual.localScale = visualScale;
+            float scale = feedback != null ? feedback.ScoreScale : 1.09f;
+            float rise = feedback != null ? feedback.RiseSeconds : 0.12f;
+            float fall = feedback != null ? feedback.ReturnSeconds : 0.2f;
+            DOTween.Sequence()
+                .SetTarget(visual)
+                .Append(visual.DOScale(visualScale * scale, rise).SetEase(Ease.OutCubic))
+                .Append(visual.DOScale(visualScale, fall).SetEase(Ease.InOutSine));
+            if (feedback != null) feedback.ShowScore(points, camera);
         }
 
         public void MoveTo(Vector3 position, Quaternion rotation, float duration)
@@ -285,12 +371,17 @@ namespace PaperSeizerStone.Presentation
 
         public void ResetForPool()
         {
+            if (feedback != null) feedback.ClearImmediately();
             flipTween?.Kill();
             hasDisplay = false;
             privatePreviewEligible = false;
             Known = false;
             PreviewArtwork = null;
             PreviewDescription = "";
+            baseDescription = "";
+            PreviewName = "";
+            PreviewRulesDescription = "";
+            SetTag(CardTag.None);
             transform.DOKill();
             visual.DOKill();
             visual.localRotation = visualRotation;

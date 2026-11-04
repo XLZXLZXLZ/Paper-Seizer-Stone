@@ -53,6 +53,7 @@ namespace PaperSeizerStone.InputControl
             controller.CameraRig.SetPrecisionMode(dragging != null);
             if (dragging != null)
             {
+                controller.View.SetHoveredPlayerCard(null);
                 SetHoveredDeck(null);
                 if (preview != null) preview.Hide();
                 dragging.transform.position = Vector3.Lerp(dragging.transform.position, DragPosition() + grabOffset,
@@ -78,6 +79,7 @@ namespace PaperSeizerStone.InputControl
                 controller.View.WantsHandExpanded(Input.mousePosition));
             RaycastHit hoverHit = default;
             bool hasHover = cursorInside && controller.CanInteract && Hit(out hoverHit);
+            controller.View.SetHoveredPlayerCard(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null);
             if (preview != null)
                 preview.Show(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null, Input.mousePosition);
             TableTarget hoverTarget = hasHover && controller.CanCheatDraw
@@ -195,12 +197,14 @@ namespace PaperSeizerStone.InputControl
             if (!hasFocus)
             {
                 SetHoveredDeck(null);
+                if (controller != null && controller.View != null) controller.View.SetHoveredPlayerCard(null);
                 if (preview != null) preview.Hide();
                 CancelDrag();
             }
         }
         private void OnDisable()
         {
+            if (controller != null && controller.View != null) controller.View.SetHoveredPlayerCard(null);
             SetHoveredDeck(null);
             if (preview != null) preview.Hide();
             if (controller != null && controller.View != null) CancelDrag();

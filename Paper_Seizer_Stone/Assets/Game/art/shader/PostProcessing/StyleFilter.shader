@@ -9,6 +9,8 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             float4 _StyleSourceTexelSize;
             float4 _ShotImpact;
+            float4 _OpeningBlur;
+            TEXTURE2D_X(_OpeningBlurTexture);
             float4 _Style, _Print, _Surface, _Grade, _Vignette;
             float4 _InkColor, _ShadowColor, _HighlightColor, _VignetteColor;
             float _SplitTone;
@@ -29,10 +31,19 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
                 return SRGBToLinear(max(c, 0));
                 #endif
             }
-            float3 SampleDisplay(float2 uv)
+            float4 SampleScene(float2 uv)
             {
                 float2 edge = abs(_StyleSourceTexelSize.xy) * 0.5;
-                return ToDisplay(SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, clamp(uv, edge, 1-edge)).rgb);
+                uv = clamp(uv, edge, 1-edge);
+                float4 source = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
+                [branch] if (_OpeningBlur.z > 0)
+                    source.rgb = lerp(source.rgb,
+                        SAMPLE_TEXTURE2D_X(_OpeningBlurTexture, sampler_LinearClamp, uv).rgb, _OpeningBlur.z);
+                return source;
+            }
+            float3 SampleDisplay(float2 uv)
+            {
+                return ToDisplay(SampleScene(uv).rgb);
             }
             float Hash(float2 p)
             {
@@ -78,7 +89,7 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
                     uv.x += (Hash(float2(stripe, floor(_Time.y * 48))) - 0.5) * 2 * _ShotImpact.x;
                     uv = saturate(uv);
                 }
-                float4 source = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
+                float4 source = SampleScene(uv);
                 float3 c = ToDisplay(source.rgb);
                 [branch] if (_Surface.x > 0.0001) c = lerp(c, Oil(uv), _Surface.x);
                 c = ToDisplay(ToOutput(c) * exp2(_Grade.x));
@@ -133,6 +144,25 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 return SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, input.texcoord);
             }
+            float4 BlurOpening(float2 uv, float2 stride)
+            {
+                float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv) * 0.227027;
+                color += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + stride * 1.384615) * 0.316216;
+                color += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv - stride * 1.384615) * 0.316216;
+                color += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv + stride * 3.230769) * 0.070270;
+                color += SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv - stride * 3.230769) * 0.070270;
+                return color;
+            }
+            float4 OpeningHorizontal(Varyings input) : SV_Target
+            {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                return BlurOpening(input.texcoord, float2(_OpeningBlur.x, 0));
+            }
+            float4 OpeningVertical(Varyings input) : SV_Target
+            {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                return BlurOpening(input.texcoord, float2(0, _OpeningBlur.y));
+            }
         ENDHLSL
         Pass
         {
@@ -152,6 +182,26 @@ Shader "Hidden/PaperSeizerStone/StyleFilter"
             #pragma target 3.5
             #pragma vertex Vert
             #pragma fragment CopyFragment
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "OpeningBlurHorizontal"
+            ZTest Always ZWrite Off Cull Off
+            HLSLPROGRAM
+            #pragma target 3.5
+            #pragma vertex Vert
+            #pragma fragment OpeningHorizontal
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "OpeningBlurVertical"
+            ZTest Always ZWrite Off Cull Off
+            HLSLPROGRAM
+            #pragma target 3.5
+            #pragma vertex Vert
+            #pragma fragment OpeningVertical
             ENDHLSL
         }
     }

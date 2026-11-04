@@ -35,6 +35,9 @@ namespace PaperSeizerStone.Flow
         private bool busy = true;
         private bool burningDeck;
         private bool inspectingDeck;
+        private bool engravingDeck;
+        public CardTagCatalog Engravings => definition.Shop.Engravings;
+        public CardTag AvailableEngraving => adventure == null ? CardTag.None : adventure.EngravingOffer;
         private int actualSeed;
         private string initializationError;
         public string InitializationError => initializationError;
@@ -51,7 +54,8 @@ namespace PaperSeizerStone.Flow
             && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
         public bool CanShopInteract => !busy && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanDeckTableInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
-        public bool CanBurnInteract => CanDeckTableInteract && !inspectingDeck;
+        public bool CanBurnInteract => CanDeckTableInteract && !inspectingDeck && !engravingDeck;
+        public bool CanEngraveInteract => CanDeckTableInteract && engravingDeck;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
             || (engine.State.Phase == BattlePhase.PlayerCheat && engine.State.Get(Side.Enemy).Bullets < BasicRules.Chambers));
 
@@ -76,6 +80,7 @@ namespace PaperSeizerStone.Flow
             }
             catch (Exception exception)
             {
+                if (cameraRig != null && cameraRig.Opening != null) cameraRig.Opening.Cancel();
                 initializationError = exception.Message;
                 Debug.LogException(exception, this);
                 return;
@@ -91,10 +96,10 @@ namespace PaperSeizerStone.Flow
             tableView.ResetEncounter(currentEnemy);
         }
 
-        private IEnumerator MoveBattle(bool enter)
+        private IEnumerator MoveBattle(bool enter, bool showHud = true)
         {
             if (!enter) tableView.PrepareExit();
-            yield return enter ? battlePanel.Show() : battlePanel.Hide();
+            yield return enter ? battlePanel.Show(showHud: showHud) : battlePanel.Hide();
             yield return new WaitForSeconds(phasePause);
         }
 
@@ -108,8 +113,27 @@ namespace PaperSeizerStone.Flow
         {
             AudioManager.SetMusic(MusicContext.Battle);
             busy = true;
-            yield return MoveBattle(true);
+            OpeningSequence opening = cameraRig.Opening;
+            bool playOpening = opening != null && opening.IsPending;
+            try
+            {
+                yield return MoveBattle(true, showHud: !playOpening);
+                if (playOpening)
+                {
+                    yield return opening.Play();
+                    yield return battlePanel.ShowHud();
+                }
+            }
+            finally
+            {
+                if (playOpening && opening != null) opening.Cancel();
+            }
             yield return BeginRound();
+        }
+
+        private void OnDisable()
+        {
+            if (cameraRig != null && cameraRig.Opening != null) cameraRig.Opening.Cancel();
         }
 
         private IEnumerator BeginRound()
@@ -255,7 +279,8 @@ namespace PaperSeizerStone.Flow
         {
             BattleObservation outcome = engine.Observe(Side.Player);
             adventure.FinishBattle(outcome, outcome.PlayerWon
-                ? definition.Shop.CreateStock(unchecked(actualSeed ^ 15485863)) : new List<ShopOffer>());
+                ? definition.Shop.CreateStock(unchecked(actualSeed ^ 15485863)) : new List<ShopOffer>(),
+                outcome.PlayerWon ? definition.Shop.CreateEngraving(adventure.EncounterIndex, unchecked(actualSeed ^ 32452843)) : CardTag.None);
             BattleFinished?.Invoke(outcome);
             if (!outcome.PlayerWon)
             {
@@ -310,6 +335,31 @@ namespace PaperSeizerStone.Flow
             shopView.Notify("选中的牌已烧毁。可以继续整备，或前往下一场战斗。");
         }
 
+        public void OpenEngravingTable()
+        {
+            if (AvailableEngraving != CardTag.None) OpenDeckTable(false, true);
+        }
+
+        public void EngraveCard(string recordId, CardTag tag)
+        {
+            if (!CanEngraveInteract) return;
+            CardTagAppearance entry = Engravings.Find(tag);
+            if (entry == null) { burnView.Notify("请选择有效刻印。"); return; }
+            if (!adventure.TryEngrave(recordId, tag, entry.price, out string error))
+            { burnView.Notify(error); return; }
+            busy = true;
+            burnView.SetInteractable(false);
+            StartCoroutine(CompleteEngraving(tag, entry.price));
+        }
+
+        private IEnumerator CompleteEngraving(CardTag tag, int price)
+        {
+            yield return burnView.Engrave(tag, price);
+            yield return new WaitForSeconds(actionPause);
+            busy = false;
+            burnView.Refresh();
+        }
+
         public void OpenBurnTable()
         {
             OpenDeckTable(false);
@@ -320,21 +370,22 @@ namespace PaperSeizerStone.Flow
             OpenDeckTable(true);
         }
 
-        private void OpenDeckTable(bool inspectOnly)
+        private void OpenDeckTable(bool inspectOnly, bool engrave = false)
         {
             if (!CanShopInteract) return;
             busy = true;
             shopView.SetInteractable(false);
-            StartCoroutine(EnterBurnTable(inspectOnly));
+            StartCoroutine(EnterBurnTable(inspectOnly, engrave));
         }
 
-        private IEnumerator EnterBurnTable(bool inspectOnly)
+        private IEnumerator EnterBurnTable(bool inspectOnly, bool engrave)
         {
             yield return shopView.Hide(hideRug: false);
             yield return new WaitForSeconds(phasePause);
             burningDeck = true;
             inspectingDeck = inspectOnly;
-            burnView.Prepare(adventure, inspectOnly);
+            engravingDeck = engrave;
+            burnView.Prepare(adventure, inspectOnly, engrave);
             yield return burnView.Show();
             yield return new WaitForSeconds(phasePause);
             busy = false;
@@ -355,6 +406,7 @@ namespace PaperSeizerStone.Flow
             yield return new WaitForSeconds(phasePause);
             burningDeck = false;
             inspectingDeck = false;
+            engravingDeck = false;
             shopView.Prepare(adventure);
             yield return shopView.Show(showRug: false);
             yield return new WaitForSeconds(phasePause);

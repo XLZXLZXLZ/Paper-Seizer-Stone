@@ -32,6 +32,7 @@ namespace PaperSeizerStone.Battle
         public int Life { get; private set; }
         public int Wallet { get; private set; }
         public int EncounterIndex { get; private set; }
+        public CardTag EngravingOffer { get; private set; }
 
         public AdventureState(IReadOnlyList<DeckCardRecord> startingDeck, int life)
         {
@@ -42,14 +43,14 @@ namespace PaperSeizerStone.Battle
             {
                 if (card == null || string.IsNullOrWhiteSpace(card.RecordId) || !ids.Add(card.RecordId))
                     throw new ArgumentException("初始牌组包含无效或重复的持有记录。");
-                deck.Add(new DeckCardRecord(card.RecordId, card.DefinitionId));
+                deck.Add(new DeckCardRecord(card.RecordId, card.DefinitionId, card.Tag));
             }
             Life = life;
             Deck = deck.AsReadOnly();
             Offers = offers.AsReadOnly();
         }
 
-        public void FinishBattle(BattleObservation result, IReadOnlyList<ShopOffer> stock)
+        public void FinishBattle(BattleObservation result, IReadOnlyList<ShopOffer> stock, CardTag engraving = CardTag.None)
         {
             if (Phase != AdventurePhase.Battle || result.Phase != BattlePhase.BattleEnd)
                 throw new InvalidOperationException("当前不能重复结算战斗。");
@@ -58,6 +59,7 @@ namespace PaperSeizerStone.Battle
             Wallet = checked(Wallet + result.RewardChips);
             offers.Clear();
             foreach (ShopOffer item in stock) offers.Add(new ShopOffer(item.DefinitionId, item.Price));
+            EngravingOffer = EncounterIndex > 0 && CardTags.IsEngraving(engraving) ? engraving : CardTag.None;
             Phase = AdventurePhase.Shop;
         }
 
@@ -93,10 +95,26 @@ namespace PaperSeizerStone.Battle
             return true;
         }
 
+        public bool TryEngrave(string recordId, CardTag tag, int price, out string error)
+        {
+            error = null;
+            DeckCardRecord card = deck.Find(item => item.RecordId == recordId);
+            if (Phase != AdventurePhase.Shop || card == null) error = "请先选择牌组中的一张牌。";
+            else if (EngravingOffer == CardTag.None || tag != EngravingOffer) error = "本次商店不提供这种刻印。";
+            else if (!CardTags.IsEngraving(tag) || price < 0) error = "刻印配置无效。";
+            else if (card.Tag == tag) error = "这张牌已拥有相同刻印。";
+            else if (Wallet < price) error = "筹码不足，无法刻印。";
+            if (error != null) return false;
+            Wallet -= price;
+            card.Tag = tag;
+            return true;
+        }
+
         public void BeginNextBattle()
         {
             if (Phase != AdventurePhase.Shop) throw new InvalidOperationException("当前不能离开商店。");
             offers.Clear();
+            EngravingOffer = CardTag.None;
             EncounterIndex++;
             Phase = AdventurePhase.Battle;
         }

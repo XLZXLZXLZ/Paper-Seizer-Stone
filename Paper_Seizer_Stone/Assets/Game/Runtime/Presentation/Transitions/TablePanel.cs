@@ -36,17 +36,28 @@ namespace PaperSeizerStone.Presentation
             IsVisible = false;
         }
 
-        public IEnumerator Show(Transform excludedWorldRoot = null)
+        public IEnumerator Show(Transform excludedWorldRoot = null, bool showHud = true, Transform secondaryExcludedWorldRoot = null)
         {
             if (excludedWorldRoot != null) excludedWorldRoot.gameObject.SetActive(false);
+            if (secondaryExcludedWorldRoot != null) secondaryExcludedWorldRoot.gameObject.SetActive(false);
             SetContent(true);
-            Coroutine worldMotion = StartCoroutine(world.Play(true, excludedWorldRoot));
-            Coroutine hudMotion = hudFade != null ? StartCoroutine(hudFade.Play(true))
+            Coroutine worldMotion = StartCoroutine(world.Play(true, excludedWorldRoot, secondaryExcludedWorldRoot));
+            Coroutine hudMotion = !showHud ? null : hudFade != null ? StartCoroutine(hudFade.Play(true))
                 : hud != null ? StartCoroutine(hud.Play(true)) : null;
             yield return worldMotion;
             if (hudMotion != null) yield return hudMotion;
             IsVisible = true;
-            if (hudFade != null) hudFade.SetInteractable(true);
+            if (showHud && hudFade != null) hudFade.SetInteractable(true);
+        }
+
+        public IEnumerator ShowHud()
+        {
+            if (hudFade != null)
+            {
+                yield return hudFade.Play(true);
+                hudFade.SetInteractable(true);
+            }
+            else if (hud != null) yield return hud.Play(true);
         }
 
         public IEnumerator Hide()

@@ -12,6 +12,9 @@ namespace PaperSeizerStone.Configuration
         [Tooltip("素材已经包含名称和说明时关闭额外 TMP 文字。缺少正面图片时自动显示文字。")]
         [SerializeField] private bool artworkIncludesText = true;
         [SerializeField] private Color faceTint = Color.white;
+        [Tooltip("刻印处理区域：UV 左、下、右、上；保护图片内的名称与说明。")]
+        [SerializeField] private Vector4 engravingRect = new Vector4(0.07f, 0.19f, 0.93f, 0.78f);
+        public Vector4 EngravingRect => engravingRect;
 
         [Header("卡背（同一牌组请使用统一配置）")]
         [SerializeField] private Texture2D backArtwork;

@@ -36,11 +36,13 @@ namespace PaperSeizerStone.Battle
     {
         public string RecordId;
         public string DefinitionId;
+        public CardTag Tag;
 
-        public DeckCardRecord(string recordId, string definitionId)
+        public DeckCardRecord(string recordId, string definitionId, CardTag tag = CardTag.None)
         {
             RecordId = recordId;
             DefinitionId = definitionId;
+            Tag = tag;
         }
     }
 
@@ -50,6 +52,7 @@ namespace PaperSeizerStone.Battle
     {
         public int InstanceId { get; }
         public string SourceRecordId { get; }
+        public CardTag Tag { get; }
         public Side OriginalSide { get; }
         public CardSpec Definition { get; internal set; }
         public bool IsRevealed { get; internal set; }
@@ -59,6 +62,7 @@ namespace PaperSeizerStone.Battle
         {
             InstanceId = id;
             SourceRecordId = record.RecordId;
+            Tag = record.Tag;
             Definition = definition;
             OriginalSide = side;
         }

@@ -21,10 +21,14 @@ namespace PaperSeizerStone.Battle
             return ids.GetRange(0, BasicRules.Slots).ToArray();
         }
 
-        private static float Value(CardSpec own, CardSpec opponent)
+        private static float Value(ObservedCard ownCard, ObservedCard opponentCard, bool afterSwap = false)
         {
-            // Unknown cards contribute neutral expected score difference, never their real gesture.
-            return own != null && opponent != null ? CardRules.Points(own, CardRules.Compare(own, opponent)) - CardRules.Points(opponent, CardRules.Compare(opponent, own)) : 0;
+            CardSpec own = afterSwap ? AfterSwap(ownCard?.Spec) : ownCard?.Spec;
+            CardSpec opponent = opponentCard?.Spec;
+            // Tags, like identities, come only from the filtered observation.
+            if (own == null || opponent == null) return 0;
+            int result = CardRules.Compare(own, opponent);
+            return CardRules.Points(own, result, ownCard.Tag) - CardRules.Points(opponent, -result, opponentCard.Tag);
         }
 
         private static CardSpec AfterSwap(CardSpec card)
@@ -49,8 +53,8 @@ namespace PaperSeizerStone.Battle
                 {
                     ObservedCard second = own.Board[b];
                     if (second == null || forbidden.Contains(second.Id)) continue;
-                    float gain = Value(AfterSwap(second.Spec), opponent.Board[a]?.Spec) + Value(AfterSwap(first.Spec), opponent.Board[b]?.Spec)
-                        - Value(first.Spec, opponent.Board[a]?.Spec) - Value(second.Spec, opponent.Board[b]?.Spec);
+                    float gain = Value(second, opponent.Board[a], true) + Value(first, opponent.Board[b], true)
+                        - Value(first, opponent.Board[a]) - Value(second, opponent.Board[b]);
                     if (gain > bestGain)
                     {
                         bestGain = gain;
@@ -60,7 +64,7 @@ namespace PaperSeizerStone.Battle
                 foreach (ObservedCard hand in own.Hand)
                 {
                     if (forbidden.Contains(hand.Id)) continue;
-                    float gain = Value(AfterSwap(hand.Spec), opponent.Board[a]?.Spec) - Value(first.Spec, opponent.Board[a]?.Spec);
+                    float gain = Value(hand, opponent.Board[a], true) - Value(first, opponent.Board[a]);
                     if (gain > bestGain)
                     {
                         bestGain = gain;

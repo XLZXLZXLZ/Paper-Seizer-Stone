@@ -24,6 +24,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private CardHoverPreview previewPrefab;
         [SerializeField, Min(0.05f)] private float transactionDuration = 0.45f;
         [SerializeField, Min(0)] private float paymentStagger = 0.05f;
+        [SerializeField] private EngravingStationView engravingStation;
         private BattleController controller;
         private AdventureState adventure;
         private Dictionary<string, CardDefinition> catalog;
@@ -32,7 +33,7 @@ namespace PaperSeizerStone.Presentation
 
         public void Initialize(BattleController owner, Dictionary<string, CardDefinition> cards)
         {
-            if (panel == null || rug == null || walletArea == null || paymentExit == null
+            if (engravingStation == null || owner.Engravings == null || panel == null || rug == null || walletArea == null || paymentExit == null
                 || deckAnchor == null || deckPile == null || continueBell == null || cardStyle == null
                 || offers == null || offers.Length < 3 || previewPrefab == null)
                 throw new InvalidOperationException("请完整绑定商店的商品、价格、火盆、卡组与铜铃。");
@@ -57,7 +58,7 @@ namespace PaperSeizerStone.Presentation
         public IEnumerator Show(bool showRug = true)
         {
             if (showRug) yield return rug.Show();
-            yield return panel.Show();
+            yield return panel.Show(adventure.EngravingOffer == CardTag.None ? engravingStation.transform : null);
             float delay = walletArea.SetCount(adventure.Wallet);
             if (delay > 0) yield return new WaitForSeconds(delay);
         }
@@ -77,6 +78,7 @@ namespace PaperSeizerStone.Presentation
         public void Refresh()
         {
             if (adventure == null) return;
+            engravingStation.Entrance(controller.Engravings, adventure.EngravingOffer, adventure.Wallet);
             deckPile.SetCount(adventure.Deck.Count);
             for (int i = 0; i < offers.Length; i++)
             {
@@ -93,6 +95,7 @@ namespace PaperSeizerStone.Presentation
         public void SetInteractable(bool value)
         {
             interactable = value;
+            if (!value) engravingStation.SetHover(false);
             continueBell.SetAvailable(value);
             if (!value)
             {
@@ -104,6 +107,7 @@ namespace PaperSeizerStone.Presentation
         private void Update()
         {
             if (controller == null || !interactable || !controller.CanShopInteract) return;
+            engravingStation.SetHover(false);
             if (preview != null) preview.Hide();
             deckPile.SetHoverOutline(false);
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
@@ -112,10 +116,12 @@ namespace PaperSeizerStone.Presentation
             ShopTableAction action = hit.collider.GetComponentInParent<ShopTableAction>();
             if (action != null)
             {
+                if (action.Kind == ShopTableActionKind.Engrave) engravingStation.SetHover(true);
                 if (action.Kind == ShopTableActionKind.InspectDeck) deckPile.SetHoverOutline(true);
                 if (!Input.GetMouseButtonDown(0)) return;
                 switch (action.Kind)
                 {
+                    case ShopTableActionKind.Engrave: controller.OpenEngravingTable(); break;
                     case ShopTableActionKind.Burn: controller.OpenBurnTable(); break;
                     case ShopTableActionKind.InspectDeck: controller.OpenDeckInspection(); break;
                     case ShopTableActionKind.Continue:

@@ -12,6 +12,7 @@ namespace PaperSeizerStone.Presentation
     {
         [SerializeField] private Camera sceneCamera;
         [SerializeField] private BattleCameraDefinition definition;
+        [SerializeField] private OpeningSequence openingSequence;
         [SerializeField, Tooltip("主相机是否显示完整玩家角色；第一人称默认关闭。")] private bool showPlayerModel;
         [SerializeField, Tooltip("主相机是否显示第一人称手臂；默认开启，与完整角色显示独立控制。")] private bool showPlayerHands = true;
         [Header("第一人称微动")]
@@ -175,6 +176,7 @@ namespace PaperSeizerStone.Presentation
         }
         public Camera Camera => sceneCamera;
         public BattleCameraDefinition Definition => definition;
+        public OpeningSequence Opening => openingSequence;
 
         public void Initialize()
         {
@@ -182,6 +184,7 @@ namespace PaperSeizerStone.Presentation
             ApplyPlayerVisibility();
             if (sceneCamera == null || definition == null)
                 throw new System.InvalidOperationException("请配置相机预制体中的 MainCamera 与相机配置 SO。");
+            if (openingSequence != null) openingSequence.SetTargetDisplay(sceneCamera.targetDisplay);
             Pose target = GetWorldPose(BattleCameraPose.Table);
             basePosition = target.position;
             baseRotation = target.rotation;
@@ -303,6 +306,7 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
+            if (openingSequence != null) openingSequence.Cancel();
             ResetShotEffects();
             DOTween.Kill(this);
             transitioning = false;
