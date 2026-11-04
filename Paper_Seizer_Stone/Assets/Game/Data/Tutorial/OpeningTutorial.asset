@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f72f3a381845ee389e10c8d9b1dc54b, type: 3}
+  m_Name: OpeningTutorial
+  m_EditorClassIdentifier:
+  sequences:
+  - node: 0
+    lines:
+    - text: "醒了？欢迎来到牌桌。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 0
+    page: 0
+  - node: 1
+    lines:
+    - text: "先抽四张牌。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 0
+    page: 0
+  - node: 2
+    lines:
+    - text: "我可以允许你再抽一张。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 0
+    page: 0
+  - node: 3
+    lines:
+    - text: "选好四张，摆到台上去。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 0
+    page: 0
+  - node: 4
+    lines:
+    - text: "摆好了就按铃。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 0
+    page: 0
+  - node: 5
+    lines:
+    - text: "你这就打算开牌了？"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    - text: "别急，我们赌点<shake>更有意思的</shake>。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 1
+    page: 1
+  - node: 6
+    lines:
+    - text: "你还活着啊。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    - text: "<shake>再挨一枪</shake>，你就真完蛋了。"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 1
+    openManual: 1
+    page: 2
+  - node: 7
+    lines:
+    - text: "<shake a=0.5>呃，好吧。</shake>"
+      voice: {fileID: 0}
+      characterSeconds: 0.055
+      holdSeconds: 0.8
+    openManual: 0
+    page: 0
+  - node: 8
+    lines: []
+    openManual: 1
+    page: 3
+  - node: 9
+    lines: []
+    openManual: 1
+    page: 4
+  - node: 10
+    lines: []
+    openManual: 1
+    page: 0
+  pages:
+  - page: 0
+    title: "基础对抗"
+    body: "把手牌拖到己方四个槽位，每个槽位放一张。第五张留在手里，之后可以用来换牌。\n\n双方暗牌逐步揭开，四组对位分别比大小：石头胜剪刀，剪刀胜布，布胜石头。同类平局。\n\n基础得分：胜利 +2，平局 +1，失败 +0。特殊牌按牌面说明结算，最后比较双方总分。\n\n悬停己方已知牌可查看牌面。摆好四张后按铜铃，或按回车 / 空格确认。"
+  - page: 1
+    title: "作弊与代价"
+    body: "前三次揭牌后，你和对手各有一次作弊机会；第四次揭完，直接计分。每次只能选择一项：\n\n• 拖动己方场上牌换位，或用手牌替换场上牌：给对手加 1 发子弹。\n• 点击己方牌库额外抽一张：给对手加 2 发子弹。\n• 按铜铃 / 回车 / 空格：跳过。\n\n对方弹巢满了就不能作弊，空位不足两格不能抽牌。明牌也能换，已触发的揭牌能力不会重复触发。\n\n总分高者开枪，平分双方开枪。作弊加的是对手的子弹：赢下总分，才能避开这份风险。"
+  - page: 2
+    title: "生命与射击"
+    body: "总分高的一方向对方开一枪；同分时双方同时开枪。输掉一轮不一定中弹，空枪不会扣生命。\n\n左轮有 6 个弹巢，命中概率 = 当前子弹数 ÷ 6。每回合开始，双方子弹重置为 2 发。\n\n中弹失去 1 条生命。玩家初始有 2 条生命，剩余生命会带入下一场战斗；普通敌人通常只有 1 条。\n\n玩家生命归零，本次冒险结束；双方同时死亡也算失败。场上牌回合结束后弃置，手牌保留，后续回合补抽四张。"
+  - page: 3
+    title: "商店与整备"
+    body: "胜利后，桌面剩余奖池变成你的钱包。未花完的筹码、生命和牌组会保留到下一战。\n\n• 点击商品购买，价格写在商品前。悬停卡牌查看能力，买下后加入持有牌组。\n• 点击实体卡组，摊开检视全部持有牌。\n• 点击火盆进入烧牌：选一张牌，再点火盆支付 {burnPrice} 筹码永久移除；至少保留 {minimumDeck} 张。\n\n选牌界面可点“返回商店”或按 Esc。往返不会刷新商品；整备完成后，按商店铜铃进入下一战。\n\n战斗每过一回合奖池减少一枚；奖池归零，战斗仍会继续。"
+  - page: 4
+    title: "刻印与标签"
+    body: "从第二次胜利后的商店开始提供刻印，每家商店只供应一种随机印版，价格以刻印台显示为准。\n\n点击刻印台摊开牌组，先选一张牌试看，再点击刻印槽支付并确认。动画完成后可以继续加工其它牌。\n\n每张牌只能有一个标签，新刻印会替换旧标签；已有相同标签时不会重复扣费。余额不足则不会成交。\n\n标签跨战斗保留，换位、回手和卡牌变形不会移除它。往返检视或烧牌不会更换印版。\n\n具体标签效果可悬停卡牌查看；按 Esc 或“返回商店”结束加工。"
+  speechBlips:
+  - {fileID: 8300000, guid: 5c757efcc7e75124969839e2eba406f1, type: 3}
+  - {fileID: 8300000, guid: dae937b9c13f5a5aafae689b68fde0fe, type: 3}
+  - {fileID: 8300000, guid: 934e30ed83e15722b5cb849903fd613c, type: 3}
+  - {fileID: 8300000, guid: 8101fa56633f5fc192ab96c98c8d9793, type: 3}
+  speechVolume: 0.35
+  blipPitch: {x: 0.88, y: 1.12}
+  blipInterval: 0.075

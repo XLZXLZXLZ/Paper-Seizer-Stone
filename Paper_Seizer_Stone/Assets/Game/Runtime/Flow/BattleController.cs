@@ -21,6 +21,7 @@ namespace PaperSeizerStone.Flow
         [SerializeField] private ShopTableView shopView;
         [SerializeField] private BurnTableView burnView;
         [SerializeField] private TablePanel battlePanel;
+        [SerializeField] private TutorialDirector tutorial;
         [Header("动画之间的留白")]
         [SerializeField, Min(0)] private float actionPause = 0.15f;
         [SerializeField, Min(0)] private float phasePause = 0.3f;
@@ -41,6 +42,9 @@ namespace PaperSeizerStone.Flow
         private int actualSeed;
         private string initializationError;
         public string InitializationError => initializationError;
+        public bool TutorialVisible => tutorial != null && tutorial.IsPresenting;
+        private bool TutorialBlocked => tutorial != null && tutorial.BlocksInput;
+        private bool previousTutorialBlocked;
 
         public event Action<BattleObservation> BattleFinished;
         public TabletopView View => tableView;
@@ -48,12 +52,12 @@ namespace PaperSeizerStone.Flow
         public BattleCameraRig CameraRig => cameraRig;
         public string EnemyName => currentEnemy == null ? "对手" : currentEnemy.DisplayName;
         public int EncounterNumber => adventure == null ? 1 : adventure.EncounterIndex + 1;
-        public bool CanInteract => !busy && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
+        public bool CanInteract => !busy && !TutorialBlocked && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
         public bool CanCheatDraw => CanInteract && engine.State.Phase == BattlePhase.PlayerCheat
             && engine.State.Get(Side.Enemy).Bullets + 2 <= BasicRules.Chambers
             && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
-        public bool CanShopInteract => !busy && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
-        public bool CanDeckTableInteract => !busy && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanShopInteract => !busy && !TutorialBlocked && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanDeckTableInteract => !busy && !TutorialBlocked && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanBurnInteract => CanDeckTableInteract && !inspectingDeck && !engravingDeck;
         public bool CanEngraveInteract => CanDeckTableInteract && engravingDeck;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
@@ -66,11 +70,12 @@ namespace PaperSeizerStone.Flow
                 if (definition == null) throw new InvalidOperationException("请在战斗控制器中配置战斗资源。");
                 adventure = definition.CreateAdventure();
                 if (cameraRig == null || tableView == null || cardPrefab == null || battleInput == null
-                    || shopView == null || burnView == null || battlePanel == null)
+                    || shopView == null || burnView == null || battlePanel == null || tutorial == null)
                     throw new InvalidOperationException("请在场景中绑定战斗、商店、烧牌 Panel、相机与输入组件。");
                 cameraRig.Initialize();
                 tableView.Initialize(definition, cardPrefab, cameraRig.Camera);
                 battleInput.Initialize(this);
+                tutorial.Initialize(definition.Shop);
                 shopView.gameObject.SetActive(true);
                 shopView.Initialize(this, definition.GetCardAssets());
                 burnView.gameObject.SetActive(true);
@@ -86,6 +91,40 @@ namespace PaperSeizerStone.Flow
                 return;
             }
             StartCoroutine(EnterEncounter());
+        }
+
+        private void Update()
+        {
+            if (adventure == null || !string.IsNullOrEmpty(initializationError)) return;
+            if (previousTutorialBlocked != TutorialBlocked)
+            {
+                previousTutorialBlocked = TutorialBlocked;
+                if (adventure.Phase == AdventurePhase.Shop)
+                {
+                    if (burningDeck) burnView.Refresh();
+                    else shopView.Refresh();
+                }
+            }
+            if (!busy && tutorial.ManualRequested)
+            {
+                busy = true;
+                battleInput.SuspendInteraction();
+                StartCoroutine(BrowseManual());
+            }
+        }
+
+        private IEnumerator BrowseManual()
+        {
+            try { yield return tutorial.OpenRequestedManual(); }
+            finally
+            {
+                busy = false;
+                if (adventure.Phase == AdventurePhase.Shop)
+                {
+                    if (burningDeck) burnView.Refresh();
+                    else shopView.Refresh();
+                }
+            }
         }
 
         private void ConfigureEncounter()
@@ -113,15 +152,12 @@ namespace PaperSeizerStone.Flow
         {
             AudioManager.SetMusic(MusicContext.Battle);
             busy = true;
-<<<<<<< HEAD
-            yield return MoveBattle(true);
-            while (!tableView.OpponentEntranceReady) yield return null;
-=======
             OpeningSequence opening = cameraRig.Opening;
             bool playOpening = opening != null && opening.IsPending;
             try
             {
                 yield return MoveBattle(true, showHud: !playOpening);
+                while (!tableView.OpponentEntranceReady) yield return null;
                 if (playOpening)
                 {
                     yield return opening.Play();
@@ -132,12 +168,14 @@ namespace PaperSeizerStone.Flow
             {
                 if (playOpening && opening != null) opening.Cancel();
             }
->>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
+            yield return tutorial.Play(TutorialNode.Greeting);
             yield return BeginRound();
         }
 
         private void OnDisable()
         {
+            StopAllCoroutines();
+            if (tutorial != null) tutorial.Cancel();
             if (cameraRig != null && cameraRig.Opening != null) cameraRig.Opening.Cancel();
         }
 
@@ -145,7 +183,14 @@ namespace PaperSeizerStone.Flow
         {
             busy = true;
             tableView.RestoreOpponentForNextRound();
-            yield return Play(engine.BeginRound());
+            bool firstDraw = !tutorial.HasPlayed(TutorialNode.PlaceCards);
+            yield return tutorial.Play(TutorialNode.DrawFour);
+            yield return Play(engine.BeginRound(), firstDraw);
+            if (firstDraw)
+            {
+                yield return tutorial.Play(TutorialNode.Basics);
+                yield return tutorial.Play(TutorialNode.PlaceCards);
+            }
             draftHand.Clear();
             draftHand.AddRange(engine.State.Get(Side.Player).Hand);
             Array.Clear(draftSlots, 0, draftSlots.Length);
@@ -153,21 +198,29 @@ namespace PaperSeizerStone.Flow
             busy = false;
         }
 
-        private IEnumerator Play(ActionResult result)
+        private IEnumerator Play(ActionResult result, bool introduceDraw = false)
         {
             if (!result.Success) throw new InvalidOperationException(result.Error);
+            int playerDraws = 0;
             for (int i = 0; i < result.Events.Count; i++)
             {
                 BattleEvent battleEvent = result.Events[i];
+                if (introduceDraw && battleEvent.Kind == BattleEventKind.CardDrawn && battleEvent.Side == Side.Player)
+                {
+                    if (playerDraws == 4) yield return tutorial.Play(TutorialNode.ExtraCard);
+                    playerDraws++;
+                }
                 if (battleEvent.Kind == BattleEventKind.ShotResolved)
                 {
                     var shots = new List<BattleEvent> { battleEvent };
                     while (i + 1 < result.Events.Count && result.Events[i + 1].Kind == BattleEventKind.ShotResolved)
                         shots.Add(result.Events[++i]);
                     bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
+                    bool enemyKilled = shots[shots.Count - 1].Snapshot.Enemy.Life <= 0;
+                    bool playerHurt = shots.Exists(shot => shot.Side == Side.Enemy && shot.Hit);
                     try
                     {
-                        yield return tableView.PresentShots(shots);
+                        yield return tableView.PresentShots(shots, () => tutorial.Play(TutorialNode.EnemyDeath));
                         if (!playerKilled && shots.Exists(shot => shot.Hit))
                         {
                             yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
@@ -179,12 +232,16 @@ namespace PaperSeizerStone.Flow
                     {
                         tableView.EndPostShotPresentation();
                     }
+                    // A simultaneous kill defers the entire hurt introduction, including its completion flag.
+                    if (playerHurt && !playerKilled && !enemyKilled)
+                        yield return tutorial.Play(TutorialNode.FirstHurt);
                 }
                 else
                 {
                     yield return tableView.Present(battleEvent);
                 }
                 yield return new WaitForSeconds(battleEvent.Kind == BattleEventKind.PhaseChanged ? phasePause : actionPause);
+                yield return tutorial.OpenRequestedManual();
             }
         }
 
@@ -225,6 +282,7 @@ namespace PaperSeizerStone.Flow
         private IEnumerator CommitAndReveal(ActionResult committed)
         {
             yield return Play(committed);
+            yield return tutorial.Play(TutorialNode.FirstBell);
             yield return RevealAndContinue();
         }
 
@@ -293,12 +351,15 @@ namespace PaperSeizerStone.Flow
                 yield break;
             }
             yield return new WaitForSeconds(victoryPause);
-            yield return MoveCamera(BattleCameraPose.Table);
             yield return MoveBattle(false);
+            yield return MoveCamera(BattleCameraPose.Shop);
             AudioManager.SetMusic(MusicContext.Shop);
             shopView.Prepare(adventure);
             yield return shopView.Show();
             yield return new WaitForSeconds(phasePause);
+            yield return tutorial.Play(TutorialNode.Shop);
+            if (adventure.EngravingOffer != CardTag.None) yield return tutorial.Play(TutorialNode.Engraving);
+            yield return tutorial.OpenRequestedManual();
             busy = false;
             shopView.Refresh();
         }
@@ -431,6 +492,7 @@ namespace PaperSeizerStone.Flow
         {
             yield return shopView.Hide();
             yield return new WaitForSeconds(phasePause);
+            yield return MoveCamera(BattleCameraPose.Table);
             adventure.BeginNextBattle();
             bool configured = true;
             try { ConfigureEncounter(); }
@@ -481,6 +543,11 @@ namespace PaperSeizerStone.Flow
                 if (IsLegalDrop(cardId, targetCard, target)) AudioManager.Play(AudioCue.CardPlace);
                 EditDraft(cardId, targetCard, target);
                 tableView.ShowDraft(draftHand, draftSlots);
+                if (!tutorial.HasPlayed(TutorialNode.BellPrompt) && Array.TrueForAll(draftSlots, id => id != 0))
+                {
+                    busy = true;
+                    StartCoroutine(PromptForBell());
+                }
                 return;
             }
             IReadOnlyList<int> board = engine.State.Get(Side.Player).Board;
@@ -500,6 +567,13 @@ namespace PaperSeizerStone.Flow
                 tableView.Notify("请将卡牌拖到己方槽位，或拖到要交换的那张手牌上。");
                 tableView.RestoreLayout();
             }
+        }
+
+        private IEnumerator PromptForBell()
+        {
+            yield return tableView.WaitForDraftPlacement();
+            yield return tutorial.Play(TutorialNode.BellPrompt);
+            busy = false;
         }
 
         private void EditDraft(int id, CardView targetCard, TableTarget target)

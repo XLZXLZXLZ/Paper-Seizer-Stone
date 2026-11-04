@@ -20684,10 +20684,6 @@ Cloth:
     second: {fileID: 3417339742655686350}
   - first: {fileID: 2480551432308528893}
     second: {fileID: 4872017687379191155}
-  - first: {fileID: 8150530925119741344}
-    second: {fileID: 0}
-  - first: {fileID: 5005764482059132986}
-    second: {fileID: 0}
   m_SelfCollisionDistance: 0
   m_SelfCollisionStiffness: 0
   m_SelfAndInterCollisionIndices: 

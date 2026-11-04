@@ -190,6 +190,7 @@ MonoBehaviour:
   shopView: {fileID: 309530341808307401}
   burnView: {fileID: 102172693}
   battlePanel: {fileID: 5158996577487676104}
+  tutorial: {fileID: 98100003}
   actionPause: 0.15
   phasePause: 0.3
   victoryPause: 0.8
@@ -2546,8 +2547,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f451dfcf5f08686d47e83e6ae25ad445, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< HEAD
-=======
 --- !u!1001 &98000001
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2577,4 +2576,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91d8651c1e674c9996ce3b65dcd62875, type: 3}
   m_Name:
   m_EditorClassIdentifier:
->>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
+--- !u!1001 &98100001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 11001, guid: 40216bac24605833b4d92611da6ef868, type: 3}
+      propertyPath: m_RootOrder
+      value: 61
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 40216bac24605833b4d92611da6ef868, type: 3}
+--- !u!224 &98100002 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 11001, guid: 40216bac24605833b4d92611da6ef868, type: 3}
+  m_PrefabInstance: {fileID: 98100001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &98100003 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 11006, guid: 40216bac24605833b4d92611da6ef868, type: 3}
+  m_PrefabInstance: {fileID: 98100001}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b17d304784e51299c6707eee1b7a0f3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:

@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.EventSystems;
 using PaperSeizerStone.Flow;
 using PaperSeizerStone.Presentation;
 
@@ -46,6 +47,7 @@ namespace PaperSeizerStone.InputControl
         private void Update()
         {
             if (controller == null || controller.Camera == null || controller.View == null) return;
+            if (!controller.CanDrag && dragging != null) CancelDrag();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (Application.isFocused && Input.GetKeyDown(KeyCode.F8)) controller.DebugBoostNextScore();
 #endif
@@ -53,6 +55,11 @@ namespace PaperSeizerStone.InputControl
             controller.CameraRig.SetPrecisionMode(dragging != null);
             if (dragging != null)
             {
+                if (Input.GetMouseButtonUp(0) && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                {
+                    CancelDrag();
+                    return;
+                }
                 controller.View.SetHoveredPlayerCard(null);
                 SetHoveredDeck(null);
                 if (preview != null) preview.Hide();
@@ -78,7 +85,8 @@ namespace PaperSeizerStone.InputControl
             controller.View.SetHandExpanded(controller.CanDrag && cursorInside &&
                 controller.View.WantsHandExpanded(Input.mousePosition));
             RaycastHit hoverHit = default;
-            bool hasHover = cursorInside && controller.CanInteract && Hit(out hoverHit);
+            bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            bool hasHover = cursorInside && !overUI && controller.CanInteract && Hit(out hoverHit);
             controller.View.SetHoveredPlayerCard(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null);
             if (preview != null)
                 preview.Show(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null, Input.mousePosition);
@@ -92,7 +100,7 @@ namespace PaperSeizerStone.InputControl
                 controller.ConfirmOrPass();
                 return;
             }
-            if (!Input.GetMouseButtonDown(0) || !Hit(out RaycastHit hit)) return;
+            if (overUI || !Input.GetMouseButtonDown(0) || !Hit(out RaycastHit hit)) return;
             CardView card = hit.collider.GetComponentInParent<CardView>();
             if (controller.CanDrag && card != null && card.CanDrag)
             {
@@ -121,6 +129,16 @@ namespace PaperSeizerStone.InputControl
             if (hoveredDeck != null) hoveredDeck.SetHoverOutline(false);
             hoveredDeck = deck;
             if (hoveredDeck != null) hoveredDeck.SetHoverOutline(true);
+        }
+
+        public void SuspendInteraction()
+        {
+            CancelDrag();
+            ClearHighlight();
+            SetHoveredDeck(null);
+            controller.View.SetHoveredPlayerCard(null);
+            controller.View.SetHandExpanded(false);
+            if (preview != null) preview.Hide();
         }
 
         private void CancelDrag()

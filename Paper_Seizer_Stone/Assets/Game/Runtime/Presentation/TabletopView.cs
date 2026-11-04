@@ -167,11 +167,8 @@ namespace PaperSeizerStone.Presentation
 
         public void PrepareExit()
         {
-<<<<<<< HEAD
             if (OpponentCombat != null) OpponentCombat.Cancel();
-=======
             SetHoveredPlayerCard(null);
->>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
             if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.Clear();
             foreach (CardView view in cards.Values)
@@ -566,7 +563,7 @@ namespace PaperSeizerStone.Presentation
             if (shotCameraRig != null) shotCameraRig.ShowPlayerHands = handsWereVisible;
         }
 
-        public IEnumerator PresentShots(IReadOnlyList<BattleEvent> shots)
+        public IEnumerator PresentShots(IReadOnlyList<BattleEvent> shots, Func<IEnumerator> onEnemyDeath = null)
         {
             Apply(shots[0].Snapshot);
             Message = shots.Count == 2 ? shots[0].Message + "  " + shots[1].Message : shots[0].Message;
@@ -576,10 +573,12 @@ namespace PaperSeizerStone.Presentation
             bool hit = false;
             Coroutine knockdown = null;
             Coroutine hitReaction = null;
+            Coroutine lastWords = null;
             bool monsterWasHit = false;
             bool playerHit = false;
             foreach (BattleEvent shot in shots) playerHit |= shot.Side == Side.Enemy && shot.Hit;
             bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
+            bool enemyKilled = shots[shots.Count - 1].Snapshot.Enemy.Life <= 0;
             foreach (BattleEvent shot in shots)
             {
                 if (!shot.Hit)
@@ -611,6 +610,7 @@ namespace PaperSeizerStone.Presentation
                 hit = true;
                 if (shot.Side == Side.Player && knockdown == null && !monsterWasHit)
                 {
+                    if (enemyKilled && onEnemyDeath != null) lastWords = StartCoroutine(onEnemyDeath());
                     if (monster != null && monster.isActiveAndEnabled && monster.IsConfigured)
                     {
                         Message += "  对手中枪。";
@@ -619,7 +619,7 @@ namespace PaperSeizerStone.Presentation
                     else
                     {
                         Message += "  对手中枪倒地。";
-                        knockdown = StartCoroutine(KnockDownOpponent());
+                        knockdown = StartCoroutine(KnockDownOpponent(lastWords));
                         if (!playerHit && shotCameraRig != null) StartCoroutine(shotCameraRig.FollowOpponentFall());
                     }
                 }
@@ -627,7 +627,7 @@ namespace PaperSeizerStone.Presentation
             }
             yield return new WaitForSecondsRealtime(0.08f);
             if (monsterWasHit)
-                hitReaction = StartCoroutine(monster.PlayHit(shots[shots.Count - 1].Snapshot.Enemy.Life <= 0));
+                hitReaction = StartCoroutine(PresentOpponentHit(monster, enemyKilled, lastWords));
             if (hit) AudioManager.Play(AudioCue.Hit);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
@@ -737,7 +737,20 @@ namespace PaperSeizerStone.Presentation
             }
         }
 
-        private IEnumerator KnockDownOpponent()
+        private IEnumerator PresentOpponentHit(GuaiwuCombatSequence monster, bool terminal, Coroutine lastWords)
+        {
+            yield return monster.PlayHit(terminal);
+            if (!terminal) yield break;
+            // Hold the terminal pose until the death subtitle also finishes.
+            if (lastWords != null) yield return lastWords;
+            GameObject actor = opponentInstance != null ? opponentInstance : defaultOpponent;
+            fallenOpponent = actor.transform;
+            opponentStandingPosition = fallenOpponent.localPosition;
+            opponentStandingRotation = fallenOpponent.localRotation;
+            actor.SetActive(false);
+        }
+
+        private IEnumerator KnockDownOpponent(Coroutine lastWords)
         {
             GameObject actor = opponentInstance != null ? opponentInstance : defaultOpponent;
             fallenOpponent = actor.transform;
@@ -764,6 +777,7 @@ namespace PaperSeizerStone.Presentation
                 fallenOpponent.localRotation = Quaternion.AngleAxis(76f * fall + 9f * recoil - 3f * settle, fallAxis) * opponentStandingRotation;
                 if (progress >= 1f)
                 {
+                    if (lastWords != null) yield return lastWords;
                     fallenOpponent.gameObject.SetActive(false);
                     yield break;
                 }
@@ -790,6 +804,22 @@ namespace PaperSeizerStone.Presentation
         }
 
         public void RestoreLayout() { Layout(moveDuration); }
+        public IEnumerator WaitForDraftPlacement()
+        {
+            // Wait for the actual move/cover tweens, rather than duplicating their configured durations.
+            bool moving;
+            do
+            {
+                moving = false;
+                if (draftSlots != null)
+                    foreach (int id in draftSlots)
+                    {
+                        CardView card = FindCard(id);
+                        moving |= card != null && card.IsPlacementAnimating;
+                    }
+                if (moving) yield return null;
+            } while (moving);
+        }
         public IEnumerable<TableTarget> PlayerDropSlots()
         {
             foreach (Transform slot in player.Slots)
@@ -836,12 +866,9 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
-<<<<<<< HEAD
             if (OpponentCombat != null) OpponentCombat.Cancel();
-=======
             SetHoveredPlayerCard(null);
             foreach (CardView view in cards.Values) view.ClearFeedback();
->>>>>>> 1c96a35c431eb2e3fdf15c144245cb9dca9ca5a1
             if (playerShooting != null) playerShooting.Cancel();
             EndPostShotPresentation();
         }

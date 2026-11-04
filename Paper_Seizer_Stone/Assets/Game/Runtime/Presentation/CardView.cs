@@ -71,6 +71,7 @@ namespace PaperSeizerStone.Presentation
         public bool Revealed { get; private set; }
         public Side Owner { get; private set; }
         public bool IsOnBoard { get; private set; }
+        public bool IsPlacementAnimating => DOTween.IsTweening(transform) || (flipTween != null && flipTween.IsActive() && flipTween.IsPlaying());
         public bool CanDrag { get; private set; }
 
         private void OnEnable()

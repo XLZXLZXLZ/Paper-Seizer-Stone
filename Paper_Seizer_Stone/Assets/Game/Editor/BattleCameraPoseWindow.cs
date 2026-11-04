@@ -9,8 +9,8 @@ namespace PaperSeizerStone.Editor
 {
     public sealed class BattleCameraPoseWindow : EditorWindow
     {
-        private static readonly string[] PoseNames = { "操作视角", "计分视角", "射击视角" };
-        private static readonly string[] PoseProperties = { "tablePose", "scoringPose", "shootingPose" };
+        private static readonly string[] PoseNames = { "操作视角", "计分视角", "射击视角", "商店视角" };
+        private static readonly string[] PoseProperties = { "tablePose", "scoringPose", "shootingPose", "shopPose" };
 
         [SerializeField] private BattleCameraRig cameraRig;
         [SerializeField] private int selectedPose;

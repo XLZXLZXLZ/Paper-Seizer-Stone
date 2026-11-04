@@ -16,6 +16,7 @@ namespace PaperSeizerStone.Configuration
         [SerializeField] private CameraPose tablePose;
         [SerializeField] private CameraPose scoringPose;
         [SerializeField] private CameraPose shootingPose;
+        [SerializeField] private CameraPose shopPose;
         [SerializeField, Min(0.05f)] private float transitionDuration = 0.3f;
 
         public float TransitionDuration => Mathf.Max(0.05f, transitionDuration);
@@ -29,6 +30,7 @@ namespace PaperSeizerStone.Configuration
                 case BattleCameraPose.Table: value = tablePose; break;
                 case BattleCameraPose.Scoring: value = scoringPose; break;
                 case BattleCameraPose.Shooting: value = shootingPose; break;
+                case BattleCameraPose.Shop: value = shopPose; break;
                 default: throw new ArgumentOutOfRangeException(nameof(pose), pose, null);
             }
             return new Pose(value.localPosition, value.localRotation);

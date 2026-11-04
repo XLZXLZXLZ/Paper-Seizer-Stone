@@ -5,7 +5,7 @@ using PaperSeizerStone.Configuration;
 
 namespace PaperSeizerStone.Presentation
 {
-    public enum BattleCameraPose { Table, Scoring, Shooting }
+    public enum BattleCameraPose { Table, Scoring, Shooting, Shop }
 
     [DefaultExecutionOrder(100)]
     public sealed class BattleCameraRig : MonoBehaviour
@@ -296,7 +296,7 @@ namespace PaperSeizerStone.Presentation
         {
             Gizmos.color = new Color(0.8f, 0.65f, 0.35f);
             if (definition == null) return;
-            foreach (BattleCameraPose key in new[] { BattleCameraPose.Table, BattleCameraPose.Scoring, BattleCameraPose.Shooting })
+            foreach (BattleCameraPose key in new[] { BattleCameraPose.Table, BattleCameraPose.Scoring, BattleCameraPose.Shooting, BattleCameraPose.Shop })
             {
                 Pose pose = GetWorldPose(key);
                 Gizmos.DrawWireSphere(pose.position, 0.12f);

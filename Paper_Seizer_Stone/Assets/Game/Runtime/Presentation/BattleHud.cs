@@ -25,6 +25,7 @@ namespace PaperSeizerStone.Presentation
         private string previousMessage;
         private string previousError;
         private bool previousInteractive;
+        private bool previousTutorial;
 
         private static string PhaseName(BattlePhase phase)
         {
@@ -69,11 +70,13 @@ namespace PaperSeizerStone.Presentation
             BattleObservation snapshot = tableView.Displayed;
             string message = tableView.Message;
             bool interactive = controller.CanInteract;
-            if (previous == snapshot && previousMessage == message && previousError == error && previousInteractive == interactive) return;
+            bool tutorial = controller.TutorialVisible;
+            if (previous == snapshot && previousMessage == message && previousError == error && previousInteractive == interactive && previousTutorial == tutorial) return;
             previous = snapshot;
             previousMessage = message;
             previousError = error;
             previousInteractive = interactive;
+            previousTutorial = tutorial;
             errorPanel.SetActive(!string.IsNullOrEmpty(error));
             if (!string.IsNullOrEmpty(error))
             {
@@ -84,8 +87,8 @@ namespace PaperSeizerStone.Presentation
             roundText.text = snapshot == null ? "准备第 " + controller.EncounterNumber + " 场战斗" : "第 " + controller.EncounterNumber + " 场  ·  第 " + snapshot.Round.ToString("00") + " 回合  /  " + PhaseName(snapshot.Phase);
             if (playerScore != null) playerScore.text = "你  " + (snapshot == null ? "00" : snapshot.Player.Score.ToString("00"));
             if (enemyScore != null) enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
-            messageText.text = string.IsNullOrEmpty(message) ? "正在准备对局。" : message;
-            if (instructionText != null) instructionText.text = snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
+            messageText.text = tutorial ? string.Empty : string.IsNullOrEmpty(message) ? "正在准备对局。" : message;
+            if (instructionText != null) instructionText.text = tutorial ? string.Empty : snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
             bool finished = snapshot != null && snapshot.Phase == BattlePhase.BattleEnd && interactive;
             resultPanel.SetActive(finished);
             if (finished)

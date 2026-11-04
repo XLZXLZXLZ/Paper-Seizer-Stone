@@ -471,24 +471,25 @@ MonoBehaviour:
   m_Color: {r: 0.94, g: 0.91, b: 0.82, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
-  m_text: "刻印"
-3筹码起"
+  m_text: "刻印\n3筹码起"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_sharedMaterial: {fileID: -7093195072476364256, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
-  m_fontColor32: {r: 0.94, g: 0.91, b: 0.82, a: 1}
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4291946736
   m_fontColor: {r: 0.94, g: 0.91, b: 0.82, a: 1}
   m_enableVertexGradient: 0
   m_overrideHtmlColors: 0
-  m_fontSize: 1.5
-  m_fontSizeBase: 1.5
+  m_fontSize: 1.1
+  m_fontSizeBase: 1.1
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 0.95
-  m_fontSizeMax: 1.5
+  m_fontSizeMin: 0.6
+  m_fontSizeMax: 1.1
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
