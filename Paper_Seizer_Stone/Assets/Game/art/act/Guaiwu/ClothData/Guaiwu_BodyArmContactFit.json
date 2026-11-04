@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "units": "source bone-local metres; collider parents carry actor scale",
+  "nativeBudget": {
+    "other9Capsules": 18,
+    "threePairsPerArm": 12,
+    "remainingSingleSpheres": 2,
+    "total": 32
+  },
+  "method": "V2: retain forearm pairs from V1. Add actual_body_fit_release Shoulder and residual UpperArm contact-triangle vertices, transformed from all five poses into same-side UpperArm local coordinates; optimize endpoint centres within .035 m proximal/.025 m distal and endpoint radii to enclose base plus contact samples by .003 m. Only proximal upper-arm endpoints changed in selected fit; distal values remain V1. Hand spheres retain the entire old sphere and add every actual Hand contact-triangle vertex with .003 m margin.",
+  "bones": [
+    {
+      "bone": "Left_UpperArm",
+      "sampleCount": 5435,
+      "sourceVertexCount": 854,
+      "inflationAdded": 0.024438243951253755,
+      "maximumPostFitGap": -0.003049999999999997,
+      "centers": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": -0.00366665720281327,
+            "y": 0.021823332103035487,
+            "z": -0.038259864191276194
+          },
+          "radius": 0.11731580898891801
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": 0.0057865324420446574,
+            "y": 0.16752258540095766,
+            "z": -0.003682956297355348
+          },
+          "radius": 0.06504160820394694
+        }
+      ],
+      "pairs": [
+        {
+          "firstStation": 0,
+          "secondStation": 1,
+          "firstCenterBoneLocal": {
+            "x": -0.00366665720281327,
+            "y": 0.021823332103035487,
+            "z": -0.038259864191276194
+          },
+          "secondCenterBoneLocal": {
+            "x": 0.0057865324420446574,
+            "y": 0.16752258540095766,
+            "z": -0.003682956297355348
+          },
+          "firstRadius": 0.11731580898891801,
+          "secondRadius": 0.06504160820394694
+        }
+      ],
+      "minimumGuaranteedClearance": 0.003
+    },
+    {
+      "bone": "Left_LowerArm",
+      "sampleCount": 3144,
+      "sourceVertexCount": 635,
+      "inflationAdded": 0.0028395203101679012,
+      "maximumPostFitGap": -0.0030500000000000024,
+      "centers": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.007051364919650144,
+            "y": -2.4464301967064782e-8,
+            "z": -0.002741077759815712
+          },
+          "radius": 0.06585591405422724
+        },
+        {
+          "station": 0.5,
+          "centerBoneLocal": {
+            "x": 0.0017481759457084732,
+            "y": 0.07482830665166053,
+            "z": -0.0027734433731556674
+          },
+          "radius": 0.06272788688787014
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": -0.0013447039298839104,
+            "y": 0.14965663510760563,
+            "z": -0.0007322261881208171
+          },
+          "radius": 0.04370621843455966
+        }
+      ],
+      "pairs": [
+        {
+          "firstStation": 0,
+          "secondStation": 0.5,
+          "firstCenterBoneLocal": {
+            "x": 0.007051364919650144,
+            "y": -2.4464301967064782e-8,
+            "z": -0.002741077759815712
+          },
+          "secondCenterBoneLocal": {
+            "x": 0.0017481759457084732,
+            "y": 0.07482830665166053,
+            "z": -0.0027734433731556674
+          },
+          "firstRadius": 0.06585591405422724,
+          "secondRadius": 0.06272788688787014
+        },
+        {
+          "firstStation": 0.5,
+          "secondStation": 1,
+          "firstCenterBoneLocal": {
+            "x": 0.0017481759457084732,
+            "y": 0.07482830665166053,
+            "z": -0.0027734433731556674
+          },
+          "secondCenterBoneLocal": {
+            "x": -0.0013447039298839104,
+            "y": 0.14965663510760563,
+            "z": -0.0007322261881208171
+          },
+          "firstRadius": 0.06272788688787014,
+          "secondRadius": 0.04370621843455966
+        }
+      ],
+      "minimumGuaranteedClearance": 0.003
+    },
+    {
+      "bone": "Right_UpperArm",
+      "sampleCount": 3694,
+      "sourceVertexCount": 731,
+      "inflationAdded": 0.05359785059082864,
+      "maximumPostFitGap": -0.003050000003378071,
+      "centers": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.0016397688437955037,
+            "y": 0.002060617212936837,
+            "z": 0.021673206023792333
+          },
+          "radius": 0.14615452107390292
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": -0.001712951453446988,
+            "y": 0.16964809272668852,
+            "z": 0.0033675262517764847
+          },
+          "radius": 0.06453472032412311
+        }
+      ],
+      "pairs": [
+        {
+          "firstStation": 0,
+          "secondStation": 1,
+          "firstCenterBoneLocal": {
+            "x": 0.0016397688437955037,
+            "y": 0.002060617212936837,
+            "z": 0.021673206023792333
+          },
+          "secondCenterBoneLocal": {
+            "x": -0.001712951453446988,
+            "y": 0.16964809272668852,
+            "z": 0.0033675262517764847
+          },
+          "firstRadius": 0.14615452107390292,
+          "secondRadius": 0.06453472032412311
+        }
+      ],
+      "minimumGuaranteedClearance": 0.003
+    },
+    {
+      "bone": "Right_LowerArm",
+      "sampleCount": 2928,
+      "sourceVertexCount": 589,
+      "inflationAdded": 0.00453429159859093,
+      "maximumPostFitGap": -0.0030500000000000037,
+      "centers": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.002412999874613259,
+            "y": -2.1194338020856825e-9,
+            "z": -0.006348431012689437
+          },
+          "radius": 0.06529178243845304
+        },
+        {
+          "station": 0.5,
+          "centerBoneLocal": {
+            "x": -0.00014974546787942838,
+            "y": 0.07398014635689074,
+            "z": -0.00452548449565228
+          },
+          "radius": 0.06569545357715476
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": 0.00037941322396559455,
+            "y": 0.1479603001898021,
+            "z": 0.0007069363919899831
+          },
+          "radius": 0.04395841837276769
+        }
+      ],
+      "pairs": [
+        {
+          "firstStation": 0,
+          "secondStation": 0.5,
+          "firstCenterBoneLocal": {
+            "x": 0.002412999874613259,
+            "y": -2.1194338020856825e-9,
+            "z": -0.006348431012689437
+          },
+          "secondCenterBoneLocal": {
+            "x": -0.00014974546787942838,
+            "y": 0.07398014635689074,
+            "z": -0.00452548449565228
+          },
+          "firstRadius": 0.06529178243845304,
+          "secondRadius": 0.06569545357715476
+        },
+        {
+          "firstStation": 0.5,
+          "secondStation": 1,
+          "firstCenterBoneLocal": {
+            "x": -0.00014974546787942838,
+            "y": 0.07398014635689074,
+            "z": -0.00452548449565228
+          },
+          "secondCenterBoneLocal": {
+            "x": 0.00037941322396559455,
+            "y": 0.1479603001898021,
+            "z": 0.0007069363919899831
+          },
+          "firstRadius": 0.06569545357715476,
+          "secondRadius": 0.04395841837276769
+        }
+      ],
+      "minimumGuaranteedClearance": 0.003
+    }
+  ],
+  "sourceRun": "actual_body_fit_release",
+  "handSpheres": [
+    {
+      "bone": "Left_Hand",
+      "centerBoneLocal": {
+        "x": -0.0019587563335618863,
+        "y": 0.05039446670932226,
+        "z": -0.008889995561213239
+      },
+      "radius": 0.06945759114075602
+    },
+    {
+      "bone": "Right_Hand",
+      "centerBoneLocal": {
+        "x": 0.00486564260019019,
+        "y": 0.041150381064786724,
+        "z": 0.002538661854624982
+      },
+      "radius": 0.06240572636478815
+    }
+  ],
+  "fitDetails": [
+    {
+      "side": "Left",
+      "addedShoulderSourceVertices": 187,
+      "addedUpperArmAndShoulderSourceVertices": 435,
+      "oldUpper": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.013357896066902505,
+            "y": -8.543384447162e-9,
+            "z": -0.016837763710769484
+          },
+          "radius": 0.09287756503766426
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": 0.0057865324420446574,
+            "y": 0.16752258540095766,
+            "z": -0.003682956297355348
+          },
+          "radius": 0.06504160820394694
+        }
+      ],
+      "newUpper": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": -0.00366665720281327,
+            "y": 0.021823332103035487,
+            "z": -0.038259864191276194
+          },
+          "radius": 0.11731580898891801
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": 0.0057865324420446574,
+            "y": 0.16752258540095766,
+            "z": -0.003682956297355348
+          },
+          "radius": 0.06504160820394694
+        }
+      ],
+      "upperRootMove": 0.035,
+      "upperDistalMove": 0,
+      "upperMaximumGap": -0.003049999999999997,
+      "handSourceVertices": 387,
+      "oldHandSphere": {
+        "centerBoneLocal": {
+          "x": 0.005638153298687426,
+          "y": 0.04243919950875039,
+          "z": -0.002946817444244057
+        },
+        "radius": 0.055752970658950594
+      },
+      "newHandSphere": {
+        "bone": "Left_Hand",
+        "centerBoneLocal": {
+          "x": -0.0019587563335618863,
+          "y": 0.05039446670932226,
+          "z": -0.008889995561213239
+        },
+        "radius": 0.06945759114075602
+      },
+      "handCenterMove": 0.012502826813288195,
+      "handMaximumContactGap": -0.003049999999999997,
+      "oldHandSphereContained": true
+    },
+    {
+      "side": "Right",
+      "addedShoulderSourceVertices": 5,
+      "addedUpperArmAndShoulderSourceVertices": 60,
+      "oldUpper": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.009612534646514213,
+            "y": -2.1143519169795354e-8,
+            "z": 0.018714950622563186
+          },
+          "radius": 0.09255667048307428
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": -0.001712951453446988,
+            "y": 0.16964809272668852,
+            "z": 0.0033675262517764847
+          },
+          "radius": 0.06453472032412311
+        }
+      ],
+      "newUpper": [
+        {
+          "station": 0,
+          "centerBoneLocal": {
+            "x": 0.0016397688437955037,
+            "y": 0.002060617212936837,
+            "z": 0.021673206023792333
+          },
+          "radius": 0.14615452107390292
+        },
+        {
+          "station": 1,
+          "centerBoneLocal": {
+            "x": -0.001712951453446988,
+            "y": 0.16964809272668852,
+            "z": 0.0033675262517764847
+          },
+          "radius": 0.06453472032412311
+        }
+      ],
+      "upperRootMove": 0.008750000000000003,
+      "upperDistalMove": 0,
+      "upperMaximumGap": -0.003050000003378071,
+      "handSourceVertices": 107,
+      "oldHandSphere": {
+        "centerBoneLocal": {
+          "x": 0.004773321649950151,
+          "y": 0.04485559658900617,
+          "z": 0.0021107207619068106
+        },
+        "radius": 0.058537072069532035
+      },
+      "newHandSphere": {
+        "bone": "Right_Hand",
+        "centerBoneLocal": {
+          "x": 0.00486564260019019,
+          "y": 0.041150381064786724,
+          "z": 0.002538661854624982
+        },
+        "radius": 0.06240572636478815
+      },
+      "handCenterMove": 0.00373098898652982,
+      "handMaximumContactGap": -0.003049999999999997,
+      "oldHandSphereContained": true
+    }
+  ],
+  "caution": "Fit is a conservative primitive approximation. Right upper-arm proximal radius grows substantially because actual Body contact triangles include an off-axis upper-arm wrap/joint bulge excluded by V1 dominant/torso/projection filters. Inspect the Lab rendered silhouette; do not accept on proxy coverage alone. Native sphere budget unchanged at 32."
+}

@@ -107,6 +107,7 @@ namespace PaperSeizerStone.Flow
             AudioManager.SetMusic(MusicContext.Battle);
             busy = true;
             yield return MoveBattle(true);
+            while (!tableView.OpponentEntranceReady) yield return null;
             yield return BeginRound();
         }
 

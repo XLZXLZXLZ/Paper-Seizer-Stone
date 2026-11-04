@@ -1,0 +1,31 @@
+{
+    "particles": 8868,
+    "releasedSleeveParticles": 1680,
+    "untouchedParticles": 7188,
+    "capsuleColliders": 13,
+    "elbowSpheres": 2,
+    "cuffMaximumDistance": 0.05999999865889549,
+    "bendingStiffness": 0.15000000596046448,
+    "damping": 0.44999998807907104,
+    "useGravity": true,
+    "useTethers": true,
+    "stretchingStiffness": 0.95,
+    "friction": 0.5,
+    "externalAcceleration": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "randomAcceleration": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "worldVelocityScale": 0.2,
+    "worldAccelerationScale": 0.1,
+    "playModeRun": false,
+    "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_Draped.asset",
+    "virtualParticles": 16039,
+    "referenceMode": "Chest and shoulder supported continuous sleeve panel",
+    "runtimeValidationRecord": "Assets/Game/art/act/Guaiwu/Guaiwu_Cloth_RuntimeFixRecord.json"
+}

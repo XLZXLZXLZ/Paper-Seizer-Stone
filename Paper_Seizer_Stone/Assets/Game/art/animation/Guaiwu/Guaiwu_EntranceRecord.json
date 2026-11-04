@@ -1,0 +1,8 @@
+{
+    "runtimePrefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth_Entrance.prefab",
+    "controller": "Assets/Game/art/animation/Guaiwu/Guaiwu_Entrance.controller",
+    "sequence": "A_Pose hold 0.5s -> A_To_Idle normalized 1s clip played over 2s -> existing looping Idle",
+    "bones": 67,
+    "playTestRun": false,
+    "clothRepairClaimed": false
+}

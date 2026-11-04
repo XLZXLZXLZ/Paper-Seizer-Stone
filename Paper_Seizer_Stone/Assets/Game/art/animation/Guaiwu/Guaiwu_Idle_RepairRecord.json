@@ -1,0 +1,30 @@
+{
+    "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_Sleeves.asset",
+    "vertices": 10471,
+    "changedVertices": 1924,
+    "paddedVertices": 1,
+    "leftCuffVertices": 266,
+    "rightCuffVertices": 268,
+    "cloth": {
+        "particles": 8868,
+        "tightenedParticles": 1680,
+        "untouchedParticles": 7188
+    },
+    "loop": {
+        "clip": "Assets/Game/art/animation/Guaiwu/Clips/Guaiwu_Idle.anim",
+        "controller": "Assets/Game/art/animation/Guaiwu/Guaiwu_Idle.controller",
+        "loopClosureMethod": "C1 cubic Hermite local position + normalized quaternion Hermite; original body retained",
+        "originalLength": 6.200000286102295,
+        "length": 7.000000476837158,
+        "loopClosureDuration": 0.800000011920929,
+        "frameRate": 60.0,
+        "preservedIdleSpeed": 1.0,
+        "bones": 67,
+        "bindings": 670,
+        "originalSamples": 373,
+        "samples": 421,
+        "removedLoopTransitions": 2,
+        "playModeRun": false
+    },
+    "playModeRun": false
+}

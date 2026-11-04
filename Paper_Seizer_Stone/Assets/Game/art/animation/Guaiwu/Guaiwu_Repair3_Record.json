@@ -1,0 +1,28 @@
+{
+    "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_TopologyShortSleeve.asset",
+    "actor": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth.prefab",
+    "method": "Source garment boundary-distance sleeve ownership; original hood/lapel weights restored; only lower hem simulates Cloth",
+    "savedLocal": "2026-11-05T00:29:50.1348476+08:00",
+    "vertices": 9500,
+    "particles": 8021,
+    "removedTriangles": 1471,
+    "leftSleeveVertices": 54,
+    "restoredVertices": 148,
+    "structuralParticles": 5125,
+    "idle": {
+        "source": "Assets/Game/art/animation/Guaiwu/Sources/guaiwu_idle.fbx",
+        "clip": "Assets/Game/art/animation/Guaiwu/Clips/Guaiwu_Idle.anim",
+        "controller": "Assets/Game/art/animation/Guaiwu/Guaiwu_Idle.controller",
+        "method": "Original source prefix; fixed-length quintic Hermite tail with normalized quaternion derivatives; identical seam values and first derivatives; single-state loop",
+        "length": 6.333333492279053,
+        "frameRate": 60.0,
+        "preservedSourceSeconds": 5.333333492279053,
+        "replacedTailSeconds": 1.0,
+        "samples": 381,
+        "bindings": 670,
+        "bones": 67,
+        "removedIdleReturnStates": 1,
+        "playModeRun": false
+    },
+    "playModeRun": false
+}

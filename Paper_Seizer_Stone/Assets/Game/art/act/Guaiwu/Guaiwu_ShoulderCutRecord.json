@@ -1,0 +1,16 @@
+{
+    "prefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth.prefab",
+    "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_LeftShoulderCut.asset",
+    "sourceMesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_CollarLayers.asset",
+    "side": "Monster left arm, screen right; cropped to shoulder",
+    "savedLocal": "2026-11-05T01:30:08.5951670+08:00",
+    "affectedTriangles": 617,
+    "vertices": 9289,
+    "particles": 7858,
+    "shoulderBindPoint": {
+        "x": -0.15422162413597108,
+        "y": 0.7828205227851868,
+        "z": -0.05661308020353317
+    },
+    "playModeRun": false
+}

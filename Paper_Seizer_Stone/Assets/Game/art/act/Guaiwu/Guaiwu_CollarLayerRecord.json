@@ -1,0 +1,15 @@
+{
+    "prefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth.prefab",
+    "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_CollarLayers.asset",
+    "sourceMesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_TopologyShortSleeve.asset",
+    "savedLocal": "2026-11-05T01:13:23.5028573+08:00",
+    "nearbyLayerPairs": 15,
+    "coordinatedGroups": 28,
+    "smoothedGroups": 2850,
+    "movedGroups": 28,
+    "vertices": 9500,
+    "particles": 8021,
+    "maximumDisplacement": 0.0017934039933606983,
+    "playModeRun": false,
+    "method": "Local nonadjacent facing layers: shared skin weights within bounded patches and up to 2mm bind-space clearance; original topology, lining, materials and animations retained"
+}

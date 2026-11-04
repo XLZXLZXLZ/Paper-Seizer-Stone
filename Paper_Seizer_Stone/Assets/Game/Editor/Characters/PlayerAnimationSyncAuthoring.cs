@@ -145,18 +145,19 @@ namespace PaperSeizerStone.Editor
             finally { EditorUtility.ClearProgressBar(); }
         }
 
-        internal static BakedPose Bake(string sourcePath, AnimationClip sourceClip)
+        internal static BakedPose Bake(string sourcePath, AnimationClip sourceClip,
+            string targetModelPath = TargetModelPath, string rigName = "Player_Rig")
         {
             Scene preview = EditorSceneManager.NewPreviewScene();
             try
             {
                 var source = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath), preview);
-                var target = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(TargetModelPath), preview);
+                var target = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(targetModelPath), preview);
                 foreach (var animator in source.GetComponentsInChildren<Animator>(true).Concat(target.GetComponentsInChildren<Animator>(true)))
                     animator.enabled = false;
                 sourceClip.SampleAnimation(source, 0f);
-                Transform sourceHips = FindPlayerHips(source);
-                Transform targetHips = FindPlayerHips(target);
+                Transform sourceHips = FindHips(source, rigName);
+                Transform targetHips = FindHips(target, rigName);
                 var sourceBones = sourceHips.GetComponentsInChildren<Transform>(true)
                     .ToDictionary(t => AnimationUtility.CalculateTransformPath(t, sourceHips), t => t, StringComparer.Ordinal);
                 var targetBones = targetHips.GetComponentsInChildren<Transform>(true)
@@ -288,12 +289,12 @@ namespace PaperSeizerStone.Editor
             return true;
         }
 
-        private static Transform FindPlayerHips(GameObject root)
+        private static Transform FindHips(GameObject root, string rigName)
         {
             var hips = root.GetComponentsInChildren<Transform>(true)
-                .Where(t => t.name == "Hips" && t.parent != null && t.parent.name == "Player_Rig").ToArray();
+                .Where(t => t.name == "Hips" && t.parent != null && t.parent.name == rigName).ToArray();
             if (hips.Length != 1 || hips[0].parent.parent == null)
-                throw new InvalidOperationException("未找到唯一的 Player_Root/Player_Rig/Hips，请使用现有玩家骨架导出的 FBX。");
+                throw new InvalidOperationException("未找到唯一的 " + rigName + "/Hips，请使用对应角色的原骨架导出 FBX。");
             return hips[0];
         }
 

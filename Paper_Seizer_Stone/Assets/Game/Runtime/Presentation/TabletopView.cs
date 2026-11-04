@@ -24,6 +24,8 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Transform opponentAnchor;
         [SerializeField] private Transform scoreCounter;
         [SerializeField] private GameObject defaultOpponent;
+        [SerializeField, Tooltip("运行时的默认对手；编辑视口仍显示 defaultOpponent。")]
+        private GameObject defaultOpponentRuntimePrefab;
         [SerializeField] private TMP_Text confirmLabel;
         [SerializeField, Tooltip("可选：未绑定时不显示桌面回合文字。")] private TMP_Text roundLabel;
         [SerializeField] private Props.TableBellView confirmBell;
@@ -58,6 +60,8 @@ namespace PaperSeizerStone.Presentation
         private Vector3 opponentStandingPosition;
         private Quaternion opponentStandingRotation;
         private string shootingFallbackReason;
+        private GuaiwuCombatSequence OpponentCombat => (opponentInstance != null ? opponentInstance : defaultOpponent)
+            ?.GetComponent<GuaiwuCombatSequence>();
 
         public string Message { get; private set; }
         public Transform ScoreCounter => scoreCounter;
@@ -130,12 +134,37 @@ namespace PaperSeizerStone.Presentation
                 Destroy(opponentInstance);
                 opponentInstance = null;
             }
-            defaultOpponent.SetActive(opponent.Appearance == null);
-            if (opponent.Appearance != null) opponentInstance = Instantiate(opponent.Appearance, opponentAnchor);
+            GameObject appearance = opponent.Appearance != null ? opponent.Appearance : defaultOpponentRuntimePrefab;
+            defaultOpponent.SetActive(appearance == null);
+            if (appearance != null)
+            {
+                if (opponent.Appearance != null) opponentInstance = Instantiate(appearance, opponentAnchor);
+                else
+                {
+                    Transform authored = defaultOpponent.transform;
+                    // authored was disabled above. Construct under its final world
+                    // frame so Cloth and Awake see the intended scale immediately.
+                    opponentInstance = Instantiate(appearance, authored, false);
+                    opponentInstance.transform.localPosition = Vector3.zero;
+                    opponentInstance.transform.localRotation = Quaternion.identity;
+                    opponentInstance.transform.localScale = Vector3.one;
+                    opponentInstance.transform.SetParent(authored.parent, true);
+                }
+            }
+        }
+
+        public bool OpponentEntranceReady
+        {
+            get
+            {
+                var entrance = opponentInstance != null ? opponentInstance.GetComponent<GuaiwuEntrance>() : null;
+                return entrance == null || entrance.IsReady;
+            }
         }
 
         public void PrepareExit()
         {
+            if (OpponentCombat != null) OpponentCombat.Cancel();
             if (playerShooting != null) playerShooting.Cancel();
             firstPersonHand.Clear();
             foreach (CardView view in cards.Values) view.transform.DOKill();
@@ -432,6 +461,8 @@ namespace PaperSeizerStone.Presentation
             AudioManager.SetShootingFocus(true);
             bool playerFires = displayed.Player.Score >= displayed.Enemy.Score;
             bool enemyFires = displayed.Enemy.Score >= displayed.Player.Score;
+            GuaiwuCombatSequence monster = OpponentCombat;
+            bool animatedEnemy = enemyFires && monster != null && monster.isActiveAndEnabled && monster.IsConfigured;
             bool animatedPlayer = playerFires && playerShooting != null && playerShooting.isActiveAndEnabled && playerShooting.IsConfigured;
             if (playerFires)
             {
@@ -443,12 +474,13 @@ namespace PaperSeizerStone.Presentation
                 shootingFallbackReason = problem;
             }
             Coroutine playerPreparation = animatedPlayer ? StartCoroutine(playerShooting.Prepare(firstPersonHand, player.Gun)) : null;
+            Coroutine enemyPreparation = animatedEnemy ? StartCoroutine(monster.Prepare(enemy.Gun)) : null;
             if (enemyFires || (playerFires && !animatedPlayer)) AudioManager.Play(AudioCue.GunMechanism);
             foreach (SideTableBindings side in new[] { player, enemy })
             {
                 bool fires = side == enemy ? enemyFires : playerFires;
                 side.Gun.DOKill();
-                if (!fires || (side == player && animatedPlayer)) continue;
+                if (!fires || (side == player && animatedPlayer) || (side == enemy && animatedEnemy)) continue;
                 side.Gun.DOMove(side.GunAimPose.position, gunRaiseDuration);
                 side.Gun.DORotateQuaternion(side.GunAimPose.rotation, gunRaiseDuration);
             }
@@ -456,7 +488,7 @@ namespace PaperSeizerStone.Presentation
             if (enemyFires) enemy.Gun.DOKill();
             for (float elapsed = 0; elapsed < aimHoldDuration; elapsed += Time.deltaTime)
             {
-                if (enemyFires)
+                if (enemyFires && !animatedEnemy)
                 {
                     float time = elapsed * enemyTremorFrequency;
                     Vector3 noise = new Vector3(Tremor(time, 1), Tremor(time, 19), Tremor(time, 47));
@@ -465,8 +497,9 @@ namespace PaperSeizerStone.Presentation
                 }
                 yield return null;
             }
-            if (enemyFires) enemy.Gun.SetPositionAndRotation(enemy.GunAimPose.position, enemy.GunAimPose.rotation);
+            if (enemyFires && !animatedEnemy) enemy.Gun.SetPositionAndRotation(enemy.GunAimPose.position, enemy.GunAimPose.rotation);
             if (playerPreparation != null) yield return playerPreparation;
+            if (enemyPreparation != null) yield return enemyPreparation;
         }
 
         private static float Tremor(float time, float offset) => Mathf.PerlinNoise(time, offset) * 2 - 1;
@@ -506,9 +539,13 @@ namespace PaperSeizerStone.Presentation
             Apply(shots[0].Snapshot);
             Message = shots.Count == 2 ? shots[0].Message + "  " + shots[1].Message : shots[0].Message;
             bool animatedPlayer = playerShooting != null && playerShooting.IsActive;
+            GuaiwuCombatSequence monster = OpponentCombat;
+            bool animatedEnemy = monster != null && monster.IsShooting;
             bool hit = false;
             float firstHitTime = 0f;
             Coroutine knockdown = null;
+            Coroutine hitReaction = null;
+            bool monsterWasHit = false;
             bool playerHit = false;
             foreach (BattleEvent shot in shots) playerHit |= shot.Side == Side.Enemy && shot.Hit;
             bool playerKilled = shots[shots.Count - 1].Snapshot.Player.Life <= 0;
@@ -520,8 +557,9 @@ namespace PaperSeizerStone.Presentation
                     continue;
                 }
                 SideTableBindings side = Get(shot.Side);
-                bool usesAnimatedGun = shot.Side == Side.Player && animatedPlayer;
-                GameObject muzzle = usesAnimatedGun ? playerShooting.MuzzleFlash : side.MuzzleFlash;
+                bool usesAnimatedGun = shot.Side == Side.Player ? animatedPlayer : animatedEnemy;
+                GameObject muzzle = shot.Side == Side.Player && animatedPlayer ? playerShooting.MuzzleFlash
+                    : shot.Side == Side.Enemy && animatedEnemy ? monster.MuzzleFlash : side.MuzzleFlash;
                 muzzle.SetActive(false);
                 if (!usesAnimatedGun)
                     side.Gun.DOPunchPosition(side.Gun.up * 0.22f, 0.3f, 2, 0.3f);
@@ -540,26 +578,40 @@ namespace PaperSeizerStone.Presentation
                     StartCoroutine(shotCameraRig.PlayPlayerFall(playerKilled));
                 }
                 hit = true;
-                if (shot.Side == Side.Player && knockdown == null)
+                if (shot.Side == Side.Player && knockdown == null && !monsterWasHit)
                 {
-                    Message += "  对手中枪倒地。";
-                    knockdown = StartCoroutine(KnockDownOpponent());
-                    if (!playerHit && shotCameraRig != null) StartCoroutine(shotCameraRig.FollowOpponentFall());
+                    if (monster != null && monster.isActiveAndEnabled && monster.IsConfigured)
+                    {
+                        Message += "  对手中枪。";
+                        monsterWasHit = true;
+                    }
+                    else
+                    {
+                        Message += "  对手中枪倒地。";
+                        knockdown = StartCoroutine(KnockDownOpponent());
+                        if (!playerHit && shotCameraRig != null) StartCoroutine(shotCameraRig.FollowOpponentFall());
+                    }
                 }
                 AudioManager.Play(AudioCue.GunFire);
             }
             yield return new WaitForSecondsRealtime(0.08f);
+            if (monsterWasHit)
+                hitReaction = StartCoroutine(monster.PlayHit(shots[shots.Count - 1].Snapshot.Enemy.Life <= 0));
             if (hit) AudioManager.Play(AudioCue.Hit);
             player.MuzzleFlash.SetActive(false);
             enemy.MuzzleFlash.SetActive(false);
             if (animatedPlayer) playerShooting.SetMuzzleFlash(false);
+            if (animatedEnemy && monster.MuzzleFlash != null) monster.MuzzleFlash.SetActive(false);
             BeginPostShotPresentation();
+            Coroutine enemyReturn = animatedEnemy && monster.IsShooting ? StartCoroutine(monster.FinishShooting()) : null;
 
             if (animatedPlayer)
             {
                 yield return playerShooting.Finish();
             }
             else yield return new WaitForSeconds(0.92f);
+            if (enemyReturn != null) yield return enemyReturn;
+            if (hitReaction != null) yield return hitReaction;
 
             if (knockdown != null && fallenOpponent != null && fallenOpponent.gameObject.activeSelf)
                 yield return knockdown;
@@ -693,6 +745,7 @@ namespace PaperSeizerStone.Presentation
 
         private void RestoreOpponentPose()
         {
+            if (OpponentCombat != null) OpponentCombat.Cancel();
             if (fallenOpponent == null) return;
             fallenOpponent.localPosition = opponentStandingPosition;
             fallenOpponent.localRotation = opponentStandingRotation;
@@ -733,12 +786,14 @@ namespace PaperSeizerStone.Presentation
 
         private void OnDisable()
         {
+            if (OpponentCombat != null) OpponentCombat.Cancel();
             if (playerShooting != null) playerShooting.Cancel();
             EndPostShotPresentation();
         }
 
         private void OnDestroy()
         {
+            if (OpponentCombat != null) OpponentCombat.Cancel();
             if (playerShooting != null) playerShooting.Cancel();
             if (player != null && player.Gun != null) player.Gun.DOKill();
             if (enemy != null && enemy.Gun != null) enemy.Gun.DOKill();

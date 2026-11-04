@@ -1,0 +1,51 @@
+{
+  "prefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth.prefab",
+  "mesh": "Assets/Game/art/act/Guaiwu/Meshes/Guaiwu_Cloak_Draped.asset",
+  "skinWeights": "Unlimited",
+  "validatedRun": "actual_body_v2",
+  "particles": 8868,
+  "virtualParticles": 16039,
+  "validatedSeconds": 12,
+  "validatedFrames": 721,
+  "mainProjectPlayRun": false,
+  "finalSavedResourcesValidated": false,
+  "validatedScales": [
+    7.247
+  ],
+  "validationReport": "C:/Users/16627/.codex/visualizations/2026/11/04/GuaiwuClothRuntimeLab/Work/Results/production_saved/results.json",
+  "labCacheCleanup": {
+    "temp": "Absent after final isolated Unity exit",
+    "library": "Removal blocked by automatic approval: blocked by policy",
+    "libraryPath": "C:/Users/16627/.codex/visualizations/2026/11/04/GuaiwuClothRuntimeLab/Library"
+  },
+  "repairComplete": false,
+  "remainingActualBodyTriangles": [
+    36,
+    40,
+    37,
+    39
+  ],
+  "contactsSavedToMain": true,
+  "actualBodyContactReport": "C:/Users/16627/.codex/visualizations/2026/11/04/GuaiwuClothRuntimeLab/Work/ActualBodyContact/actual_body_v2/summary.json",
+  "rejectedCandidates": [
+    {
+      "run": "refined_native_v1",
+      "reason": "Posed mesh with 294 added vertices still intersects actual Body and alters sleeve coverage.",
+      "crossingTrianglesAt4Seconds": 107
+    },
+    {
+      "run": "arm_reference_native",
+      "reason": "Continuous forearm/upper-arm skin reference removes the chest-only assumption but produces visible local pulls and penetration.",
+      "crossingTrianglesAt4Seconds": 65
+    },
+    {
+      "run": "arm_guided_dress",
+      "reason": "Guided cuff transition and release still leave visible elbow/cuff penetration in the final Idle pose.",
+      "crossingTrianglesAt10Seconds": 63
+    }
+  ],
+  "mainApplicationReport": "C:/Users/16627/.codex/visualizations/2026/11/04/GuaiwuClothRuntimeLab/Work/Production/BodyContactApply/result.json",
+  "mainBackup": "C:/Users/16627/.codex/visualizations/2026/11/04/GuaiwuClothRuntimeLab/Work/Production/BodyContactApply/Before.prefab",
+  "currentLimitation": "Open sleeve replacement reverted at user request. Original clothing and A Pose entrance restored; original cloth limitations remain.",
+  "activeRuntimePrefab": "Assets/Game/art/act/Guaiwu/Prefabs/Guaiwu_Cloth_Entrance.prefab"
+}

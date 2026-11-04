@@ -1,0 +1,13 @@
+{
+    "source": "Assets/Game/art/animation/Guaiwu/Sources/guaiwu_idle.fbx",
+    "clip": "Assets/Game/art/animation/Guaiwu/Clips/Guaiwu_Idle.anim",
+    "method": "Latest user export retargeted in full; no artificial closure; existing heading conversion retained",
+    "savedLocal": "2026-11-05T00:54:07.3726785+08:00",
+    "length": 6.200000286102295,
+    "frameRate": 60.0,
+    "boneLengthRatio": 1.0000005960464478,
+    "artificialTailSeconds": 0.0,
+    "samples": 373,
+    "bindings": 670,
+    "playModeRun": false
+}

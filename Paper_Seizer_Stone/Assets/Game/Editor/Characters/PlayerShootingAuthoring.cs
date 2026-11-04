@@ -245,7 +245,7 @@ namespace PaperSeizerStone.Editor
             };
         }
 
-        private static PropPose BakeProp(Scene scene, string path, AnimationClip clip, string rigName, Transform targetRig,
+        internal static PropPose BakeProp(Scene scene, string path, AnimationClip clip, string rigName, Transform targetRig,
             Transform animationRoot, PlayerAnimationSyncAuthoring.BakedPose space, bool fitGun)
         {
             var source = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path), scene);
@@ -323,12 +323,14 @@ namespace PaperSeizerStone.Editor
         private static void FitGunScale(Transform root, Transform[] target, Transform[] source, float unitRatio)
         {
             var ratios = new List<float>();
+            int pivot = Array.FindIndex(target, t => t.name == "GunRoot");
+            if (pivot < 0) throw new InvalidOperationException("枪械缺少 GunRoot，不能用场景原点估算尺寸。");
             string[] references = { "Hammer", "Trigger", "Socket_Grip", "Socket_Muzzle" };
             for (int b = 0; b < target.Length; b++)
             {
                 if (!references.Contains(target[b].name)) continue;
-                float from = Vector3.Distance(source[b].position, source[0].position) * unitRatio;
-                float to = Vector3.Distance(target[b].position, target[0].position);
+                float from = Vector3.Distance(source[b].position, source[pivot].position) * unitRatio;
+                float to = Vector3.Distance(target[b].position, target[pivot].position);
                 if (from > 0.000001f && to > 0.000001f) ratios.Add(from / to);
             }
             if (ratios.Count == 0) throw new InvalidOperationException("无法匹配源枪械与现有模型的尺寸。");
@@ -338,7 +340,7 @@ namespace PaperSeizerStone.Editor
             root.localScale *= scale;
         }
 
-        private static AnimationClip SaveClip(string path, EditorCurveBinding[] bindings, AnimationCurve[] curves, AnimationClip source)
+        internal static AnimationClip SaveClip(string path, EditorCurveBinding[] bindings, AnimationCurve[] curves, AnimationClip source)
         {
             var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
             if (clip == null)
@@ -474,7 +476,7 @@ namespace PaperSeizerStone.Editor
             public Animator GunAnimator, BulletAnimator;
             public Transform GunRig, BulletRig;
         }
-        private sealed class PropPose { public EditorCurveBinding[] Bindings; public AnimationCurve[] Curves; }
+        internal sealed class PropPose { public EditorCurveBinding[] Bindings; public AnimationCurve[] Curves; }
 
         private sealed class ShotBackup
         {
