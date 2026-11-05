@@ -12,9 +12,14 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Canvas overlayCanvas;
         [SerializeField] private CanvasGroup inputBlock;
         [SerializeField] private Image eyelids;
+        [SerializeField] private bool startClosed = true;
         private Material authoredMaterial;
         private Material animatedMaterial;
         private int revision;
+        private static bool awaitingMenuArrival;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetArrival() { awaitingMenuArrival = false; }
 
         public bool IsPending { get; private set; }
         public float BlurPixels { get; private set; }
@@ -28,7 +33,8 @@ namespace PaperSeizerStone.Presentation
                 enabled = false;
                 return;
             }
-            if (!definition.playOpening) { Cancel(); return; }
+            bool menuArrival = startClosed && awaitingMenuArrival;
+            if (startClosed) awaitingMenuArrival = false;
 
             authoredMaterial = eyelids.material;
             animatedMaterial = new Material(authoredMaterial) { hideFlags = HideFlags.HideAndDontSave };
@@ -38,6 +44,8 @@ namespace PaperSeizerStone.Presentation
             animatedMaterial.SetFloat("_Curvature", definition.curvature);
             animatedMaterial.SetFloat("_EdgePixels", definition.edgeSoftnessPixels);
             animatedMaterial.SetColor("_LidColor", definition.lidColor);
+
+            if (!startClosed || (!definition.playOpening && !menuArrival)) { Cancel(); return; }
 
             IsPending = true;
             BlurPixels = 0f;
@@ -51,6 +59,29 @@ namespace PaperSeizerStone.Presentation
         public void SetTargetDisplay(int display)
         {
             if (overlayCanvas != null) overlayCanvas.targetDisplay = display;
+        }
+
+        // Reuse the same eyelids in the menu, then leave them closed until scene unload.
+        public IEnumerator Close()
+        {
+            if (animatedMaterial == null || !isActiveAndEnabled) yield break;
+            int run = ++revision;
+            inputBlock.alpha = 1f;
+            inputBlock.blocksRaycasts = true;
+            overlayCanvas.enabled = true;
+            float start = Time.unscaledTime;
+            float seconds = Mathf.Max(0.1f, definition.closeDuration);
+            while (run == revision && isActiveAndEnabled)
+            {
+                float progress = Mathf.Clamp01((Time.unscaledTime - start) / seconds);
+                animatedMaterial.SetFloat("_EyeOpening", 1f - Mathf.SmoothStep(0f, 1f, progress));
+                if (progress >= 1f) break;
+                yield return null;
+            }
+            if (run != revision || !isActiveAndEnabled) yield break;
+            awaitingMenuArrival = true;
+            // Render one fully closed frame before starting the scene load.
+            yield return null;
         }
 
         // One call plays every stage and releases the mask/blur even if the coroutine is disposed.

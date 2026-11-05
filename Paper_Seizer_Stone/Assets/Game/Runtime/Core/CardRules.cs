@@ -14,9 +14,11 @@ namespace PaperSeizerStone.Battle
             return BasicRules.Compare(a.Gesture, b.Gesture);
         }
 
-        public static int Points(CardSpec card, int result, CardTag tag = CardTag.None)
+        public static int Points(CardSpec card, int result, CardTag tag = CardTag.None, bool movedByCheatThisRound = false)
         {
             int original = result > 0 ? 2 : result == 0 ? 1 : card.Ability == CardAbility.FlowerScissors ? 1 : 0;
+            if (card.Ability == CardAbility.LeadWeight && !movedByCheatThisRound) original++;
+            if (card.Ability == CardAbility.Pyrite && result > 0) original--;
             return original + CardTags.ScoreModifier(tag, result);
         }
     }

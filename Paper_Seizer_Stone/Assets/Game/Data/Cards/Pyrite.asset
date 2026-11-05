@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e5e1928390a05a00d0a96f8c4a60c3, type: 3}
+  m_Name: Pyrite
+  m_EditorClassIdentifier:
+  definitionId: pyrite
+  displayName: 黄铁矿
+  gesture: 0
+  ability: 15
+  description: "视为石头。每次对位获胜时，本牌少得 1 分，桌面奖池增加 2 枚筹码。之后再叠加刻印修正。"
+  transformation: {fileID: 0}
+  artwork: {fileID: 0}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: cf8ef3e57d404a19bb4f67aee7f98803, type: 2}

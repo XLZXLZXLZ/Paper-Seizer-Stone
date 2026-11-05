@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e5e1928390a05a00d0a96f8c4a60c3, type: 3}
+  m_Name: ContractPaper
+  m_EditorClassIdentifier:
+  definitionId: contract_paper
+  displayName: 契约纸
+  gesture: 1
+  ability: 17
+  description: "视为布。计分时本牌在场，且本回合己方没有作弊，则桌面奖池增加 2 枚筹码。多张分别生效，每回合均可触发。"
+  transformation: {fileID: 0}
+  artwork: {fileID: 0}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: 7a441965f2af4c23a7a51bacd0b180fa, type: 2}

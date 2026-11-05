@@ -13,12 +13,6 @@ MonoBehaviour:
   m_Name: BasicShop
   m_EditorClassIdentifier:
   cardPool:
-  - Card: {fileID: 11400000, guid: 479642ed1224655219da791985cf46cd, type: 2}
-    Price: 2
-  - Card: {fileID: 11400000, guid: e9c195d4c4b83362ded9847faaaad54c, type: 2}
-    Price: 2
-  - Card: {fileID: 11400000, guid: fcf6cbe8af1805bc721b86cd9de2177b, type: 2}
-    Price: 2
   - Card: {fileID: 11400000, guid: c0df4b839ee06200b35113d055c055b7, type: 2}
     Price: 5
   - Card: {fileID: 11400000, guid: 460d149bfd705a87599a6d9bda23d899, type: 2}
@@ -35,7 +29,23 @@ MonoBehaviour:
     Price: 4
   - Card: {fileID: 11400000, guid: 30676bc566d14d81f602c76019691895, type: 2}
     Price: 3
-  offerCount: 3
+  - Card: {fileID: 11400000, guid: 5a475a7390e64b4a9b50b81e56e3c839, type: 2}
+    Price: 4
+  - Card: {fileID: 11400000, guid: 46bfa5e2d77e419ba5de827568403c6c, type: 2}
+    Price: 5
+  - Card: {fileID: 11400000, guid: 39a5a5f25e4d40b4bf57a332d88806a5, type: 2}
+    Price: 4
+  - Card: {fileID: 11400000, guid: b1ba6ea9f44b4623b9b09291273351ee, type: 2}
+    Price: 4
+  - Card: {fileID: 11400000, guid: 6cf6735b062548348ded4640b10fa074, type: 2}
+    Price: 3
+  - Card: {fileID: 11400000, guid: 027693bba2524df4ac59aea01d3b2192, type: 2}
+    Price: 3
+  - Card: {fileID: 11400000, guid: 569ae2c8ae0c4631bf300103253cd404, type: 2}
+    Price: 3
+  - Card: {fileID: 11400000, guid: bfc33dfd41984e6cb36425b96c73070f, type: 2}
+    Price: 4
+  offerCount: 4
   guaranteeSpecialCard: 1
   removePrice: 3
   minimumDeckSize: 5

@@ -1,0 +1,20 @@
+{
+  "mode": "built-in imagegen",
+  "status": "approved_and_bound",
+  "edits": [
+    {
+      "title": "油布",
+      "original": "oilcloth.png",
+      "revision": "oilcloth-v2.png",
+      "gameAsset": "Assets/Game/art/texture/card/oilcloth.png",
+      "prompt": "Edit this existing game card image with one strictly localized change: REMOVE all THREE small cream water-droplet symbols from the top surface of the folded black oilcloth. Fill those spots seamlessly with the same near-black scratched block-print texture as the surrounding cloth. The cloth should have NO small icons or little decorative elements on its surface, only the existing broad cream fold highlights. Preserve the cloth shape, folds, scale, placement and silhouette exactly. Preserve EVERYTHING else unchanged: exact Chinese title 油布, title size and position, horizontal divider, worn double border, sage-grey paper color and texture, rounded cream edges, portrait dimensions and overall composition. Do not add anything."
+    },
+    {
+      "title": "剪票钳",
+      "original": "ticket_punch.png",
+      "revision": "ticket_punch-v2.png",
+      "gameAsset": "Assets/Game/art/texture/card/ticket_punch.png",
+      "prompt": "Edit this existing game card image with strictly localized changes: REMOVE the small cream paper ticket held between the upper and lower jaws, and REMOVE BOTH small circular paper chads floating below/right of the jaws. Reconstruct the revealed background seamlessly using the surrounding sage-grey textured paper. Keep the ticket-punch PLIERS TOOL ITSELF completely intact, including both handles, hinge rivet, upper and lower jaw, and the small physical punch pin attached to the upper jaw. Show a clear empty gap between the jaws, no ticket, no loose scraps, no loose circles or auxiliary objects anywhere. Preserve the tool's original shape, scale, position, diagonal angle and cream cut highlights exactly. Preserve EVERYTHING else: exact Chinese title 剪票钳, title position, horizontal divider, worn double border, sage paper, rounded cream edges, distressed woodcut texture, portrait dimensions and overall composition. Do not add anything."
+    }
+  ]
+}

@@ -15,7 +15,7 @@ namespace PaperSeizerStone.Configuration
     public sealed class ShopDefinition : ScriptableObject
     {
         [SerializeField] private ShopEntry[] cardPool;
-        [SerializeField, Range(1, 3)] private int offerCount = 3;
+        [SerializeField, Range(1, 4)] private int offerCount = 4;
         [SerializeField] private bool guaranteeSpecialCard = true;
         [SerializeField, Min(0)] private int removePrice = 3;
         [SerializeField] private CardTagCatalog engravings;
@@ -47,7 +47,10 @@ namespace PaperSeizerStone.Configuration
             {
                 if (entry == null || entry.Card == null || entry.Price < 0)
                     throw new InvalidOperationException("商店商品配置无效。");
-                if (entry.Card.Ability != CardAbility.ShatteredGlass && ids.Add(entry.Card.Id)) candidates.Add(entry);
+                string id = entry.Card.Id;
+                if (id == "rock" || id == "scissors" || id == "paper"
+                    || entry.Card.Ability == CardAbility.ShatteredGlass) continue;
+                if (ids.Add(id)) candidates.Add(entry);
             }
             var random = new System.Random(seed);
             var result = new List<ShopOffer>();
@@ -61,7 +64,7 @@ namespace PaperSeizerStone.Configuration
                     result.Add(new ShopOffer(entry.Card.Id, entry.Price));
                 }
             }
-            while (result.Count < Mathf.Clamp(offerCount, 1, 3) && candidates.Count > 0)
+            while (result.Count < Mathf.Clamp(offerCount, 1, 4) && candidates.Count > 0)
             {
                 int index = random.Next(candidates.Count);
                 ShopEntry entry = candidates[index];

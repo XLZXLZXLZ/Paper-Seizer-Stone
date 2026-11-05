@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35e5e1928390a05a00d0a96f8c4a60c3, type: 3}
+  m_Name: TranslucentPaper
+  m_EditorClassIdentifier:
+  definitionId: translucent_paper
+  displayName: 透光纸
+  gesture: 1
+  ability: 13
+  description: "视为布。被翻开时，额外揭开对位的敌方暗牌，并正常触发该牌的揭牌能力。"
+  transformation: {fileID: 0}
+  artwork: {fileID: 0}
+  faceColor: {r: 1, g: 1, b: 1, a: 1}
+  appearance: {fileID: 11400000, guid: 7f03f3eb8cce48b5adce590144b2257e, type: 2}

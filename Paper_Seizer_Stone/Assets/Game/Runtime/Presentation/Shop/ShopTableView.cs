@@ -35,8 +35,8 @@ namespace PaperSeizerStone.Presentation
         {
             if (engravingStation == null || owner.Engravings == null || panel == null || rug == null || walletArea == null || paymentExit == null
                 || deckAnchor == null || deckPile == null || continueBell == null || cardStyle == null
-                || offers == null || offers.Length < 3 || previewPrefab == null)
-                throw new InvalidOperationException("请完整绑定商店的商品、价格、火盆、卡组与铜铃。");
+                || offers == null || offers.Length < 4 || previewPrefab == null)
+                throw new InvalidOperationException("请完整绑定商店的四个商品位、价格、火盆、卡组与铜铃。");
             controller = owner;
             catalog = cards;
             walletArea.Initialize();

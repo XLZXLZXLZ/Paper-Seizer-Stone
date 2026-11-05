@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   displayName: 碎玻璃
   description: "视为剪刀。炼金玻璃瓶破碎后的剪刀类牌。本场战斗内保留变形。"
-  frontArtwork: {fileID: 0}
-  artworkIncludesText: 0
+  frontArtwork: {fileID: 2800000, guid: 29022bd20f38498e96e283bf95057201, type: 3}
+  artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}
   backArtwork: {fileID: 2800000, guid: d316035bff0d2d543b8076d9aa91f132, type: 3}
   playerBackTint: {r: 0.5, g: 0.72, b: 1, a: 1}

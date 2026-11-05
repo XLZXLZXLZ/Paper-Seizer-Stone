@@ -11,6 +11,7 @@ namespace PaperSeizerStone.Presentation.MainMenu
         [SerializeField] private Camera menuCamera;
         [SerializeField] private Transform disc;
         [SerializeField] private MenuSettingsPanel settings;
+        [SerializeField] private OpeningSequence openingSequence;
         [SerializeField] private string gameplayScene = "Assets/Scenes/BasicBattle.unity";
         [SerializeField] private LayerMask interactionMask = 1;
         private MenuSector hovered;
@@ -72,7 +73,11 @@ namespace PaperSeizerStone.Presentation.MainMenu
                         break;
                     }
                     PaperSeizerStone.Audio.GameAudioSettings.Save();
-                    settings.ShowStatus("正在进入游戏…");
+                    if (openingSequence != null)
+                    {
+                        openingSequence.SetTargetDisplay(menuCamera.targetDisplay);
+                        yield return openingSequence.Close();
+                    }
                     yield return SceneManager.LoadSceneAsync(gameplayScene);
                     break;
                 case MenuAction.Settings:

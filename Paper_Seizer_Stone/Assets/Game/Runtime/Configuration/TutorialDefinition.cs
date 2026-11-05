@@ -6,7 +6,7 @@ namespace PaperSeizerStone.Configuration
     public enum TutorialNode
     {
         Greeting, DrawFour, ExtraCard, PlaceCards, BellPrompt,
-        FirstBell, FirstHurt, EnemyDeath, Shop, Engraving, Basics
+        FirstBell, FirstHurt, EnemyDeath, Shop, Engraving, Basics, FirstBoss
     }
 
     public enum ManualPage { Confrontation, Cheating, Life, Shop, Engraving }
@@ -19,7 +19,7 @@ namespace PaperSeizerStone.Configuration
         public AudioClip voice;
         [Min(0.01f)] public float characterSeconds = 0.055f;
         [Min(0), Tooltip("字幕全文显示后自动停留的时间；有整句语音时也会等语音结束。")]
-        public float holdSeconds = 1;
+        public float holdSeconds = 1.6f;
     }
 
     [Serializable]

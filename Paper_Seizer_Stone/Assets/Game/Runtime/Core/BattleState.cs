@@ -18,6 +18,7 @@ namespace PaperSeizerStone.Battle
         public int Life { get; internal set; }
         public int Bullets { get; internal set; }
         public int Score { get; internal set; }
+        public bool HasCheatedThisRound { get; internal set; }
 
         internal FighterState(int life)
         {
@@ -64,12 +65,16 @@ namespace PaperSeizerStone.Battle
         public CardTag Tag { get; }
         public int AppearanceSeed { get; }
         public bool IsRevealed { get; }
+        public bool MovedByCheatThisRound { get; }
+        public bool SwapDiscountAvailable { get; }
 
         internal ObservedCard(CardRuntime card, bool visible)
         {
             Id = card.InstanceId;
             OriginalSide = card.OriginalSide;
             IsRevealed = card.IsRevealed;
+            MovedByCheatThisRound = visible && card.MovedByCheatThisRound;
+            SwapDiscountAvailable = visible && card.SwapDiscountAvailable;
             DefinitionId = visible ? card.Definition.Id : null;
             Gesture = visible ? (Gesture?)card.Definition.Gesture : null;
             Spec = visible ? card.Definition : null;
@@ -88,6 +93,7 @@ namespace PaperSeizerStone.Battle
         public int Life { get; }
         public int Bullets { get; }
         public int Score { get; }
+        public bool HasCheatedThisRound { get; }
 
         internal FighterObservation(BattleState state, Side owner, Side observer)
         {
@@ -122,6 +128,7 @@ namespace PaperSeizerStone.Battle
             Life = fighter.Life;
             Bullets = fighter.Bullets;
             Score = fighter.Score;
+            HasCheatedThisRound = fighter.HasCheatedThisRound;
         }
     }
 

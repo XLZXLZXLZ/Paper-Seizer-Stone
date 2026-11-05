@@ -15,5 +15,6 @@ MonoBehaviour:
   enemyId: housemaster
   displayName: 庄主
   life: 2
+  isBoss: 1
   deck: {fileID: 11400000, guid: 2731fe0571ecfe726f2fb439ba4fb1f2, type: 2}
   appearance: {fileID: 0}

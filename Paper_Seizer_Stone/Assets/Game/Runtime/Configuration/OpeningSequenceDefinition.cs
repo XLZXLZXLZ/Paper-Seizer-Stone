@@ -7,7 +7,9 @@ namespace PaperSeizerStone.Configuration
         [Tooltip("每次开始冒险时，在首场战斗播放苏醒开场。")]
         public bool playOpening = true;
         [Min(0.1f), Tooltip("睁眼与对焦动画时长，不含场景布景等待，单位秒。")]
-        public float duration = 4f;
+        public float duration = 5f;
+        [Min(0.1f), Tooltip("主菜单开始游戏时的闭眼时长，单位秒。")]
+        public float closeDuration = 0.8f;
         [Tooltip("横轴为0～1的播放进度，纵轴为0～1的睁眼程度。")]
         public AnimationCurve eyelidOpening = new AnimationCurve(
             new Keyframe(0f, 0f), new Keyframe(0.1f, 0f), new Keyframe(0.3f, 0.18f),

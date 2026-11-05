@@ -18,7 +18,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fc5c9d36c47c138023d7f3a952f65387, type: 2}
   - {fileID: 11400000, guid: fe56872624f795d7dcd28bd4fde9148e, type: 2}
   - {fileID: 11400000, guid: 47766ce73413db68539f50168441d7d0, type: 2}
+  - {fileID: 11400000, guid: a09b237a784c4f6bbb253a4eeacd76d5, type: 2}
+  - {fileID: 11400000, guid: 9dae1828105e412daecb6fb18bfc1513, type: 2}
+  - {fileID: 11400000, guid: a780e5b338fe44399f9aae6cbc240df0, type: 2}
+  - {fileID: 11400000, guid: e9b9f680496a48779772ae4b1be72d02, type: 2}
+  - {fileID: 11400000, guid: 6c52e336896a4e85939d5c4bf0b8071b, type: 2}
+  - {fileID: 11400000, guid: cf8aa2ce2ed94350889f7a313306e6f0, type: 2}
+  - {fileID: 11400000, guid: 9a535cd2394d40918c27e3d67aeff46f, type: 2}
+  - {fileID: 11400000, guid: 7de01e3809ae4394bc63084ebf9a21cf, type: 2}
   shop: {fileID: 11400000, guid: c29dc638b5d9b5b601cfd1383deb0c7d, type: 2}
   playerLife: 2
   chips: 8
   seed: 0
+  engravingStartCycle: 3
+  initialEnemyEngravingChance: 0.2
+  enemyEngravingChancePerCycle: 0.1
+  maximumEnemyEngravingChance: 1

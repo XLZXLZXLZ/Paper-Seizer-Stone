@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: OpeningSequence
   m_EditorClassIdentifier:
   playOpening: 1
-  duration: 4
+  duration: 5
+  closeDuration: 0.8
   eyelidOpening:
     serializedVersion: 2
     m_Curve:

@@ -99,11 +99,14 @@ namespace PaperSeizerStone.Battle
             {
                 card.IsRevealed = false;
                 card.RevealedThisRound = false;
+                card.MovedByCheatThisRound = false;
+                card.SwapDiscountAvailable = false;
             }
             foreach (Side side in new[] { Side.Player, Side.Enemy })
             {
                 State.Get(side).Bullets = 2;
                 State.Get(side).Score = 0;
+                State.Get(side).HasCheatedThisRound = false;
             }
             Emit(events, BattleEventKind.RoundStarted, "新回合开始，双方左轮重新装入两发子弹。");
             foreach (Side side in new[] { Side.Player, Side.Enemy })
@@ -186,15 +189,7 @@ namespace PaperSeizerStone.Battle
                     candidates.Clear();
                     candidates.Add(chosen);
                 }
-                foreach (int id in candidates)
-                {
-                    CardRuntime card = State.CardMap[id];
-                    card.IsRevealed = true;
-                    bool firstReveal = !card.RevealedThisRound;
-                    card.RevealedThisRound = true;
-                    Emit(events, BattleEventKind.CardRevealed, SideName(color) + "揭示了「" + card.Definition.Name + "」。", color, id);
-                    if (firstReveal) RevealAbility(card, events);
-                }
+                foreach (int id in candidates) RevealCard(id, events);
             }
             State.Phase = State.RevealStep == 4 ? BattlePhase.Scoring : BattlePhase.PlayerCheat;
             enemyCheatStart = State.Phase == BattlePhase.PlayerCheat ? Observe(Side.Enemy) : null;
@@ -206,6 +201,19 @@ namespace PaperSeizerStone.Battle
         private Side BoardSide(int id)
         {
             return Array.IndexOf(State.Get(Side.Player).Slots, id) >= 0 ? Side.Player : Side.Enemy;
+        }
+
+        private void RevealCard(int id, List<BattleEvent> events)
+        {
+            CardRuntime card = State.CardMap[id];
+            if (card.IsRevealed) return;
+            // Mark before resolving effects: opposing translucent papers must not reveal each other twice.
+            card.IsRevealed = true;
+            bool firstReveal = !card.RevealedThisRound;
+            card.RevealedThisRound = true;
+            Emit(events, BattleEventKind.CardRevealed, SideName(card.OriginalSide) + "揭示了「" + card.Definition.Name + "」。",
+                card.OriginalSide, id);
+            if (firstReveal) RevealAbility(card, events);
         }
 
         private void RevealAbility(CardRuntime card, List<BattleEvent> events)
@@ -223,6 +231,21 @@ namespace PaperSeizerStone.Battle
                 trailingScorePenalties[card.InstanceId] = side;
                 Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
                     + "」已生效：本回合计分后若己方分数较低，对方减少三分。", side, card.InstanceId);
+            }
+            else if (card.Definition.Ability == CardAbility.HookSickle)
+            {
+                card.SwapDiscountAvailable = true;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                    + "」已生效：本回合下一次涉及此牌的作弊交换免装弹。", side, card.InstanceId);
+            }
+            else if (card.Definition.Ability == CardAbility.TranslucentPaper)
+            {
+                int lane = Array.IndexOf(State.Get(side).Slots, card.InstanceId);
+                int target = State.Get(BasicRules.Other(side)).Slots[lane];
+                if (target == 0 || State.CardMap[target].IsRevealed) return;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                    + "」揭开了对位的敌牌。", side, card.InstanceId);
+                RevealCard(target, events);
             }
         }
 
@@ -269,7 +292,23 @@ namespace PaperSeizerStone.Battle
                 default: return ActionResult.Fail("无法识别这次作弊操作。");
             }
 
+            bool swapping = action.Kind == CheatKind.SwapBoard || action.Kind == CheatKind.SwapHand;
+            CardRuntime firstCard = swapping ? State.CardMap[action.FirstCard] : null;
+            CardRuntime secondCard = swapping ? State.CardMap[action.SecondCard] : null;
+            bool firstDiscount = swapping && firstCard.SwapDiscountAvailable;
+            bool secondDiscount = swapping && secondCard.SwapDiscountAvailable;
+            // The ordinary capacity check above remains in force even for a free exchange.
+            // Two ready hook sickles both consume their offer; a single exchange can only be free once.
+            if (firstDiscount || secondDiscount) cost = 0;
             var events = new List<BattleEvent>();
+            if (action.Kind != CheatKind.Pass) fighter.HasCheatedThisRound = true;
+            if (swapping)
+            {
+                firstCard.MovedByCheatThisRound = true;
+                secondCard.MovedByCheatThisRound = true;
+                firstCard.SwapDiscountAvailable = false;
+                secondCard.SwapDiscountAvailable = false;
+            }
             if (action.Kind == CheatKind.SwapBoard)
             {
                 fighter.Slots[firstSlot] = action.SecondCard;
@@ -280,14 +319,16 @@ namespace PaperSeizerStone.Battle
                 fighter.Slots[firstSlot] = action.SecondCard;
                 fighter.HandCards[handIndex] = action.FirstCard;
             }
-            if (side == Side.Player && (action.Kind == CheatKind.SwapBoard || action.Kind == CheatKind.SwapHand))
+            if (side == Side.Player && swapping)
             {
                 State.ForbiddenCards.Add(action.FirstCard);
                 State.ForbiddenCards.Add(action.SecondCard);
             }
-            if (action.Kind == CheatKind.SwapBoard || action.Kind == CheatKind.SwapHand)
+            if (swapping)
             {
                 Emit(events, BattleEventKind.CardsSwapped, SideName(side) + "交换了两张牌。", side, action.FirstCard);
+                if (firstDiscount) EmitSwapDiscount(firstCard, side, events);
+                if (secondDiscount) EmitSwapDiscount(secondCard, side, events);
                 TransformAfterSwap(action.FirstCard, side, events);
                 TransformAfterSwap(action.SecondCard, side, events);
             }
@@ -314,6 +355,12 @@ namespace PaperSeizerStone.Battle
             return ActionResult.Ok(events);
         }
 
+        private void EmitSwapDiscount(CardRuntime card, Side side, List<BattleEvent> events)
+        {
+            Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                + "」免除了本次交换的装弹，本回合优惠已使用。", side, card.InstanceId);
+        }
+
         public ActionResult ScoreRound()
         {
             if (State.Phase != BattlePhase.Scoring) return ActionResult.Fail("当前阶段不能计分。");
@@ -325,14 +372,24 @@ namespace PaperSeizerStone.Battle
                 CardRuntime a = State.CardMap[player.Slots[lane]];
                 CardRuntime b = State.CardMap[enemy.Slots[lane]];
                 int result = CardRules.Compare(a.Definition, b.Definition);
-                int p = CardRules.Points(a.Definition, result, a.Tag);
-                int e = CardRules.Points(b.Definition, -result, b.Tag);
+                int p = CardRules.Points(a.Definition, result, a.Tag, a.MovedByCheatThisRound);
+                int e = CardRules.Points(b.Definition, -result, b.Tag, b.MovedByCheatThisRound);
                 player.Score += p;
                 enemy.Score += e;
                 Emit(events, BattleEventKind.LaneScored, "第 " + (lane + 1) + " 组对位    你 " + p.ToString("+0;-0;0") + " 分    ·    对手 " + e.ToString("+0;-0;0") + " 分",
                     lane: lane, playerPoints: p, enemyPoints: e);
-                if (result != 0) WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
+                if (result != 0)
+                {
+                    WinAbility(result > 0 ? a : b, result > 0 ? Side.Player : Side.Enemy, events);
+                    LossAbility(result < 0 ? a : b, result < 0 ? Side.Player : Side.Enemy, events);
+                }
+                else
+                {
+                    TieAbility(a, Side.Player, events);
+                    TieAbility(b, Side.Enemy, events);
+                }
             }
+            ResolveContractPapers(events);
             ResolveTrailingScorePenalties(events);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (debugScoreBonusPending)
@@ -365,6 +422,42 @@ namespace PaperSeizerStone.Battle
             trailingScorePenalties.Clear();
         }
 
+        private void AddChips(CardRuntime card, Side side, int amount, List<BattleEvent> events)
+        {
+            State.Chips += amount;
+            Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                + "」令奖池增加 " + amount + " 枚筹码。", side, card.InstanceId);
+        }
+
+        private void ResolveContractPapers(List<BattleEvent> events)
+        {
+            foreach (Side side in new[] { Side.Player, Side.Enemy })
+            {
+                FighterState fighter = State.Get(side);
+                if (fighter.HasCheatedThisRound) continue;
+                foreach (int id in fighter.Slots)
+                {
+                    CardRuntime card = State.CardMap[id];
+                    if (card.Definition.Ability == CardAbility.ContractPaper) AddChips(card, side, 2, events);
+                }
+            }
+        }
+
+        private void LossAbility(CardRuntime card, Side side, List<BattleEvent> events)
+        {
+            if (card.Definition.Ability == CardAbility.TicketPunch) AddChips(card, side, 1, events);
+        }
+
+        private void TieAbility(CardRuntime card, Side side, List<BattleEvent> events)
+        {
+            if (card.Definition.Ability != CardAbility.Oilcloth) return;
+            FighterState opponent = State.Get(BasicRules.Other(side));
+            int removed = opponent.Bullets > 1 ? 1 : 0;
+            opponent.Bullets -= removed;
+            Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                + (removed > 0 ? "」平局，移除了对方一发子弹。" : "」平局，但对方至少保留一发子弹。"), side, card.InstanceId);
+        }
+
         private void WinAbility(CardRuntime card, Side side, List<BattleEvent> events)
         {
             if (card.Tag == CardTag.Violence)
@@ -382,6 +475,15 @@ namespace PaperSeizerStone.Battle
                 fighter.Bullets = Math.Min(BasicRules.Chambers, fighter.Bullets + 1);
                 Emit(events, BattleEventKind.AbilityTriggered, full ? "火药纸获胜，但己方弹巢已满。" : SideName(side) + "的火药纸获胜，己方装入一发子弹。", side, card.InstanceId);
             }
+            else if (card.Definition.Ability == CardAbility.Sickle)
+            {
+                FighterState fighter = State.Get(side);
+                bool canDraw = fighter.DrawCards.Count + fighter.DiscardCards.Count > 0;
+                Emit(events, BattleEventKind.AbilityTriggered, SideName(side) + "的「" + card.Definition.Name
+                    + (canDraw ? "」获胜，抽取一张牌保留在手中。" : "」获胜，但牌库和弃牌堆都已为空。"), side, card.InstanceId);
+                if (canDraw) Draw(side, events);
+            }
+            else if (card.Definition.Ability == CardAbility.Pyrite) AddChips(card, side, 2, events);
         }
 
         public ActionResult ExecuteShots()

@@ -6,7 +6,11 @@ namespace PaperSeizerStone.Battle
     public enum Gesture { Rock, Paper, Scissors }
     // Keep serialized values and legacy identifiers: WoodenCrate = 柏木棒, Pliers = 刀子,
     // Fork = 三叉戟. Fork and Silk now arm the card-face trailing-score effect on reveal.
-    public enum CardAbility { None, Hammer, Glass, ShatteredGlass, WoodenCrate, FlowerScissors, Pliers, Fork, Silk, GunpowderPaper }
+    public enum CardAbility
+    {
+        None, Hammer, Glass, ShatteredGlass, WoodenCrate, FlowerScissors, Pliers, Fork, Silk, GunpowderPaper,
+        LeadWeight, HookSickle, Sickle, TranslucentPaper, Oilcloth, Pyrite, TicketPunch, ContractPaper
+    }
     public enum BattlePhase { Created, Preparing, Planning, Revealing, PlayerCheat, EnemyCheat, Scoring, Shooting, RoundEnd, BattleEnd }
 
     // Immutable rule data, detached from Unity assets.
@@ -57,6 +61,8 @@ namespace PaperSeizerStone.Battle
         public CardSpec Definition { get; internal set; }
         public bool IsRevealed { get; internal set; }
         public bool RevealedThisRound { get; internal set; }
+        public bool MovedByCheatThisRound { get; internal set; }
+        public bool SwapDiscountAvailable { get; internal set; }
 
         internal CardRuntime(int id, DeckCardRecord record, CardSpec definition, Side side)
         {

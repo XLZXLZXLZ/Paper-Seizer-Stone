@@ -179,7 +179,9 @@ namespace PaperSeizerStone.Presentation
                 SetResultVisible(false);
                 return;
             }
-            roundText.text = snapshot == null ? "准备第 " + controller.EncounterNumber + " 场战斗" : "第 " + controller.EncounterNumber + " 场  ·  第 " + snapshot.Round.ToString("00") + " 回合  /  " + PhaseName(snapshot.Phase);
+            string encounter = "第 " + controller.CycleNumber + " 轮 · " + controller.EncounterInCycle + "/4 场"
+                + (controller.IsBossEncounter ? " · 头目" : "");
+            roundText.text = snapshot == null ? "准备" + encounter : encounter + "  ·  第 " + snapshot.Round.ToString("00") + " 回合  /  " + PhaseName(snapshot.Phase);
             if (playerScore != null) playerScore.text = "你  " + (snapshot == null ? "00" : snapshot.Player.Score.ToString("00"));
             if (enemyScore != null) enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
             messageText.text = tutorial ? string.Empty : string.IsNullOrEmpty(message) ? "正在准备对局。" : message;

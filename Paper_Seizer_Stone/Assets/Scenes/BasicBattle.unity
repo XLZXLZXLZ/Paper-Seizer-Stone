@@ -196,6 +196,18 @@ MonoBehaviour:
   phasePause: 0.3
   victoryPause: 0.8
   postShotScoreHold: 1.5
+--- !u!114 &900013 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 10100, guid: 550a245efcadfba5d2166c451b4fbbb2,
+    type: 3}
+  m_PrefabInstance: {fileID: 2511134475506925108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5399e8e1d69d47a8a2b6f6348584b177, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &9100100 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2446601118148054537, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
@@ -2406,12 +2418,12 @@ PrefabInstance:
     - target: {fileID: 6747520506492672438, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.9829897
+      value: 0.9169811
       objectReference: {fileID: 0}
     - target: {fileID: 6747520506492672438, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.84339625
+      value: 0.89622635
       objectReference: {fileID: 0}
     - target: {fileID: 6747520506492672438, guid: 3dd9b2fcf2c115d5794ffd92247eff7a,
         type: 3}
@@ -2638,18 +2650,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb529a1bb49b740ce785d97b9da476b, type: 3}
---- !u!114 &900013 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 10100, guid: 550a245efcadfba5d2166c451b4fbbb2,
-    type: 3}
-  m_PrefabInstance: {fileID: 2511134475506925108}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5399e8e1d69d47a8a2b6f6348584b177, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &4513627881449131820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2052224317999067416, guid: 550a245efcadfba5d2166c451b4fbbb2,
