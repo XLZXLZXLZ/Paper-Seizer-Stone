@@ -19,6 +19,10 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private GameObject inputShield;
         [SerializeField] private GameObject dialoguePanel;
         [SerializeField] private TextAnimator_TMP dialogueText;
+        [SerializeField] private CanvasGroup subtitleGroup;
+        [SerializeField, Min(0.01f)] private float subtitleFadeInSeconds = 0.1f;
+        [SerializeField, Min(0.01f)] private float subtitleFadeOutSeconds = 0.12f;
+        [SerializeField, Range(0.3f, 0.95f)] private float subtitleMaximumWidth = 0.7f;
         [SerializeField, Range(0, 1)] private float subtitleOutlineWidth = 0.18f;
         [SerializeField] private Color subtitleOutlineColor = new Color(0.03f, 0.025f, 0.02f, 1);
         [SerializeField, Min(0.01f)] private float hintCharacterSeconds = 0.045f;
@@ -66,6 +70,7 @@ namespace PaperSeizerStone.Presentation
         private int hintCharacter;
         private float nextHintCharacter;
         private float warningHoldUntil = -1;
+        private float subtitleTargetAlpha;
         public bool ManualRequested { get; private set; }
         public bool IsPresenting => running || manualOpen;
         public bool BlocksInput => IsPresenting || ManualRequested || inputGuard;
@@ -76,7 +81,7 @@ namespace PaperSeizerStone.Presentation
             dialogueText.DefaultBehaviorsTags = new[] { "shake" };
             dialogueText.defaultTagsMode = Febucci.UI.Core.TAnimCore.DefaultTagsMode.Fallback;
             inputShield.SetActive(false);
-            dialoguePanel.SetActive(false);
+            HideSubtitle();
             manualRect = (RectTransform)manualPanel.transform;
             manualRestPosition = manualRect.anchoredPosition;
             manualRestScale = manualRect.localScale;
@@ -140,8 +145,31 @@ namespace PaperSeizerStone.Presentation
             if (!displayingHint) return;
             displayingHint = false;
             displayedHint = null;
-            dialoguePanel.SetActive(false);
+            FadeOutSubtitle();
             speechSource.Stop();
+        }
+
+        private void FadeOutSubtitle()
+        {
+            subtitleTargetAlpha = 0;
+            if (subtitleGroup == null) HideSubtitle();
+        }
+
+        private void HideSubtitle()
+        {
+            subtitleTargetAlpha = 0;
+            if (subtitleGroup != null) subtitleGroup.alpha = 0;
+            dialoguePanel.SetActive(false);
+        }
+
+        private void UpdateSubtitleFade()
+        {
+            if (subtitleGroup == null || !dialoguePanel.activeSelf) return;
+            float duration = subtitleTargetAlpha > subtitleGroup.alpha
+                ? subtitleFadeInSeconds : subtitleFadeOutSeconds;
+            subtitleGroup.alpha = Mathf.MoveTowards(subtitleGroup.alpha, subtitleTargetAlpha,
+                Time.unscaledDeltaTime / Mathf.Max(0.01f, duration));
+            if (subtitleTargetAlpha == 0 && subtitleGroup.alpha == 0) dialoguePanel.SetActive(false);
         }
 
         private void LateUpdate()
@@ -214,6 +242,7 @@ namespace PaperSeizerStone.Presentation
 
         private void Update()
         {
+            UpdateSubtitleFade();
             if (inputGuard && Time.frameCount > releaseFrame && !HeldInput()) inputGuard = false;
             if (!manualOpen || inputGuard || !Application.isFocused) return;
             if (Input.GetKeyDown(KeyCode.Escape)) CloseManual();
@@ -239,7 +268,7 @@ namespace PaperSeizerStone.Presentation
                     if (line != null && !string.IsNullOrEmpty(line.text)) yield return Say(line, run);
                 }
                 if (!IsCurrent(run)) yield break;
-                dialoguePanel.SetActive(false);
+                HideSubtitle();
                 if (sequence.openManual) yield return OpenManual(sequence.page);
                 // An interrupted sequence must remain eligible for a later attempt.
                 if (IsCurrent(run)) completed.Add(node);
@@ -247,7 +276,7 @@ namespace PaperSeizerStone.Presentation
             finally
             {
                 speechSource.Stop();
-                dialoguePanel.SetActive(false);
+                HideSubtitle();
                 running = false;
                 inputShield.SetActive(manualOpen);
                 GuardInput();
@@ -256,6 +285,8 @@ namespace PaperSeizerStone.Presentation
 
         private void PrepareSubtitle(string text)
         {
+            if (subtitleGroup != null) subtitleGroup.alpha = 0;
+            subtitleTargetAlpha = 1;
             dialoguePanel.SetActive(true);
             // The saved subtitle starts inactive. Activate and initialize TMP before its
             // outline setters access the CanvasRenderer and create a local material instance.
@@ -263,6 +294,15 @@ namespace PaperSeizerStone.Presentation
             subtitle.ForceMeshUpdate();
             subtitle.outlineWidth = subtitleOutlineWidth;
             subtitle.outlineColor = subtitleOutlineColor;
+            // Fit the complete sentence once, so the backing does not grow with each letter.
+            GlobalFontService.Apply(subtitle);
+            RectTransform backing = (RectTransform)dialoguePanel.transform;
+            RectTransform parent = (RectTransform)backing.parent;
+            float maximumWidth = Mathf.Max(128, parent.rect.width * subtitleMaximumWidth);
+            Vector2 preferred = subtitle.GetPreferredValues(text, maximumWidth - 96, Mathf.Infinity);
+            backing.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                Mathf.Clamp(preferred.x + 96, 128, maximumWidth));
+            backing.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(56, preferred.y + 16));
             dialogueText.timeScale = TimeScale.Unscaled;
             dialogueText.SetText(text, true);
         }
@@ -297,6 +337,11 @@ namespace PaperSeizerStone.Presentation
             float holdUntil = Time.unscaledTime + Mathf.Max(0, line.holdSeconds);
             while (IsCurrent(run) && (Time.unscaledTime < holdUntil || (line.voice != null && speechSource.isPlaying))) yield return null;
             speechSource.Stop();
+            if (IsCurrent(run))
+            {
+                FadeOutSubtitle();
+                while (IsCurrent(run) && dialoguePanel.activeSelf) yield return null;
+            }
         }
 
         private void PlayBlip()
@@ -491,7 +536,7 @@ namespace PaperSeizerStone.Presentation
             manualCloseRequested = false;
             ManualRequested = false;
             if (speechSource != null) speechSource.Stop();
-            dialoguePanel.SetActive(false);
+            HideSubtitle();
             manualPanel.SetActive(false);
             ResetManualVisuals();
             inputShield.SetActive(false);

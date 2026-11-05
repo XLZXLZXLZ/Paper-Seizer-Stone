@@ -14,7 +14,7 @@ namespace PaperSeizerStone.Configuration
         [SerializeField] private EnemyDefinition[] enemies;
         [SerializeField] private ShopDefinition shop;
         [SerializeField, Min(1)] private int playerLife = 2;
-        [SerializeField, Min(0)] private int chips = 8;
+        [SerializeField, Min(0)] private int chips = 10;
         [Tooltip("零使用新种子，非零按场次派生种子。")]
         [SerializeField] private int seed;
         [SerializeField, Min(1)] private int engravingStartCycle = 3;

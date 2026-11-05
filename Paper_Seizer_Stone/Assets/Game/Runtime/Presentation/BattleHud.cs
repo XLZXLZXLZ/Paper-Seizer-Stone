@@ -21,6 +21,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text instructionText;
         [SerializeField] private GameObject resultPanel;
         [SerializeField] private TMP_Text deathSubtitle;
+        [SerializeField] private Image deathArtwork;
         [SerializeField] private GameObject[] gameplayPanels;
         [SerializeField] private GameObject errorPanel;
         [SerializeField] private TMP_Text errorText;
@@ -30,6 +31,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(0)] private float deathSubtitleSeconds = 2f;
         [SerializeField, Min(0.01f)] private float deathFadeSeconds = 0.9f;
         private Tween resultFade;
+        private Tween deathArtworkFade;
         private bool resultVisible;
         private bool deathPresentationStarted;
 
@@ -38,6 +40,7 @@ namespace PaperSeizerStone.Presentation
             if (restartButton != null) restartButton.onClick.AddListener(Restart);
             if (returnToMenuButton != null) returnToMenuButton.onClick.AddListener(ReturnToMenu);
             if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(false);
+            if (deathArtwork != null) deathArtwork.gameObject.SetActive(false);
         }
 
         private void Restart()
@@ -82,6 +85,17 @@ namespace PaperSeizerStone.Presentation
             resultVisible = visible;
             resultFade?.Kill();
             resultPanel.SetActive(visible);
+            deathArtworkFade?.Kill();
+            if (deathArtwork != null)
+            {
+                deathArtwork.gameObject.SetActive(visible);
+                Color color = deathArtwork.color;
+                color.a = 0;
+                deathArtwork.color = color;
+                if (visible)
+                    deathArtworkFade = deathArtwork.DOFade(1f, deathFadeSeconds)
+                        .SetUpdate(true).SetEase(Ease.OutCubic);
+            }
             if (resultGroup == null) return;
             resultGroup.alpha = 0f;
             resultGroup.interactable = false;
@@ -108,6 +122,7 @@ namespace PaperSeizerStone.Presentation
         private void OnDestroy()
         {
             resultFade?.Kill();
+            deathArtworkFade?.Kill();
             if (restartButton != null) restartButton.onClick.RemoveListener(Restart);
             if (returnToMenuButton != null) returnToMenuButton.onClick.RemoveListener(ReturnToMenu);
         }

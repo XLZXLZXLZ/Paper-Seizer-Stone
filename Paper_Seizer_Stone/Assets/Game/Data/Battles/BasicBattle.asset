@@ -28,7 +28,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7de01e3809ae4394bc63084ebf9a21cf, type: 2}
   shop: {fileID: 11400000, guid: c29dc638b5d9b5b601cfd1383deb0c7d, type: 2}
   playerLife: 2
-  chips: 8
+  chips: 10
   seed: 0
   engravingStartCycle: 3
   initialEnemyEngravingChance: 0.2

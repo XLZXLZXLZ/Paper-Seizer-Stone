@@ -59,9 +59,10 @@ void ToonAdditionalLights_float(
     Diffuse = float3(0.0, 0.0, 0.0);
     Specular = float3(0.0, 0.0, 0.0);
 
-    // Preview already has the original main-light fallback. Do not add a
-    // second artificial lamp. Disabled additional-light quality modes stay 0.
-    #if !defined(SHADERGRAPH_PREVIEW) && (defined(_ADDITIONAL_LIGHTS) || defined(_ADDITIONAL_LIGHTS_VERTEX))
+    // Unlit Shader Graph passes can select a variant without URP's lighting
+    // keyword in a player build. The uploaded light count is authoritative:
+    // disabled additional-light quality modes upload zero and skip this loop.
+    #if !defined(SHADERGRAPH_PREVIEW)
         float3 normalWS = SafeNormalize(NormalWS);
         float3 viewDirectionWS = SafeNormalize(ViewDirectionWS);
         uint renderingLayers = GetMeshRenderingLightLayer();

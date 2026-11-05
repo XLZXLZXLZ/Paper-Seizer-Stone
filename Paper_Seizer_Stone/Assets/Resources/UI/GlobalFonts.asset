@@ -16,6 +16,6 @@ MonoBehaviour:
   defaultFont: {fileID: 11400000, guid: 26618bc6b492380488441588be276bc4, type: 2}
   uiFont: {fileID: 11400000, guid: 17fa833f93446f6489e2983e9d474500, type: 2}
   cardFont: {fileID: 0}
-  scoreFont: {fileID: 0}
+  scoreFont: {fileID: 11400000, guid: 8f7833a20f9a57aebc70cda6e42a752e, type: 2}
   fallbackFonts:
   - {fileID: 11400000, guid: 17fa833f93446f6489e2983e9d474500, type: 2}

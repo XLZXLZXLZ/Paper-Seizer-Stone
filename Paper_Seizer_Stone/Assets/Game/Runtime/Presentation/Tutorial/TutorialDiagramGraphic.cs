@@ -10,7 +10,7 @@ namespace PaperSeizerStone.Presentation
 
         [SerializeField] private Shape shape;
         [SerializeField, Min(0.5f)] private float lineWidth = 2;
-        [SerializeField, Range(1, 8)] private int chipCount = 8;
+        [SerializeField, Range(1, 10)] private int chipCount = 10;
 
         private const int EllipseSegments = 48;
 
@@ -110,11 +110,11 @@ namespace PaperSeizerStone.Presentation
 
         private void DrawChipStack(VertexHelper mesh, Rect rect)
         {
-            int count = Mathf.Clamp(chipCount, 1, 8);
+            int count = Mathf.Clamp(chipCount, 1, 10);
             float radiusX = rect.width * 0.5f;
             float radiusY = Mathf.Min(rect.width * 0.17f, rect.height * 0.18f);
-            // Use eight-chip capacity so 8, 7 and 6 chip stacks share a baseline and decrease in height.
-            float step = (rect.height - radiusY * 2) / 8;
+            // Use ten-chip capacity so 10, 9 and 8 chip stacks share a baseline and decrease in height.
+            float step = (rect.height - radiusY * 2) / 10;
             Vector2 bottom = new Vector2(rect.center.x, rect.yMin + radiusY);
             DrawArc(mesh, bottom, radiusX, radiusY, Mathf.PI, Mathf.PI * 2, lineWidth);
             for (int i = 0; i < count; i++)
