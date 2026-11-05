@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using PaperSeizerStone.Battle;
 using PaperSeizerStone.Flow;
+using DG.Tweening;
+using UnityEngine.UI;
 
 namespace PaperSeizerStone.Presentation
 {
@@ -20,12 +22,62 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text resultDetails;
         [SerializeField] private GameObject errorPanel;
         [SerializeField] private TMP_Text errorText;
+        [SerializeField] private CanvasGroup resultGroup;
+        [SerializeField] private Button restartButton;
+        [SerializeField] private Button quitButton;
+        [SerializeField, Min(0.01f)] private float deathFadeSeconds = 0.9f;
+        private Tween resultFade;
+        private bool resultVisible;
 
+        private void Awake()
+        {
+            if (restartButton != null) restartButton.onClick.AddListener(Restart);
+            if (quitButton != null) quitButton.onClick.AddListener(Quit);
+        }
+
+        private void Restart()
+        {
+            if (resultGroup == null || !resultGroup.interactable) return;
+            controller.ConfirmOrPass();
+        }
+
+        private void Quit()
+        {
+            if (resultGroup == null || !resultGroup.interactable) return;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        private void SetResultVisible(bool visible)
+        {
+            if (resultVisible == visible) return;
+            resultVisible = visible;
+            resultFade?.Kill();
+            resultPanel.SetActive(visible);
+            if (resultGroup == null) return;
+            resultGroup.alpha = 0f;
+            resultGroup.interactable = false;
+            resultGroup.blocksRaycasts = visible;
+            if (visible)
+                resultFade = resultGroup.DOFade(1f, deathFadeSeconds).SetUpdate(true).SetEase(Ease.OutCubic)
+                    .OnComplete(() => resultGroup.interactable = true);
+        }
+
+        private void OnDestroy()
+        {
+            resultFade?.Kill();
+            if (restartButton != null) restartButton.onClick.RemoveListener(Restart);
+            if (quitButton != null) quitButton.onClick.RemoveListener(Quit);
+        }
         private BattleObservation previous;
         private string previousMessage;
         private string previousError;
         private bool previousInteractive;
         private bool previousTutorial;
+        private bool previousDeathComplete;
 
         private static string PhaseName(BattlePhase phase)
         {
@@ -71,7 +123,9 @@ namespace PaperSeizerStone.Presentation
             string message = tableView.Message;
             bool interactive = controller.CanInteract;
             bool tutorial = controller.TutorialVisible;
-            if (previous == snapshot && previousMessage == message && previousError == error && previousInteractive == interactive && previousTutorial == tutorial) return;
+            bool deathComplete = controller.DeathPresentationComplete;
+            if (previous == snapshot && previousMessage == message && previousError == error && previousInteractive == interactive && previousTutorial == tutorial && previousDeathComplete == deathComplete) return;
+            previousDeathComplete = deathComplete;
             previous = snapshot;
             previousMessage = message;
             previousError = error;
@@ -81,7 +135,7 @@ namespace PaperSeizerStone.Presentation
             if (!string.IsNullOrEmpty(error))
             {
                 errorText.text = error;
-                resultPanel.SetActive(false);
+                SetResultVisible(false);
                 return;
             }
             roundText.text = snapshot == null ? "准备第 " + controller.EncounterNumber + " 场战斗" : "第 " + controller.EncounterNumber + " 场  ·  第 " + snapshot.Round.ToString("00") + " 回合  /  " + PhaseName(snapshot.Phase);
@@ -89,12 +143,12 @@ namespace PaperSeizerStone.Presentation
             if (enemyScore != null) enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
             messageText.text = tutorial ? string.Empty : string.IsNullOrEmpty(message) ? "正在准备对局。" : message;
             if (instructionText != null) instructionText.text = tutorial ? string.Empty : snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
-            bool finished = snapshot != null && snapshot.Phase == BattlePhase.BattleEnd && interactive;
-            resultPanel.SetActive(finished);
+            bool finished = deathComplete;
+            SetResultVisible(finished);
             if (finished)
             {
-                resultTitle.text = "冒险结束";
-                resultDetails.text = "抵达第 " + controller.EncounterNumber + " 场战斗\n按回车或点击桌面按钮重新开始";
+                resultTitle.text = "你死了";
+                resultDetails.text = "抵达第 " + controller.EncounterNumber + " 场战斗";
             }
         }
     }

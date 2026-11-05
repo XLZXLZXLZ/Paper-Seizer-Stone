@@ -99,6 +99,7 @@ namespace PaperSeizerStone.Presentation
         public bool IsActive => active;
         private bool mechanismSoundPlayed;
         private bool loadSoundPlayed;
+        private bool openSoundPlayed, closeSoundPlayed;
 
         public string ConfigurationProblem
         {
@@ -132,6 +133,7 @@ namespace PaperSeizerStone.Presentation
                 throw new InvalidOperationException("玩家射击缺少手牌表现组件或桌面枪械引用。");
             Cancel();
             mechanismSoundPlayed = loadSoundPlayed = false;
+            openSoundPlayed = closeSoundPlayed = false;
             int run = ++revision;
             bool prepared = false;
             try
@@ -201,7 +203,9 @@ namespace PaperSeizerStone.Presentation
                     Queue(clock, 0);
                     yield return WaitForEvaluation(requestedFrame, run);
                     // Hand the controller back on a single idle state, preserving its pose and time.
-                    while (active && revision == run && idle.IsValid() && idle.IsInTransition(0))
+                    float transitionDeadline = Time.unscaledTime + definition.ReturnBlend + 0.25f;
+                    while (active && revision == run && idle.IsValid() && idle.IsInTransition(0)
+                        && Time.unscaledTime < transitionDeadline)
                         yield return null;
                 }
             }
@@ -313,15 +317,25 @@ namespace PaperSeizerStone.Presentation
                 graph.Evaluate(Time.deltaTime);
                 if (Application.isPlaying)
                 {
-                    if (!mechanismSoundPlayed && clock >= definition.GunStart)
+                    if (!openSoundPlayed && clock >= definition.OpenSoundTime)
+                    {
+                        openSoundPlayed = true;
+                        PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunOpen);
+                    }
+                    if (!mechanismSoundPlayed && clock >= definition.CockSoundTime)
                     {
                         mechanismSoundPlayed = true;
                         PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunMechanism);
                     }
-                    if (!loadSoundPlayed && clock >= definition.BulletStart)
+                    if (!loadSoundPlayed && clock >= definition.LoadSoundTime)
                     {
                         loadSoundPlayed = true;
                         PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunLoad);
+                    }
+                    if (!closeSoundPlayed && clock >= definition.CloseSoundTime)
+                    {
+                        closeSoundPlayed = true;
+                        PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunClose);
                     }
                 }
                 ApplyOffset(placementBaselines[0], characterPlacement, characterWeight, null);

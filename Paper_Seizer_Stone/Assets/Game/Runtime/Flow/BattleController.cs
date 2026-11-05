@@ -44,6 +44,13 @@ namespace PaperSeizerStone.Flow
         private string initializationError;
         public string InitializationError => initializationError;
         public bool TutorialVisible => tutorial != null && tutorial.IsPresenting;
+        public bool DeathPresentationComplete { get; private set; }
+
+        private void CompletePlayerDeath()
+        {
+            DeathPresentationComplete = true;
+            if (tutorial != null) tutorial.Cancel();
+        }
         private bool TutorialBlocked => tutorial != null && tutorial.BlocksInput;
         private bool previousTutorialBlocked;
 
@@ -221,17 +228,17 @@ namespace PaperSeizerStone.Flow
                     bool playerHurt = shots.Exists(shot => shot.Side == Side.Enemy && shot.Hit);
                     try
                     {
-                        yield return tableView.PresentShots(shots, () => tutorial.Play(TutorialNode.EnemyDeath));
+                        yield return tableView.PresentShots(shots, () => tutorial.Play(TutorialNode.EnemyDeath), CompletePlayerDeath);
                         if (!playerKilled && shots.Exists(shot => shot.Hit))
                         {
                             yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
                             yield return new WaitForSecondsRealtime(postShotScoreHold);
                         }
-                        yield return cameraRig.MoveTo(BattleCameraPose.Table);
+                        if (!playerKilled) yield return cameraRig.MoveTo(BattleCameraPose.Table);
                     }
                     finally
                     {
-                        tableView.EndPostShotPresentation();
+                        tableView.EndPostShotPresentation(playerKilled);
                     }
                     // A simultaneous kill defers the entire hurt introduction, including its completion flag.
                     if (playerHurt && !playerKilled && !enemyKilled)
@@ -256,6 +263,11 @@ namespace PaperSeizerStone.Flow
 
         public void ConfirmOrPass()
         {
+            if (DeathPresentationComplete)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path);
+                return;
+            }
             if (!CanInteract) return;
             if (engine.State.Phase == BattlePhase.BattleEnd)
             {

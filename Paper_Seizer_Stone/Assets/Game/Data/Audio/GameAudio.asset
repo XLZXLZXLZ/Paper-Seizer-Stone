@@ -105,39 +105,38 @@ MonoBehaviour:
     maximumVoices: 2
     priority: 120
   - cue: 8
-    description: "举枪 / 机械动作轨开始"
+    description: "开保险 / 扳机机械声"
     clips:
-    - {fileID: 8300000, guid: 61027c72665b5b0ca4ce562b27bee576, type: 3}
-    volume: 0.36
-    pitchRange: {x: 0.92, y: 1.02}
-    minimumInterval: 0.1
+    - {fileID: 8300000, guid: 71452cd8b2984149b5bf87bc0433ac2d, type: 3}
+    volume: 0.7
+    pitchRange: {x: 1, y: 1}
+    minimumInterval: 0
     maximumVoices: 2
     priority: 70
   - cue: 9
-    description: "装填子弹动作轨开始"
+    description: "子弹装入弹巢"
     clips:
-    - {fileID: 8300000, guid: 998f95dab4535145b6dc9577e42c1276, type: 3}
-    - {fileID: 8300000, guid: 61027c72665b5b0ca4ce562b27bee576, type: 3}
-    volume: 0.38
-    pitchRange: {x: 1.05, y: 1.1}
-    minimumInterval: 0.08
+    - {fileID: 8300000, guid: 9f9165407e554d0f9fe240d58ec77c41, type: 3}
+    volume: 0.75
+    pitchRange: {x: 1, y: 1}
+    minimumInterval: 0
     maximumVoices: 2
     priority: 70
   - cue: 10
-    description: "空枪击锤"
+    description: "空枪击发"
     clips:
-    - {fileID: 8300000, guid: 998f95dab4535145b6dc9577e42c1276, type: 3}
-    volume: 0.65
-    pitchRange: {x: 0.72, y: 0.75}
+    - {fileID: 8300000, guid: 59a67f1147c447e68472eadc1b5af7c9, type: 3}
+    volume: 0.7
+    pitchRange: {x: 1, y: 1}
     minimumInterval: 0
     maximumVoices: 2
     priority: 25
   - cue: 11
-    description: "实弹击发 / 与枪口闪光同步"
+    description: "实弹击发 / 枪口火光同步"
     clips:
-    - {fileID: 8300000, guid: e83c2cd058545e2b8bd86883a943ff88, type: 3}
-    volume: 0.78
-    pitchRange: {x: 0.98, y: 1.02}
+    - {fileID: 8300000, guid: b6474d72b5e44a059b53e5078f859ef0, type: 3}
+    volume: 0.9
+    pitchRange: {x: 1, y: 1}
     minimumInterval: 0
     maximumVoices: 2
     priority: 10
@@ -216,3 +215,21 @@ MonoBehaviour:
     minimumInterval: 0.2
     maximumVoices: 1
     priority: 90
+  - cue: 21
+    description: "装弹完成 / 合上弹巢"
+    clips:
+    - {fileID: 8300000, guid: 1cf1eaa7ea864430a95eb0ce3187b7bc, type: 3}
+    volume: 0.75
+    pitchRange: {x: 1, y: 1}
+    minimumInterval: 0
+    maximumVoices: 2
+    priority: 70
+  - cue: 20
+    description: "打开弹巢"
+    clips:
+    - {fileID: 8300000, guid: 4f6cf1e788064f32a31e4756d9182bad, type: 3}
+    volume: 0.7
+    pitchRange: {x: 1, y: 1}
+    minimumInterval: 0
+    maximumVoices: 2
+    priority: 70

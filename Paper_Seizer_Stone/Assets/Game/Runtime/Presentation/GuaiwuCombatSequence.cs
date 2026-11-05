@@ -22,6 +22,9 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Tooltip("负数表示人物动作末帧击发。")] private float fireMoment = -1;
         [SerializeField, Min(0)] private float enterBlend = .15f;
         [SerializeField, Min(0)] private float returnBlend = .25f;
+        [SerializeField, Tooltip("扳机机械声在人物动画中的秒数；负数为击发点前0.2秒。")]
+        private float cockSoundTime = -1f;
+        private bool cockSoundPlayed;
         [Header("手动对位（相对预制体原位置）")]
         [SerializeField] private ShootingPlacement characterPlacement = new ShootingPlacement();
         [SerializeField] private ShootingPlacement gunPlacement = new ShootingPlacement();
@@ -46,6 +49,10 @@ namespace PaperSeizerStone.Presentation
             && characterAnimator != null && gunAnimator != null && gunRoot != null && muzzleFlash != null
             && (characterAnimator.runtimeAnimatorController != null || active) && fireClip.length > 0;
         public GameObject MuzzleFlash => muzzleFlash;
+        public void AlignRestingGun(SideTableBindings side)
+        {
+            if (IsConfigured) side.AlignRestGunToAnimation(gunRoot, gunAnimator, gunClip, gunPlacement);
+        }
         public float FireTime => fireClip == null ? 0 : fireMoment < 0 ? fireClip.length : Mathf.Clamp(fireMoment, 0, fireClip.length);
         private static Pose Read(Transform t) => new Pose { position = t.localPosition, rotation = t.localRotation, scale = t.localScale };
         private static void Restore(Transform t, Pose p) { if (t == null) return; t.localPosition = p.position; t.localRotation = p.rotation; t.localScale = p.scale; }
@@ -141,7 +148,9 @@ namespace PaperSeizerStone.Presentation
             Queue(clock, 0);
             int frame = queued;
             while (active && run == revision && evaluated < frame) yield return null;
-            while (active && run == revision && characterAnimator.IsInTransition(0)) yield return null;
+            float transitionDeadline = Time.unscaledTime + returnBlend + 0.25f;
+            while (active && run == revision && characterAnimator.IsInTransition(0)
+                && Time.unscaledTime < transitionDeadline) yield return null;
         }
 
         private void StartAction(AnimationClip clip, bool withGun)
@@ -155,6 +164,7 @@ namespace PaperSeizerStone.Presentation
             characterBase = Read(characterAnimator.transform); gunBase = Read(gunRoot);
             gunRootVisible = gunRoot.gameObject.activeSelf;
             active = true; shooting = withGun; clock = weight = 0; queued = evaluated = 0;
+            cockSoundPlayed = false;
             lastClock = 0; returning = false;
             characterAnimator.enabled = false; characterAnimator.applyRootMotion = false; characterAnimator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             gunRoot.gameObject.SetActive(withGun); muzzleFlash.SetActive(false);
@@ -178,6 +188,12 @@ namespace PaperSeizerStone.Presentation
             lastClock = clock;
             if (shooting && gun.IsValid()) gun.SetTime(Mathf.Clamp(clock - gunStart, 0, gunClip.length));
             graph.Evaluate(0);
+            if (Application.isPlaying && shooting && !cockSoundPlayed
+                && clock >= Mathf.Clamp(cockSoundTime < 0 ? FireTime - 0.2f : cockSoundTime, 0, FireTime))
+            {
+                cockSoundPlayed = true;
+                PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.GunMechanism);
+            }
             PlayerShootingSequence.ApplyPlacement(characterAnimator.transform, characterBase.position, characterBase.rotation, characterBase.scale, characterPlacement, weight, Vector3.zero);
             if (shooting) PlayerShootingSequence.ApplyPlacement(gunRoot, gunBase.position, gunBase.rotation, gunBase.scale, gunPlacement, 1, gunRoot.InverseTransformPoint(gunAnimator.transform.position));
             evaluated = queued;

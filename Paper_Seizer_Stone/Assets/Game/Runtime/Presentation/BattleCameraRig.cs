@@ -47,17 +47,21 @@ namespace PaperSeizerStone.Presentation
 
         private const float HitBuildUpSeconds = 1.85f;
 
-        public void ShakeForShot()
+        private float shakeStrength = 1f;
+        private bool lethalHit;
+        public void ShakeForShot(float strength = 1f)
         {
+            shakeStrength = Mathf.Max(0f, strength);
             shakeStart = Time.unscaledTime;
         }
         private UnityEngine.UI.Image hitOverlay;
 
         // One call owns the entire buildup, flash, blackout and recovery timeline.
-        public void PlayHitScreenEffect()
+        public void PlayHitScreenEffect(bool immediate = false, bool lethal = false)
         {
             if (!isActiveAndEnabled) return;
-            hitStart = Time.unscaledTime;
+            lethalHit = lethal;
+            hitStart = Time.unscaledTime - (immediate ? HitBuildUpSeconds : 0f);
             EnsureHitOverlay();
         }
 
@@ -70,7 +74,11 @@ namespace PaperSeizerStone.Presentation
 
         private void EnsureHitOverlay()
         {
-            if (hitOverlay != null) return;
+            if (hitOverlay != null)
+            {
+                hitOverlay.canvas.sortingOrder = short.MaxValue;
+                return;
+            }
 
             var overlay = new GameObject("Hit Screen Overlay", typeof(RectTransform), typeof(Canvas));
             var canvas = overlay.GetComponent<Canvas>();
@@ -96,6 +104,7 @@ namespace PaperSeizerStone.Presentation
         {
             shakeStart = hitStart = float.NegativeInfinity;
             playerShotFlashStart = float.NegativeInfinity;
+            lethalHit = false;
             if (hitOverlay != null)
             {
                 hitOverlay.color = Color.clear;
@@ -103,11 +112,17 @@ namespace PaperSeizerStone.Presentation
             }
         }
 
+        public void KeepDeathBackdrop()
+        {
+            shakeStart = playerShotFlashStart = float.NegativeInfinity;
+            if (hitOverlay != null) hitOverlay.canvas.sortingOrder = 90;
+        }
+
         public Vector4 HitScreenEffect
         {
             get
             {
-                if (!IsHitEffectPlaying) return Vector4.zero;
+                if (!IsHitEffectPlaying) return lethalHit ? new Vector4(0, 0, 1, 0) : Vector4.zero;
                 float elapsed = Time.unscaledTime - hitStart;
                 if (elapsed < HitBuildUpSeconds)
                 {
@@ -116,14 +131,10 @@ namespace PaperSeizerStone.Presentation
                 }
                 float impactElapsed = elapsed - HitBuildUpSeconds;
                 float t = impactElapsed / hitSequenceDuration;
-                const float flashDuration = 0.09f;
-                const float recoveryStart = 3f / 5.5f;
-                float flashProgress = Mathf.Clamp01(impactElapsed / flashDuration);
-                float flash = 0.8f * (1f - flashProgress);
-                float black = flashProgress < 1f ? 0f
-                    : 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(recoveryStart, 1f, t));
-                float red = flashProgress < 1f ? 1f : black;
-                return new Vector4(hitDistortion * (1f - flashProgress), flash, black, red);
+                float black = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.08f, 0.25f, t));
+                if (!lethalHit) black *= 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, t));
+                float red = (1f - black) * (1f - Mathf.Clamp01(t / 0.3f));
+                return new Vector4(hitDistortion * (1f - Mathf.Clamp01(t / 0.25f)), 0f, black, red);
             }
         }
 
@@ -131,14 +142,13 @@ namespace PaperSeizerStone.Presentation
 
         private void LateUpdate()
         {
-            if (!IsHitEffectPlaying) hitStart = float.NegativeInfinity;
+            if (!IsHitEffectPlaying && !lethalHit) hitStart = float.NegativeInfinity;
             if (hitOverlay != null)
             {
                 Vector4 effect = HitScreenEffect;
-                hitOverlay.color = effect.y > 0f
-                    ? new Color(1f, 0.88f, 0.68f, effect.y)
-                    : new Color(0f, 0f, 0f, effect.z);
-                hitOverlay.enabled = effect.y > 0f || effect.z > 0f;
+                float hitAlpha = effect.z + effect.w * 0.8f * (1f - effect.z);
+                hitOverlay.color = new Color(0.55f * (1f - effect.z), 0f, 0f, hitAlpha);
+                hitOverlay.enabled = hitAlpha > 0f;
                 float shotFlash = playerShotFlashStrength * (1f - Mathf.Clamp01(
                     (Time.unscaledTime - playerShotFlashStart) / Mathf.Max(0.01f, playerShotFlashSeconds)));
                 if (shotFlash > 0f)
@@ -159,7 +169,7 @@ namespace PaperSeizerStone.Presentation
                 cursor.x >= 0 && cursor.x <= Screen.width && cursor.y >= 0 && cursor.y <= Screen.height)
                 target = new Vector2(cursor.x / Screen.width * 2 - 1, cursor.y / Screen.height * 2 - 1);
             mouseOffset = Vector2.Lerp(mouseOffset, target, blend);
-            float weight = !subtleMotion || deathPose ? 0 : precisionMode || transitioning || currentPose == BattleCameraPose.Shooting ? 0.2f : 1;
+            float weight = !subtleMotion || deathPose || currentPose == BattleCameraPose.Scoring ? 0 : precisionMode || transitioning || currentPose == BattleCameraPose.Shooting ? 0.2f : 1;
             motionWeight = Mathf.Lerp(motionWeight, weight, blend);
             float phase = Time.unscaledTime * breathFrequency * Mathf.PI * 2;
             float breath = Mathf.Sin(phase);
@@ -174,7 +184,7 @@ namespace PaperSeizerStone.Presentation
                 float decay = 1f - shotElapsed / shotTremorDuration;
                 float wave = shotElapsed * Mathf.Lerp(94f, 63.5f, 1f - decay);
                 angles += new Vector3(Mathf.Cos(wave), Mathf.Sin(wave * 1.37f),
-                    Mathf.Sin(wave * 0.83f + 2f)) * (impactTremorAngle * decay);
+                    Mathf.Sin(wave * 0.83f + 2f)) * (impactTremorAngle * shakeStrength * decay);
             }
             sceneCamera.transform.SetPositionAndRotation(basePosition + baseRotation * position,
                 baseRotation * Quaternion.Euler(angles));
@@ -273,16 +283,39 @@ namespace PaperSeizerStone.Presentation
                 basePosition = Vector3.Lerp(startPosition, landed, fall) + up * (0.045f * impact);
                 baseRotation = Quaternion.Slerp(startRotation, landedRotation, fall)
                     * Quaternion.Euler(-3f * impact, 0f, 4f * impact);
-                if (t >= 1f) yield break;
+                if (t >= 1f) break;
                 yield return null;
             }
+            if (lethal) yield break;
+
+            // Restore the viewpoint while the nonlethal blackout is opaque. Recovery must not
+            // depend on another actor's animation coroutine returning successfully.
+            float recoveryAt = start + Mathf.Max(duration, hitSequenceDuration * 0.3f);
+            while (Time.unscaledTime < recoveryAt) yield return null;
+            float recoveryStart = Time.unscaledTime;
+            const float recoverySeconds = 0.35f;
+            while (true)
+            {
+                float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((Time.unscaledTime - recoveryStart) / recoverySeconds));
+                basePosition = Vector3.Lerp(landed, startPosition, t);
+                baseRotation = Quaternion.Slerp(landedRotation, startRotation, t);
+                if (t >= 1f) break;
+                yield return null;
+            }
+            basePosition = startPosition;
+            baseRotation = startRotation;
+            deathPose = false;
+            while (IsHitEffectPlaying) yield return null;
+            if (!lethalHit) ResetShotEffects();
         }
 
         public IEnumerator MoveTo(BattleCameraPose pose) => MoveToPose(GetWorldPose(pose), pose);
 
         public IEnumerator FocusScoreCounter(Transform counter)
         {
+            ResetShotEffects();
             if (counter == null) return MoveTo(BattleCameraPose.Scoring);
+            motionWeight = 0f;
 
             var renderers = counter.GetComponentsInChildren<MeshRenderer>();
             Bounds bounds = new Bounds(counter.position, Vector3.zero);
