@@ -47,6 +47,7 @@ namespace PaperSeizerStone.Presentation
         private CardView selected;
         private CardTag selectedOriginalTag;
         private Vector3 glowScale;
+        private BrazierFlameView brazierFlame;
 
         public void Initialize(BattleController owner, Dictionary<string, CardDefinition> definitions)
         {
@@ -59,6 +60,7 @@ namespace PaperSeizerStone.Presentation
             if (editorPreview != null) editorPreview.SetActive(false);
             walletArea.Initialize();
             glowScale = emberGlow.localScale;
+            brazierFlame = emberGlow.GetComponent<BrazierFlameView>();
             preview = Instantiate(previewPrefab);
             preview.Hide();
             panel.Initialize();
@@ -98,6 +100,7 @@ namespace PaperSeizerStone.Presentation
                 cards.Add(card);
             }
             emberGlow.localScale = glowScale;
+            if (brazierFlame != null) brazierFlame.ResetPulse();
             Refresh();
         }
 
@@ -145,7 +148,8 @@ namespace PaperSeizerStone.Presentation
             {
                 emberGlow.DOKill();
                 emberGlow.localScale = glowScale;
-                emberGlow.DOPunchScale(glowScale * 0.2f, 0.3f, 2, 0.4f);
+                if (brazierFlame != null) brazierFlame.Pulse(0.25f, 0.3f);
+                else emberGlow.DOPunchScale(glowScale * 0.2f, 0.3f, 2, 0.4f);
             }
         }
 
@@ -231,7 +235,8 @@ namespace PaperSeizerStone.Presentation
             Coroutine payment = StartCoroutine(walletArea.Pay(price, paymentExit, burnDuration * 0.65f, 0.05f));
             yield return burning.transform.DOMove(burnAnchor.position, burnDuration * 0.4f).SetEase(Ease.InOutSine).WaitForCompletion();
             PaperSeizerStone.Audio.AudioManager.Play(PaperSeizerStone.Audio.AudioCue.CardBurn);
-            emberGlow.DOPunchScale(glowScale * 0.65f, burnDuration * 0.6f, 2, 0.4f);
+            if (brazierFlame != null) brazierFlame.Pulse(1f, burnDuration * 0.6f);
+            else emberGlow.DOPunchScale(glowScale * 0.65f, burnDuration * 0.6f, 2, 0.4f);
             burning.transform.DORotate(new Vector3(0, 120, 0), burnDuration * 0.6f, RotateMode.LocalAxisAdd);
             yield return burning.transform.DOScale(Vector3.zero, burnDuration * 0.6f).SetEase(Ease.InCubic).WaitForCompletion();
             burning.gameObject.SetActive(false);
