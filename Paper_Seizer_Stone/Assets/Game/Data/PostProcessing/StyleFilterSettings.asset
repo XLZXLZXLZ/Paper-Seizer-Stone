@@ -17,17 +17,17 @@ MonoBehaviour:
   parameters:
     strength: 1
     posterize: 0.6
-    levels: 7
+    levels: 10
     dither: 0
     ditherSize: 1
-    halftone: 0.32
-    dotSize: 5.5
-    dotAngle: 35
+    halftone: 0.133
+    dotSize: 7.87
+    dotAngle: 41.5
     inkColor: {r: 0.16, g: 0.18, b: 0.2, a: 1}
-    oil: 0
-    oilRadius: 2
-    paper: 0.04
-    paperScale: 2
+    oil: 0.32
+    oilRadius: 3
+    paper: 0.021
+    paperScale: 1.34
     exposure: 0
     contrast: 8
     saturation: -12

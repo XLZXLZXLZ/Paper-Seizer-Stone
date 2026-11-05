@@ -14,6 +14,9 @@ namespace PaperSeizerStone.Presentation.MainMenu
         [SerializeField] private OpeningSequence openingSequence;
         [SerializeField] private string gameplayScene = "Assets/Scenes/BasicBattle.unity";
         [SerializeField] private LayerMask interactionMask = 1;
+        [Header("转盘缓慢循环旋转")]
+        [SerializeField] private bool rotateDisc = true;
+        [SerializeField, Range(-20, 20), Tooltip("每秒旋转角度；2度约3分钟一圈，负数反转，0停止。")] private float discRotationSpeed = 2f;
         private MenuSector hovered;
         private MenuSector pressed;
         private bool busy;
@@ -49,6 +52,14 @@ namespace PaperSeizerStone.Presentation.MainMenu
                 MenuSector clicked = pressed;
                 pressed = null;
                 if (clicked != null && clicked == target) StartCoroutine(Activate(clicked));
+            }
+            if (rotateDisc && disc != null && hovered == null && pressed == null
+                && !busy && !settings.BlocksMenu && !Mathf.Approximately(discRotationSpeed, 0f))
+            {
+                // Rotate the complete disc around its local normal, preserving the authored tilt.
+                // Colliders and visuals turn together; only the existing Visual hover motion is separate.
+                disc.Rotate(Vector3.up, discRotationSpeed * Time.unscaledDeltaTime, Space.Self);
+                Physics.SyncTransforms();
             }
         }
 

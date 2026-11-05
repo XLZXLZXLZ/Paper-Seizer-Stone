@@ -148,14 +148,19 @@ namespace PaperSeizerStone.Presentation
 
         private TextMeshPro CreateNumber(string label, Vector3 position)
         {
-            if (numberFont == null) return null;
+            var fonts = GlobalFontService.Configuration;
+            TMP_FontAsset initialFont = fonts != null && fonts.applyGlobally
+                ? (fonts.scoreFont != null ? fonts.scoreFont : fonts.defaultFont) : null;
+            if (initialFont == null) initialFont = numberFont;
+            if (initialFont == null) return null;
             var node = new GameObject(label, typeof(RectTransform));
             node.layer = gameObject.layer;
             node.transform.SetParent(transform, false);
             node.transform.localPosition = position;
             node.transform.localRotation = Quaternion.Euler(numberEulerAngles);
             var number = node.AddComponent<TextMeshPro>();
-            number.font = numberFont;
+            number.font = initialFont;
+            GlobalFontService.Apply(number);
             number.fontSize = numberSize;
             number.color = numberColor;
             number.alignment = TextAlignmentOptions.Center;
