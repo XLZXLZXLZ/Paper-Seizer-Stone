@@ -35,8 +35,9 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private CardTagCatalog tagCatalog;
         [SerializeField] private CardTag previewTag;
         private Vector4 tagData;
+        private Vector4 tagMotion;
         private int visualSeed;
-        private Color tagColor = Color.white;
+        private Vector4 tagColor = Vector4.one;
         private Vector4 tagRect = new Vector4(0.07f, 0.19f, 0.93f, 0.78f);
         private string baseDescription;
         public string PreviewName { get; private set; }
@@ -270,11 +271,13 @@ namespace PaperSeizerStone.Presentation
             backProperties.SetColor("_BaseColor", b);
             backProperties.SetColor("_Color", b);
             faceProperties.SetVector("_TagData", tagData);
-            faceProperties.SetColor("_TagColor", tagColor);
+            faceProperties.SetVector("_TagColor", tagColor);
             faceProperties.SetVector("_TagArtworkRect", tagRect);
+            faceProperties.SetVector("_TagMotion", tagMotion);
             ghostProperties.SetVector("_TagData", tagData);
-            ghostProperties.SetColor("_TagColor", tagColor);
+            ghostProperties.SetVector("_TagColor", tagColor);
             ghostProperties.SetVector("_TagArtworkRect", tagRect);
+            ghostProperties.SetVector("_TagMotion", tagMotion);
             ghostProperties.SetFloat("_ArtworkStrength", PreviewArtwork != null ? 1f : 0f);
             face.SetPropertyBlock(faceProperties);
             back.SetPropertyBlock(backProperties);
@@ -294,17 +297,31 @@ namespace PaperSeizerStone.Presentation
             if (appearance != null) tagRect = appearance.EngravingRect;
             CardTagAppearance entry = tagCatalog != null ? tagCatalog.Find(tag) : null;
             tagData = entry == null ? Vector4.zero : new Vector4((int)tag, entry.strength, (visualSeed % 997) * 0.0137f, entry.patternScale);
-            tagColor = entry == null ? Color.white : entry.color;
+            Color authoredColor = entry == null ? Color.white : entry.color;
+            Color workingColor = QualitySettings.activeColorSpace == ColorSpace.Linear ? authoredColor.linear : authoredColor;
+            // Shader Graph declares this as a Vector4; convert once and pass the same values to every renderer.
+            tagColor = new Vector4(workingColor.r, workingColor.g, workingColor.b, workingColor.a);
+            tagMotion = entry == null ? Vector4.zero : new Vector4(entry.motionSpeed, entry.motionStrength, 0, 0);
             TagDescription = entry == null ? "" : entry.displayName + "刻印：" + entry.description;
             PreviewDescription = baseDescription + (string.IsNullOrEmpty(TagDescription) ? "" : "\n\n" + TagDescription);
             ApplyColors();
         }
 
-        public void CopyTagTo(Material material)
+        public void CopyTagTo(Material material, Camera viewCamera = null)
         {
             material.SetVector("_TagData", tagData);
-            material.SetColor("_TagColor", tagColor);
+            material.SetVector("_TagColor", tagColor);
             material.SetVector("_TagArtworkRect", tagRect);
+            material.SetVector("_TagMotion", tagMotion);
+            // Use the source card's observation angle instead of an unrelated fixed UI angle.
+            Vector3 view = Vector3.up;
+            if (viewCamera != null && face != null)
+            {
+                Vector3 direction = viewCamera.transform.position - face.bounds.center;
+                if (direction.sqrMagnitude > 0.000001f)
+                    view = face.worldToLocalMatrix.MultiplyVector(direction).normalized;
+            }
+            material.SetVector("_TagView", new Vector4(view.x, view.y, view.z, 0));
         }
 
         // Only a visual rotation; never changes public/reveal state in the rules.

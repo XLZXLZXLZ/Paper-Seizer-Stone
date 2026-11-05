@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 铅块
   gesture: 0
   ability: 10
-  description: "视为石头。本回合未参与作弊换位或换牌时，计分额外获得 1 分。初始布阵不算移动，换回原位仍算移动。"
+  description: "石头类。本回合没有用这张牌作弊换位或换牌，计分时额外得 1 分。换回原位也算用过。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

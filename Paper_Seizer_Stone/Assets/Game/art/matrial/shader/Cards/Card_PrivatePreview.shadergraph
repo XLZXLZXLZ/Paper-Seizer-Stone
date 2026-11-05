@@ -38,6 +38,9 @@
         },
         {
             "m_Id": "c63f73af09624a199b57be01f7fc85a0"
+        },
+        {
+            "m_Id": "be9846c0ec4b4a9c861b1c91c25a8159"
         }
     ],
     "m_Keywords": [
@@ -209,6 +212,9 @@
         },
         {
             "m_Id": "998a73fb0b4d48728fe244559730b86f"
+        },
+        {
+            "m_Id": "867763c384784406894d65b26dec98e7"
         }
     ],
     "m_GroupDatas": [
@@ -917,6 +923,20 @@
                     "m_Id": "f0c5ed7db867496790a81dce9805e90c"
                 },
                 "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "867763c384784406894d65b26dec98e7"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "b5d2000663f8477aafc98696653a571a"
+                },
+                "m_SlotId": 7
             }
         }
     ],
@@ -6342,6 +6362,9 @@
             "m_Id": "d8ab040f55264a4c8b67221d5a0057bb"
         },
         {
+            "m_Id": "f86ef88e2b2e472b84ab8713abbec177"
+        },
+        {
             "m_Id": "2d6c6d51c7c6457a913a2e61866dfa57"
         }
     ],
@@ -6589,4 +6612,116 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty",
+    "m_ObjectId": "be9846c0ec4b4a9c861b1c91c25a8159",
+    "m_Guid": {
+        "m_GuidSerialized": "04ec4e19-b474-414c-9be6-a9b3bacbdc71"
+    },
+    "m_Name": "刻印动态速度／强度",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "刻印动态速度／强度",
+    "m_DefaultReferenceName": "_TagMotion",
+    "m_OverrideReferenceName": "_TagMotion",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_Precision": 1,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_Id": 0,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 2,
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_DefaultValue": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_Labels": [],
+    "m_ObjectId": "511cb8922cef42b39e8b52d213d13672"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "867763c384784406894d65b26dec98e7",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "EngravingMotion",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -3200,
+            "y": -2800,
+            "width": 220,
+            "height": 160
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "511cb8922cef42b39e8b52d213d13672"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 1,
+    "m_PreviewExpanded": false,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "be9846c0ec4b4a9c861b1c91c25a8159"
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
+    "m_Id": 7,
+    "m_DisplayName": "Motion",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Motion",
+    "m_StageCapability": 2,
+    "m_Value": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_DefaultValue": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 0
+    },
+    "m_Labels": [],
+    "m_ObjectId": "f86ef88e2b2e472b84ab8713abbec177"
 }

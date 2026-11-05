@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 剪票钳
   gesture: 2
   ability: 16
-  description: "视为剪刀。每次对位落败时，桌面奖池增加 1 枚筹码。"
+  description: "剪刀类。对位落败时，桌上奖池增加 1 枚筹码。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

@@ -89,7 +89,7 @@ namespace PaperSeizerStone.InputControl
             bool hasHover = cursorInside && !overUI && controller.CanInteract && Hit(out hoverHit);
             controller.View.SetHoveredPlayerCard(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null);
             if (preview != null)
-                preview.Show(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null, Input.mousePosition);
+                preview.Show(hasHover ? hoverHit.collider.GetComponentInParent<CardView>() : null, Input.mousePosition, controller.Camera);
             TableTarget hoverTarget = hasHover && controller.CanCheatDraw
                 ? hoverHit.collider.GetComponentInParent<TableTarget>() : null;
             SetHoveredDeck(hoverTarget != null && hoverTarget.Kind == TableTargetKind.PlayerDeck

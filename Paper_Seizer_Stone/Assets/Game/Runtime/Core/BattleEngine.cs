@@ -400,7 +400,7 @@ namespace PaperSeizerStone.Battle
             }
 #endif
             State.Phase = BattlePhase.Shooting;
-            Emit(events, BattleEventKind.PhaseChanged, player.Score == enemy.Score ? "总分相同，双方同时开枪。" : player.Score > enemy.Score ? "你赢下了总分，举枪吧。" : "对手赢下了总分，即将开枪。");
+            Emit(events, BattleEventKind.PhaseChanged, player.Score == enemy.Score ? "总分相同，双方不开枪，结束本回合。" : player.Score > enemy.Score ? "你赢下了总分，举枪吧。" : "对手赢下了总分，即将开枪。");
             return ActionResult.Ok(events);
         }
 
@@ -492,9 +492,9 @@ namespace PaperSeizerStone.Battle
             var events = new List<BattleEvent>();
             FighterState player = State.Get(Side.Player);
             FighterState enemy = State.Get(Side.Enemy);
-            bool playerFires = player.Score >= enemy.Score;
-            bool enemyFires = enemy.Score >= player.Score;
-            // Both outcomes are sampled before applying any damage, including mutual death.
+            bool playerFires = player.Score > enemy.Score;
+            bool enemyFires = enemy.Score > player.Score;
+            // Only the higher-scoring side fires; a tie consumes no shot random draw.
             bool playerHit = playerFires && random.Next(BasicRules.Chambers) < player.Bullets;
             bool enemyHit = enemyFires && random.Next(BasicRules.Chambers) < enemy.Bullets;
             if (playerHit) enemy.Life = Math.Max(0, enemy.Life - 1);

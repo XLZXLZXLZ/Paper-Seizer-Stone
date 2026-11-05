@@ -51,6 +51,8 @@ MonoBehaviour:
   parts:
   - {fileID: 88000002}
   - {fileID: 1450720062280269337}
+  entryFirstParts:
+  - {fileID: 88000002}
   runtimeRoots: 
   - {fileID: 3668169991134906096}
   - {fileID: 4234600924056334942}
@@ -65,7 +67,8 @@ MonoBehaviour:
   duration: 0.6
   stagger: 0.02
   phaseVariation: 0.65
-  entryPhaseVariation: 1.2
+  entryPhaseVariation: 0.18
+  entryFirstLead: 0.12
 --- !u!114 &2101314309833229685
 MonoBehaviour:
   m_ObjectHideFlags: 0

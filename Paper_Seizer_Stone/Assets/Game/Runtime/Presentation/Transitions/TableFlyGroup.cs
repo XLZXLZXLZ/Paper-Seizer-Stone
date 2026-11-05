@@ -10,6 +10,8 @@ namespace PaperSeizerStone.Presentation
     public sealed class TableFlyGroup : MonoBehaviour
     {
         [SerializeField] private Transform[] parts;
+        [Tooltip("优先下落的垫座、托盘等物件；需同时包含在转场物件中。")]
+        [SerializeField] private Transform[] entryFirstParts;
         [Tooltip("共享桌体等固定物件及其子层级始终不参与转场。")]
         [SerializeField] private Transform[] stationaryRoots;
         [Tooltip("Direct active children are animated individually: live cards and physics tokens.")]
@@ -25,6 +27,8 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(0.05f)] private float duration = 0.55f;
         [SerializeField, Min(0)] private float stagger = 0.025f;
         [SerializeField, Min(0)] private float entryHeight = 4f;
+        [SerializeField, Min(0)] private float entryPhaseVariation = 0.18f;
+        [SerializeField, Min(0)] private float entryFirstLead = 0.12f;
         [SerializeField, Min(0)] private float phaseVariation = 0.65f;
         [SerializeField, Range(0, 0.5f)] private float entryDurationVariation = 0.18f;
         private readonly System.Random motionRandom = new System.Random();
@@ -62,6 +66,14 @@ namespace PaperSeizerStone.Presentation
         {
             if (stationaryRoots != null)
                 foreach (Transform root in stationaryRoots)
+                    if (root != null && (part == root || part.IsChildOf(root))) return true;
+            return false;
+        }
+
+        private bool IsEntryFirst(Transform part)
+        {
+            if (entryFirstParts != null)
+                foreach (Transform root in entryFirstParts)
                     if (root != null && (part == root || part.IsChildOf(root))) return true;
             return false;
         }
@@ -117,6 +129,7 @@ namespace PaperSeizerStone.Presentation
             Initialize();
             if (sequence != null) sequence.Kill();
             List<Pose> moving = Collect(enter, excludedRoot, secondaryExcludedRoot);
+            bool hasEntryFirst = enter && radialWorld && moving.Exists(pose => IsEntryFirst(pose.Part));
             sequence = DOTween.Sequence();
             for (int i = 0; i < moving.Count; i++)
             {
@@ -131,11 +144,22 @@ namespace PaperSeizerStone.Presentation
                         new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), i % 2 == 0 ? 1 : -1)));
                 if (enter) { SetPosition(part, away); part.localRotation = radialWorld ? pose.Rotation : awayRotation; }
                 Vector3 target = enter ? pose.Position : away;
-                float seconds = enter && radialWorld
-                    ? duration * Mathf.Lerp(1f - entryDurationVariation, 1f + entryDurationVariation, (float)motionRandom.NextDouble()) : duration;
+                float seconds = duration;
+                // Keep large decks within a short entry window; supports start and land first.
+                float delay = Mathf.Min(i * stagger, 0.35f);
+                if (radialWorld)
+                {
+                    if (enter)
+                    {
+                        bool first = IsEntryFirst(part);
+                        seconds *= first ? 1f - entryDurationVariation
+                            : Mathf.Lerp(1f - entryDurationVariation, 1f + entryDurationVariation, (float)motionRandom.NextDouble());
+                        delay = first ? 0f : (hasEntryFirst ? entryFirstLead : 0f)
+                            + (float)motionRandom.NextDouble() * entryPhaseVariation;
+                    }
+                    else delay = (float)motionRandom.NextDouble() * phaseVariation;
+                }
                 Tween movement = !radialWorld && part is RectTransform ui ? ui.DOAnchorPos3D(target, seconds) : part.DOLocalMove(target, seconds);
-                // Large decks still finish the transition within a bounded interval.
-                float delay = radialWorld ? (float)motionRandom.NextDouble() * phaseVariation : Mathf.Min(i * stagger, 0.35f);
                 if (enter) sequence.InsertCallback(delay, () => part.gameObject.SetActive(true));
                 sequence.Insert(delay, movement.SetEase(radialWorld ? Ease.InCubic : enter ? Ease.OutCubic : Ease.InCubic));
                 sequence.Insert(delay, part.DOLocalRotateQuaternion(enter ? pose.Rotation : awayRotation, seconds));

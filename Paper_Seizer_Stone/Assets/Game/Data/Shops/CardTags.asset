@@ -15,36 +15,46 @@ MonoBehaviour:
   tags:
   - tag: 1
     displayName: 暴力
-    description: "获胜时，己方增加1发子弹，上限6发。"
+    description: "本牌对位获胜时，为己方装入 1 发子弹，最多装至 6 发。"
     price: 3
     color: {r: 0.38, g: 0.12, b: 0.065, a: 1}
     strength: 0.9
     patternScale: 1
+    motionSpeed: 0
+    motionStrength: 0
   - tag: 2
     displayName: 风险
-    description: "胜利额外+2分；失败−1分。"
+    description: "本牌对位获胜时额外得 2 分；落败时少得 1 分。"
     price: 3
     color: {r: 0.72, g: 0.46, b: 0.13, a: 1}
     strength: 0.92
     patternScale: 1
+    motionSpeed: 0.12
+    motionStrength: 0.22
   - tag: 3
     displayName: 保守
-    description: "胜利−1分；失败额外+2分。"
+    description: "本牌对位获胜时少得 1 分；落败时额外得 2 分。"
     price: 3
     color: {r: 0.77, g: 0.61, b: 0.34, a: 1}
     strength: 0.9
     patternScale: 1
+    motionSpeed: 0.08
+    motionStrength: 0.14
   - tag: 4
     displayName: 阴极
-    description: "胜利−4分；失败额外+4分。"
+    description: "本牌对位获胜时少得 4 分；落败时额外得 4 分。"
     price: 3
     color: {r: 0.11, g: 0.075, b: 0.15, a: 1}
     strength: 0.92
     patternScale: 1
+    motionSpeed: 0
+    motionStrength: 0
   - tag: 5
     displayName: 平衡
-    description: "胜利−1分；平局额外+2分。"
+    description: "本牌对位获胜时少得 1 分；平局时额外得 2 分。"
     price: 3
     color: {r: 0.13, g: 0.34, b: 0.32, a: 1}
     strength: 0.95
     patternScale: 1
+    motionSpeed: 0
+    motionStrength: 0

@@ -14,6 +14,10 @@ namespace PaperSeizerStone.Configuration
         public Color color = Color.white;
         [Range(0, 1)] public float strength = 0.85f;
         [Range(0.3f, 3)] public float patternScale = 1;
+        [Tooltip("刻印光泽每秒变化周期数；设为 0 时停止动态，纹理位置始终固定。")]
+        [Range(0, 1)] public float motionSpeed;
+        [Tooltip("刻印光泽动态强度；设为 0 时关闭动态，不改变固定图案。")]
+        [Range(0, 1)] public float motionStrength;
     }
 
     // One authoring source for the shop, world cards and UI previews.

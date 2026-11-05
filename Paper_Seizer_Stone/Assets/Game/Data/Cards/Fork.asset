@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 三叉戟
   gesture: 2
   ability: 7
-  description: "视为剪刀。被翻开时触发效果，该局分数比对方低则对方减少三分。"
+  description: "剪刀类。揭开后，本回合获得以下效果：四组对位计分后，若己方总分落后，对手总分减少 3 分。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.81, g: 0.79, b: 0.63, a: 1}

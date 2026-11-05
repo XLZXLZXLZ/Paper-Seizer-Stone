@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 镰刀
   gesture: 2
   ability: 12
-  description: "视为剪刀。对位获胜时，抽取 1 张牌加入手牌，可保留至后续回合使用。"
+  description: "剪刀类。对位获胜时，抽 1 张牌留在手中，供后续回合使用。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

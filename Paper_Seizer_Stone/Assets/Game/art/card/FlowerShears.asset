@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FlowerShears
   m_EditorClassIdentifier:
   displayName: 花剪
-  description: "视为剪刀。对拼失败时，额外为自己增加 1 分。"
+  description: "剪刀类。对位落败时，仍可得到 1 分。"
   frontArtwork: {fileID: 2800000, guid: fe7ef49ee2f9d04439a18bad9af3f0c3, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

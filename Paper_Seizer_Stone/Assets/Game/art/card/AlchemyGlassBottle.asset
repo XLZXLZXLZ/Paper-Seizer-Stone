@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AlchemyGlassBottle
   m_EditorClassIdentifier:
   displayName: 炼金玻璃瓶
-  description: "视为石头。与其它卡牌作弊交换后，变为“碎玻璃”，基类变为剪刀。变形仅持续本场战斗。"
+  description: "石头类。作弊时与另一张牌交换，就会碎成“碎玻璃”，变为剪刀类。本场对局结束后复原。"
   frontArtwork: {fileID: 2800000, guid: b87678bb10c385a4dbca0cbbc03529ed, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

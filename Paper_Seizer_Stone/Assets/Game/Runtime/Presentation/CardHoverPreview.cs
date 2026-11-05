@@ -55,7 +55,7 @@ namespace PaperSeizerStone.Presentation
                 + descriptionLabel.GetPreferredValues(text, Mathf.Max(20, size.x - descriptionPadding), Mathf.Infinity).y;
         }
 
-        public void Show(CardView card, Vector2 cursor)
+        public void Show(CardView card, Vector2 cursor, Camera viewCamera = null)
         {
             if (card == null || !card.Known) { Hide(); return; }
             var canvas = GetComponent<Canvas>();
@@ -81,7 +81,7 @@ namespace PaperSeizerStone.Presentation
             fallback.rectTransform.anchorMin = artwork.rectTransform.anchorMin;
             fallback.rectTransform.offsetMin = Vector2.zero;
             artwork.texture = card.PreviewArtwork;
-            if (previewMaterial != null) card.CopyTagTo(previewMaterial);
+            if (previewMaterial != null) card.CopyTagTo(previewMaterial, viewCamera);
             if (descriptionLabel != null)
             {
                 descriptionLabel.rectTransform.anchorMax = new Vector2(1, footer / (size.y + footer));

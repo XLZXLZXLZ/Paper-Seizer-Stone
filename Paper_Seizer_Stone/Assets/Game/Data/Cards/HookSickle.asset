@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 钩镰
   gesture: 2
   ability: 11
-  description: "视为剪刀。揭牌后，本回合下一次涉及本牌的作弊交换不向对手装弹，仍占用一次作弊操作。对手弹巢已满时仍不能作弊。"
+  description: "剪刀类。揭开后，本回合下一次用这张牌作弊换位或换牌，无需给对手装弹。仍占一次作弊机会；对手装满 6 发时仍不能使用。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

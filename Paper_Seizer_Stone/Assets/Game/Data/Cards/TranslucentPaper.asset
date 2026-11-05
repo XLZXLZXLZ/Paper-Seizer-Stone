@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 透光纸
   gesture: 1
   ability: 13
-  description: "视为布。被翻开时，额外揭开对位的敌方暗牌，并正常触发该牌的揭牌能力。"
+  description: "布类。揭开时，同时揭开正对面的敌方暗牌；那张牌的揭牌能力也会触发。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

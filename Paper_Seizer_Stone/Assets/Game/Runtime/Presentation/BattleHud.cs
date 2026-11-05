@@ -147,7 +147,7 @@ namespace PaperSeizerStone.Presentation
                 case BattlePhase.EnemyCheat: return "双方同时执行本次操作，完成后继续揭牌。";
                 case BattlePhase.Revealing: return "先揭示我方颜色的牌，再揭示对手颜色的牌。";
                 case BattlePhase.Scoring: return "基础得分：胜利 +2  ·  平局 +1  ·  失败 +0；特殊牌按牌面结算。";
-                case BattlePhase.Shooting: return "总分高的一方开枪；总分相同，双方同时开枪。";
+                case BattlePhase.Shooting: return "总分高的一方开枪；总分相同，双方不开枪。";
                 case BattlePhase.BattleEnd: return snapshot.PlayerWon ? "胜利，正在收拾桌面，准备进入商店。" : "按回车或点击「重新开始」，开始一次新的冒险。";
                 case BattlePhase.RoundEnd: return "手牌保留到下一回合，筹码归零后对局仍会继续。";
                 default: return "正在准备牌库与桌面，请稍候。";

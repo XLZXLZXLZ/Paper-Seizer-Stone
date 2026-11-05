@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 碎玻璃
   gesture: 2
   ability: 3
-  description: "视为剪刀。炼金玻璃瓶破碎后的剪刀类牌。本场战斗内保留变形。"
+  description: "剪刀类。炼金玻璃瓶破碎后的形态。对局结束后恢复为炼金玻璃瓶。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.68, g: 0.87, b: 0.82, a: 1}

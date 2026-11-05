@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LeadWeight
   m_EditorClassIdentifier:
   displayName: 铅块
-  description: "视为石头。本回合未参与作弊换位或换牌时，计分额外获得 1 分。初始布阵不算移动，换回原位仍算移动。"
+  description: "石头类。本回合没有用这张牌作弊换位或换牌，计分时额外得 1 分。换回原位也算用过。"
   frontArtwork: {fileID: 2800000, guid: a0dd27e4b48442878e75afbaa4f7e128, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

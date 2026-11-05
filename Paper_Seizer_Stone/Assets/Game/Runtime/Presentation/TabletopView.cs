@@ -393,7 +393,8 @@ namespace PaperSeizerStone.Presentation
             Layout(moveDuration);
             if (flipping != null) flipping.Tilt(0, 0.14f);
             if (flipping != null) AudioManager.Play(AudioCue.CardReveal);
-            else if (battleEvent.Kind == BattleEventKind.CardDrawn) AudioManager.Play(AudioCue.CardDraw);
+            else if (battleEvent.Kind == BattleEventKind.CardDrawn && battleEvent.Side == Side.Player)
+                AudioManager.Play(AudioCue.CardDraw);
             else if (battleEvent.Kind == BattleEventKind.CardsSwapped || battleEvent.Kind == BattleEventKind.LayoutCommitted)
                 AudioManager.Play(AudioCue.CardPlace);
             else if (battleEvent.Kind == BattleEventKind.DeckShuffled) AudioManager.Play(AudioCue.CardShuffle);
@@ -490,7 +491,7 @@ namespace PaperSeizerStone.Presentation
             foreach (IReadOnlyList<BattleEvent> events in new[] { playerEvents, enemyEvents })
                 foreach (BattleEvent action in events)
                 {
-                    draw |= action.Kind == BattleEventKind.CardDrawn;
+                    draw |= action.Kind == BattleEventKind.CardDrawn && action.Side == Side.Player;
                     swap |= action.Kind == BattleEventKind.CardsSwapped;
                     if (action.Kind == BattleEventKind.DeckShuffled) AudioManager.Play(AudioCue.CardShuffle);
                 }
@@ -500,10 +501,11 @@ namespace PaperSeizerStone.Presentation
 
         public IEnumerator PrepareShooting()
         {
+            if (displayed.Player.Score == displayed.Enemy.Score) yield break;
             AlignOpponentRestGun();
             AudioManager.SetShootingFocus(true);
-            bool playerFires = displayed.Player.Score >= displayed.Enemy.Score;
-            bool enemyFires = displayed.Enemy.Score >= displayed.Player.Score;
+            bool playerFires = displayed.Player.Score > displayed.Enemy.Score;
+            bool enemyFires = displayed.Enemy.Score > displayed.Player.Score;
             GuaiwuCombatSequence monster = OpponentCombat;
             bool animatedEnemy = enemyFires && monster != null && monster.isActiveAndEnabled && monster.IsConfigured;
             bool animatedPlayer = playerFires && playerShooting != null && playerShooting.isActiveAndEnabled && playerShooting.IsConfigured;

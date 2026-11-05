@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Oilcloth
   m_EditorClassIdentifier:
   displayName: 油布
-  description: "视为布。对位平局时，移除对手的 1 发子弹，最低保留 1 发。"
+  description: "布类。对位平局时，移除对手的 1 发子弹，但至少留下 1 发。"
   frontArtwork: {fileID: 2800000, guid: b3a00e4ea18c4d60b94189df168eb1b8, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

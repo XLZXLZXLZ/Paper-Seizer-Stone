@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 契约纸
   gesture: 1
   ability: 17
-  description: "视为布。计分时本牌在场，且本回合己方没有作弊，则桌面奖池增加 2 枚筹码。多张分别生效，每回合均可触发。"
+  description: "布类。本回合己方一次也没有作弊，且计分时这张牌仍在场上，桌上奖池增加 2 枚筹码。无需装弹的换牌也算作弊。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

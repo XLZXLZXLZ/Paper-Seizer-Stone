@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 锤子
   gesture: 0
   ability: 1
-  description: "视为石头。对上剪刀类和石头类均视为胜利。同名牌对拼为平局。"
+  description: "石头类。击败石头类和剪刀类牌；遇到另一张锤子时平局。"
   transformation: {fileID: 0}
   artwork: {fileID: 2800000, guid: 5de3abd35d3b01a458e1d3698163bc49, type: 3}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

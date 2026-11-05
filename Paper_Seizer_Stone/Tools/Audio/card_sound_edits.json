@@ -1,0 +1,125 @@
+{
+  "method": "energy trim, waveform-similar time compression, 1.08x acceleration, edge fades",
+  "files": [
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-fan-1.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-fan-1.wav",
+      "guid": "0037aa05b2fc46aa9727a74561b4252a",
+      "source_seconds": 0.7208,
+      "source_selection_seconds": [
+        0.1592,
+        0.5988
+      ],
+      "output_seconds": 0.13,
+      "gain": 1.0457
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-fan-2.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-fan-2.wav",
+      "guid": "a799795e2d8f4863b40be159fb658413",
+      "source_seconds": 1.3065,
+      "source_selection_seconds": [
+        0.5471,
+        1.0796
+      ],
+      "output_seconds": 0.15,
+      "gain": 2.0
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-slide-1.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-slide-1.wav",
+      "guid": "4d62092151f84273aa6b7d2f48103bd9",
+      "source_seconds": 0.6008,
+      "source_selection_seconds": [
+        0.142,
+        0.2114
+      ],
+      "output_seconds": 0.0643,
+      "gain": 0.8898
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-slide-2.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-slide-2.wav",
+      "guid": "640e70d39a8f483ebf1a0b1d666c733f",
+      "source_seconds": 0.5841,
+      "source_selection_seconds": [
+        0.0376,
+        0.3958
+      ],
+      "output_seconds": 0.09,
+      "gain": 2.0
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-place-1.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-place-1.wav",
+      "guid": "9b8804d2eb174f0bbae94c3eeff7d529",
+      "source_seconds": 0.6891,
+      "source_selection_seconds": [
+        0.1202,
+        0.2464
+      ],
+      "output_seconds": 0.11,
+      "gain": 0.8608
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-place-2.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-place-2.wav",
+      "guid": "44a2f0a4a94c4e1ea069b07798f9c086",
+      "source_seconds": 0.4594,
+      "source_selection_seconds": [
+        0.0418,
+        0.2716
+      ],
+      "output_seconds": 0.13,
+      "gain": 2.0
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-place-3.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-place-3.wav",
+      "guid": "0081cc705613498581bf20a4c4a373de",
+      "source_seconds": 0.8835,
+      "source_selection_seconds": [
+        0.2369,
+        0.6995
+      ],
+      "output_seconds": 0.12,
+      "gain": 2.0
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-shove-1.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-shove-1.wav",
+      "guid": "e344dd1c66c949aa8bfd6a55c54fde4c",
+      "source_seconds": 0.7659,
+      "source_selection_seconds": [
+        0.1176,
+        0.4354
+      ],
+      "output_seconds": 0.16,
+      "gain": 0.9702
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-shove-2.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-shove-2.wav",
+      "guid": "af9701fb1a374b69b00378237819108b",
+      "source_seconds": 0.7668,
+      "source_selection_seconds": [
+        0.0371,
+        0.5204
+      ],
+      "output_seconds": 0.16,
+      "gain": 2.0
+    },
+    {
+      "source": "Assets/Game/Audio/SFX/Cards/card-shuffle.ogg",
+      "output": "Assets/Game/Audio/SFX/Cards/Short/card-shuffle.wav",
+      "guid": "2e89fd3948844c8bba0818c4812d81cd",
+      "source_seconds": 3.0635,
+      "source_selection_seconds": [
+        0.1538,
+        2.9271
+      ],
+      "output_seconds": 0.4,
+      "gain": 2.0
+    }
+  ]
+}

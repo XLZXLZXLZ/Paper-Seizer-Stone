@@ -29,50 +29,50 @@ MonoBehaviour:
   - cue: 0
     description: "拿牌 / 手牌选择"
     clips:
-    - {fileID: 8300000, guid: bad16eb3200857199aa296f209e154c2, type: 3}
-    - {fileID: 8300000, guid: 8747216d364455fc979be196e81e0058, type: 3}
+    - {fileID: 8300000, guid: 0037aa05b2fc46aa9727a74561b4252a, type: 3}
+    - {fileID: 8300000, guid: a799795e2d8f4863b40be159fb658413, type: 3}
     volume: 0.38
-    pitchRange: {x: 0.96, y: 1.04}
-    minimumInterval: 0.06
-    maximumVoices: 2
+    pitchRange: {x: 1, y: 1.06}
+    minimumInterval: 0.045
+    maximumVoices: 1
     priority: 170
   - cue: 1
     description: "逐张抽牌"
     clips:
-    - {fileID: 8300000, guid: 1bb71ced7042532e82710072fd8f76c4, type: 3}
-    - {fileID: 8300000, guid: b0abb78d68b7587eb2faf74c1e0272e1, type: 3}
+    - {fileID: 8300000, guid: 4d62092151f84273aa6b7d2f48103bd9, type: 3}
+    - {fileID: 8300000, guid: 640e70d39a8f483ebf1a0b1d666c733f, type: 3}
     volume: 0.42
-    pitchRange: {x: 0.96, y: 1.04}
-    minimumInterval: 0.06
-    maximumVoices: 3
+    pitchRange: {x: 1, y: 1.06}
+    minimumInterval: 0.04
+    maximumVoices: 2
     priority: 160
   - cue: 2
     description: "放牌 / 换牌 / 弃牌"
     clips:
-    - {fileID: 8300000, guid: 6883c2741625541c8acb5d345dfbe6c9, type: 3}
-    - {fileID: 8300000, guid: 3b2e9096ea46521aa0da7c1be557e505, type: 3}
-    - {fileID: 8300000, guid: 870b33b9cab05ec29afbbd7b84cf67cb, type: 3}
+    - {fileID: 8300000, guid: 9b8804d2eb174f0bbae94c3eeff7d529, type: 3}
+    - {fileID: 8300000, guid: 44a2f0a4a94c4e1ea069b07798f9c086, type: 3}
+    - {fileID: 8300000, guid: 0081cc705613498581bf20a4c4a373de, type: 3}
     volume: 0.5
-    pitchRange: {x: 0.97, y: 1.03}
-    minimumInterval: 0.06
-    maximumVoices: 3
+    pitchRange: {x: 1, y: 1.06}
+    minimumInterval: 0.04
+    maximumVoices: 2
     priority: 150
   - cue: 3
     description: "正式揭牌"
     clips:
-    - {fileID: 8300000, guid: 5f8e06b7d05e5b5b97d30d4d92acbc1e, type: 3}
-    - {fileID: 8300000, guid: e8f5a8c8454c57f6ba7b52898019fc7f, type: 3}
+    - {fileID: 8300000, guid: e344dd1c66c949aa8bfd6a55c54fde4c, type: 3}
+    - {fileID: 8300000, guid: af9701fb1a374b69b00378237819108b, type: 3}
     volume: 0.48
-    pitchRange: {x: 0.98, y: 1.02}
-    minimumInterval: 0.06
+    pitchRange: {x: 1, y: 1.06}
+    minimumInterval: 0.05
     maximumVoices: 2
     priority: 145
   - cue: 4
     description: "弃牌洗回牌库"
     clips:
-    - {fileID: 8300000, guid: 360eb8bef7f156d7a6b2f52d94d6b2e5, type: 3}
+    - {fileID: 8300000, guid: 2e89fd3948844c8bba0818c4812d81cd, type: 3}
     volume: 0.38
-    pitchRange: {x: 1, y: 1}
+    pitchRange: {x: 1, y: 1.03}
     minimumInterval: 0.25
     maximumVoices: 1
     priority: 160
@@ -224,6 +224,15 @@ MonoBehaviour:
     minimumInterval: 0
     maximumVoices: 2
     priority: 70
+  - cue: 22
+    description: "头目战切灯：机械重扣、低频冲击与短混响"
+    clips:
+    - {fileID: 8300000, guid: 85b42d9abffc42f9ab267dd6a761567d, type: 3}
+    volume: 0.85
+    pitchRange: {x: 1, y: 1}
+    minimumInterval: 0.5
+    maximumVoices: 1
+    priority: 15
   - cue: 20
     description: "打开弹巢"
     clips:

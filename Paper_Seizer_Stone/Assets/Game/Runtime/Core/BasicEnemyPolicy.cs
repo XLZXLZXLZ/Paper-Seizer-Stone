@@ -111,9 +111,6 @@ namespace PaperSeizerStone.Battle
                     }
                 }
             }
-            if (best.Kind == CheatKind.Pass && opponent.Bullets <= 4 && own.DrawCount + own.DiscardCount > 0
-                && own.Hand.Count < 4 && contractCost == 0 && random.NextDouble() < 0.18)
-                return new CheatAction(CheatKind.Draw);
             return best;
         }
     }

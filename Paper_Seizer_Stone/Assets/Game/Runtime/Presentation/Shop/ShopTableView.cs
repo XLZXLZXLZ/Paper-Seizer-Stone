@@ -155,7 +155,7 @@ namespace PaperSeizerStone.Presentation
             ShopOfferView offer = hit.collider.GetComponentInParent<ShopOfferView>();
             controller.SetShopHint(this, offer == null ? null : offer.Details);
             if (offer == null) return;
-            if (preview != null) preview.Show(hit.collider.GetComponentInParent<CardView>(), Input.mousePosition);
+            if (preview != null) preview.Show(hit.collider.GetComponentInParent<CardView>(), Input.mousePosition, controller.Camera);
             if (Input.GetMouseButtonDown(0)) controller.BuyCard(offer.Index);
         }
 

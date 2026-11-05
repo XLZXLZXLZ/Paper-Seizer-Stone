@@ -29,5 +29,6 @@ TMP 全局默认字体也已更新，计分器不再优先使用系统苹方字�
 
 以上均按 SIL OFL 1.1 分发；随软件嵌入/分发时保留各字体版权与 OFL 文本。
 Unity / TextMeshPro 可直接使用已保存的 MaShanZheng-Regular SDF.asset；初始图集为空，由 TMP 在编辑或运行时按需填充。
+2026-11-06：图文玩法手册正文及图示注释单独使用 LXGWWenKai/LXGWWenKai-Regular SDF.asset。该资源引用已有霞鹜文楷 TTF，开启 Dynamic 多图集，缺字回退圆体；手册标题、分类、按钮与其它界面继续使用马善政。
 替换过程未启动 Unity 编译、测试或试玩，也未操作电脑屏幕。
 字体版权与授权也已收入 Assets/StreamingAssets/ThirdPartyNotices.txt，供后续构建保留。

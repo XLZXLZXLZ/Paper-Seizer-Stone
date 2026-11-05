@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 10243}
   - component: {fileID: 93001}
   - component: {fileID: 4074113530909700427}
+  - component: {fileID: 98000010}
   m_Layer: 0
   m_Name: BattleTable
   m_TagString: Untagged
@@ -20,6 +21,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &98000010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d931a8607453eb2d074ae485c5a12, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  lights:
+  - {fileID: 10241}
+  - {fileID: 98000012}
+  bossColor: {r: 1, g: 0.48235294, b: 0.42745098, a: 1}
 --- !u!4 &10002
 Transform:
   m_ObjectHideFlags: 0
@@ -76,6 +93,17 @@ MonoBehaviour:
   - {fileID: 3599951405841939238}
   - {fileID: 2855761692158733128}
   - {fileID: 8689943813781724663}
+  entryFirstParts:
+  - {fileID: 2446601118148054537}
+  - {fileID: 3876756728550119720}
+  - {fileID: 4026009752931353283}
+  - {fileID: 2724694655001182669}
+  - {fileID: 4522346363027133559}
+  - {fileID: 2671709940315600915}
+  - {fileID: 3949615707371509659}
+  - {fileID: 4023593191133932003}
+  - {fileID: 10030}
+  - {fileID: 1943723331919050915}
   stationaryRoots:
   - {fileID: 3994875636903827992}
   - {fileID: 10240}
@@ -96,7 +124,8 @@ MonoBehaviour:
   duration: 0.6
   stagger: 0.02
   phaseVariation: 0.65
-  entryPhaseVariation: 1.2
+  entryPhaseVariation: 0.18
+  entryFirstLead: 0.12
 --- !u!114 &10243
 MonoBehaviour:
   m_ObjectHideFlags: 0

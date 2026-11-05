@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Scissors
   m_EditorClassIdentifier:
   displayName: 剪刀
-  description: "剪刀可以克制布。"
+  description: "剪刀类。克制布，被石头克制。"
   frontArtwork: {fileID: 2800000, guid: 913a66098d843b146b6d9c7c83d374e9, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1.35, g: 1.35, b: 1.35, a: 1}

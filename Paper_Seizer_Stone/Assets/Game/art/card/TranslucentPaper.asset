@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TranslucentPaper
   m_EditorClassIdentifier:
   displayName: 透光纸
-  description: "视为布。被翻开时，额外揭开对位的敌方暗牌，并正常触发该牌的揭牌能力。"
+  description: "布类。揭开时，同时揭开正对面的敌方暗牌；那张牌的揭牌能力也会触发。"
   frontArtwork: {fileID: 2800000, guid: 021508f7c46049adb3361728321890a4, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

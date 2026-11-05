@@ -58,6 +58,9 @@ MonoBehaviour:
   - {fileID: 1790650824004684081}
   - {fileID: 69000010}
   - {fileID: 69000012}
+  entryFirstParts:
+  - {fileID: 1486778311769720820}
+  - {fileID: 88000002}
   runtimeRoots: 
   - {fileID: 4407946998402010159}
   radialWorld: 1
@@ -71,7 +74,8 @@ MonoBehaviour:
   duration: 0.6
   stagger: 0.02
   phaseVariation: 0.65
-  entryPhaseVariation: 1.2
+  entryPhaseVariation: 0.18
+  entryFirstLead: 0.12
 --- !u!114 &4032948384629283805
 MonoBehaviour:
   m_ObjectHideFlags: 0

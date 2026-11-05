@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 油布
   gesture: 1
   ability: 14
-  description: "视为布。对位平局时，移除对手的 1 发子弹，最低保留 1 发。"
+  description: "布类。对位平局时，移除对手的 1 发子弹，但至少留下 1 发。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 1, g: 1, b: 1, a: 1}

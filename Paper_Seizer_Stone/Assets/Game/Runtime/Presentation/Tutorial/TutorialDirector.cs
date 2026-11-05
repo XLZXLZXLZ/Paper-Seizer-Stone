@@ -33,6 +33,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField, Min(0.01f)] private float pageFadeSeconds = 0.14f;
         [SerializeField] private TMP_Text manualTitle;
         [SerializeField] private TMP_Text manualBody;
+        [SerializeField] private TutorialManualView manualView;
         [SerializeField] private TMP_Text pageNumber;
         [SerializeField] private Button manualButton;
         [SerializeField] private Button previousButton;
@@ -412,8 +413,10 @@ namespace PaperSeizerStone.Presentation
             if (entry == null) return;
             currentPage = page;
             manualTitle.text = entry.title;
-            manualBody.text = entry.body.Replace("{burnPrice}", shop.RemovePrice.ToString())
+            string body = entry.body.Replace("{burnPrice}", shop.RemovePrice.ToString())
                 .Replace("{minimumDeck}", shop.MinimumDeckSize.ToString());
+            if (manualView != null) manualView.Display(page, body);
+            else if (manualBody != null) manualBody.text = body;
             pageNumber.text = ((int)page + 1) + " / " + pageButtons.Length;
         }
 

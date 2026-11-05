@@ -154,7 +154,11 @@ namespace PaperSeizerStone.Flow
 
         private void ConfigureEncounter()
         {
-            if (bossLighting != null) bossLighting.Restore();
+            // The saved table owns the lights, so an unset scene override can use its component.
+            if (bossLighting == null) bossLighting = tableView.GetComponentInParent<BossBattleLighting>();
+            if (bossLighting == null)
+                throw new InvalidOperationException("请在 BattleTable 预制体上配置头目战灯光组件与目标灯。");
+            bossLighting.Restore();
             currentEnemy = definition.GetEnemy(adventure.EncounterIndex);
             engine = definition.CreateEngine(adventure, out actualSeed);
             enemy = new BasicEnemyPolicy(unchecked(actualSeed + 7919));
@@ -336,10 +340,11 @@ namespace PaperSeizerStone.Flow
             yield return Play(engine.ScoreRound());
             yield return cameraRig.FocusScoreCounter(tableView.ScoreCounter);
             yield return tableView.RevealCounterScores();
-            yield return MoveCamera(BattleCameraPose.Shooting);
+            bool tied = engine.State.Get(Side.Player).Score == engine.State.Get(Side.Enemy).Score;
+            yield return MoveCamera(tied ? BattleCameraPose.Table : BattleCameraPose.Shooting);
             try
             {
-                yield return tableView.PrepareShooting();
+                if (!tied) yield return tableView.PrepareShooting();
                 yield return Play(engine.ExecuteShots());
             }
             finally
@@ -443,7 +448,9 @@ namespace PaperSeizerStone.Flow
         {
             yield return burnView.Burn(price);
             yield return new WaitForSeconds(actionPause);
-            yield return ReturnFromBurnTable();
+            burnView.Prepare(adventure);
+            busy = false;
+            burnView.Refresh();
         }
 
         public void OpenEngravingTable()

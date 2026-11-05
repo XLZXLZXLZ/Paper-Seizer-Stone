@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TicketPunch
   m_EditorClassIdentifier:
   displayName: 剪票钳
-  description: "视为剪刀。每次对位落败时，桌面奖池增加 1 枚筹码。"
+  description: "剪刀类。对位落败时，桌上奖池增加 1 枚筹码。"
   frontArtwork: {fileID: 2800000, guid: d6a830ccb8a244e2a079ecfe4d15b370, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

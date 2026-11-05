@@ -6,7 +6,7 @@ namespace PaperSeizerStone.Audio
         CardPickUp, CardDraw, CardPlace, CardReveal, CardShuffle, Bell,
         AmmunitionAdd, AmmunitionRemove, GunMechanism, GunLoad, GunEmpty,
         GunFire, Hit, ScoreTick, ScoreReveal, Victory, Defeat, ChipDrop, ChipPay, CardBurn,
-        GunOpen, GunClose
+        GunOpen, GunClose, BossLightSwitch
     }
 
     public enum MusicContext { Menu, Battle, Shop }

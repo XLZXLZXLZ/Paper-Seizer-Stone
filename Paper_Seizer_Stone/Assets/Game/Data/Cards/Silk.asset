@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 绸缎
   gesture: 1
   ability: 8
-  description: "视为布。被翻开时触发效果，该局分数比对方低则对方减少三分。"
+  description: "布类。揭开后，本回合获得以下效果：四组对位计分后，若己方总分落后，对手总分减少 3 分。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.74, g: 0.66, b: 0.85, a: 1}

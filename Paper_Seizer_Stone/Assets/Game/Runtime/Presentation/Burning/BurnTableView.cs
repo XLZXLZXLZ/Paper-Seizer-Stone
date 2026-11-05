@@ -185,7 +185,7 @@ namespace PaperSeizerStone.Presentation
             int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
             if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
             CardView card = hit.collider.GetComponentInParent<CardView>();
-            if (card != null && records.ContainsKey(card) && preview != null) preview.Show(card, Input.mousePosition);
+            if (card != null && records.ContainsKey(card) && preview != null) preview.Show(card, Input.mousePosition, controller.Camera);
             var action = hit.collider.GetComponentInParent<PaperSeizerStone.Presentation.Props.ShopTableAction>();
             if (engraving && action != null && action.Kind == PaperSeizerStone.Presentation.Props.ShopTableActionKind.Engrave)
                 engravingStation.SetHover(true);
