@@ -17,6 +17,7 @@ namespace PaperSeizerStone.Flow
         [SerializeField] private CardView cardPrefab;
         [SerializeField] private BattleCameraRig cameraRig;
         [SerializeField] private TabletopView tableView;
+        [SerializeField] private BattleHud battleHud;
         [SerializeField] private BattleInput battleInput;
         [SerializeField] private ShopTableView shopView;
         [SerializeField] private BurnTableView burnView;
@@ -39,17 +40,28 @@ namespace PaperSeizerStone.Flow
         private bool inspectingDeck;
         private bool engravingDeck;
         public CardTagCatalog Engravings => definition.Shop.Engravings;
+        public int CardRemovalPrice => definition.Shop.RemovePrice;
         public CardTag AvailableEngraving => adventure == null ? CardTag.None : adventure.EngravingOffer;
         private int actualSeed;
         private string initializationError;
         public string InitializationError => initializationError;
         public bool TutorialVisible => tutorial != null && tutorial.IsPresenting;
         public bool DeathPresentationComplete { get; private set; }
+        public bool DeathChoicesReady { get; private set; }
+
+        public void SetDeathChoicesReady(bool ready) => DeathChoicesReady = DeathPresentationComplete && ready;
 
         private void CompletePlayerDeath()
         {
             DeathPresentationComplete = true;
-            if (tutorial != null) tutorial.Cancel();
+            // The battle HUD may be disabled in the scene; it cannot poll for death until activated.
+            if (battleHud != null) battleHud.ShowPlayerDeath();
+            battleInput.SuspendInteraction();
+            if (tutorial != null)
+            {
+                tutorial.Cancel();
+                tutorial.gameObject.SetActive(false);
+            }
         }
         private bool TutorialBlocked => tutorial != null && tutorial.BlocksInput;
         private bool previousTutorialBlocked;
@@ -60,7 +72,7 @@ namespace PaperSeizerStone.Flow
         public BattleCameraRig CameraRig => cameraRig;
         public string EnemyName => currentEnemy == null ? "对手" : currentEnemy.DisplayName;
         public int EncounterNumber => adventure == null ? 1 : adventure.EncounterIndex + 1;
-        public bool CanInteract => !busy && !TutorialBlocked && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
+        public bool CanInteract => !DeathPresentationComplete && !busy && !TutorialBlocked && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
         public bool CanCheatDraw => CanInteract && engine.State.Phase == BattlePhase.PlayerCheat
             && engine.State.Get(Side.Enemy).Bullets + 2 <= BasicRules.Chambers
             && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
@@ -265,14 +277,14 @@ namespace PaperSeizerStone.Flow
         {
             if (DeathPresentationComplete)
             {
+                if (!DeathChoicesReady) return;
                 UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path);
                 return;
             }
             if (!CanInteract) return;
             if (engine.State.Phase == BattlePhase.BattleEnd)
             {
-                // Defeat starts a fresh adventure; victories enter the shop automatically.
-                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path);
+                // Death choices own restarting; victories enter the shop automatically.
                 return;
             }
             if (engine.State.Phase == BattlePhase.Planning)
@@ -386,19 +398,26 @@ namespace PaperSeizerStone.Flow
             StartCoroutine(CompletePurchase(index, adventure.Offers[index].Price));
         }
 
+        public void SetShopHint(UnityEngine.Object owner, string message) => tutorial.SetHint(owner, message);
+        public void ClearShopHint(UnityEngine.Object owner) => tutorial.ClearHint(owner);
+        public void ShowShopWarning(UnityEngine.Object owner, string message)
+        {
+            tutorial.ShowHintWarning(owner, message.StartsWith("筹码不足", StringComparison.Ordinal) ? "筹码不足" : message);
+        }
+
         private IEnumerator CompletePurchase(int index, int price)
         {
             yield return shopView.Purchase(index, price);
             yield return new WaitForSeconds(actionPause);
             busy = false;
             shopView.Refresh();
-            shopView.Notify("新牌已加入牌组。可以继续整备，或前往下一场战斗。");
         }
 
         public void RemoveCard(string recordId)
         {
             if (!CanBurnInteract) return;
             int price = definition.Shop.RemovePrice;
+            if (adventure.Wallet < price) { burnView.Notify("筹码不足"); return; }
             if (!adventure.TryRemove(recordId, price, definition.Shop.MinimumDeckSize, out string error))
             { burnView.Notify(error); return; }
             busy = true;
@@ -411,12 +430,15 @@ namespace PaperSeizerStone.Flow
             yield return burnView.Burn(price);
             yield return new WaitForSeconds(actionPause);
             yield return ReturnFromBurnTable();
-            shopView.Notify("选中的牌已烧毁。可以继续整备，或前往下一场战斗。");
         }
 
         public void OpenEngravingTable()
         {
-            if (AvailableEngraving != CardTag.None) OpenDeckTable(false, true);
+            if (!CanShopInteract || AvailableEngraving == CardTag.None) return;
+            CardTagAppearance entry = Engravings.Find(AvailableEngraving);
+            if (entry == null) return;
+            if (adventure.Wallet < entry.price) { shopView.Notify("筹码不足"); return; }
+            OpenDeckTable(false, true);
         }
 
         public void EngraveCard(string recordId, CardTag tag)
@@ -424,6 +446,7 @@ namespace PaperSeizerStone.Flow
             if (!CanEngraveInteract) return;
             CardTagAppearance entry = Engravings.Find(tag);
             if (entry == null) { burnView.Notify("请选择有效刻印。"); return; }
+            if (adventure.Wallet < entry.price) { burnView.Notify("筹码不足"); return; }
             if (!adventure.TryEngrave(recordId, tag, entry.price, out string error))
             { burnView.Notify(error); return; }
             busy = true;
@@ -441,6 +464,8 @@ namespace PaperSeizerStone.Flow
 
         public void OpenBurnTable()
         {
+            if (!CanShopInteract) return;
+            if (adventure.Wallet < CardRemovalPrice) { shopView.Notify("筹码不足"); return; }
             OpenDeckTable(false);
         }
 

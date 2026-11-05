@@ -1,9 +1,11 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 using PaperSeizerStone.Battle;
 using PaperSeizerStone.Flow;
 using DG.Tweening;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace PaperSeizerStone.Presentation
 {
@@ -18,37 +20,60 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text messageText;
         [SerializeField] private TMP_Text instructionText;
         [SerializeField] private GameObject resultPanel;
-        [SerializeField] private TMP_Text resultTitle;
-        [SerializeField] private TMP_Text resultDetails;
+        [SerializeField] private TMP_Text deathSubtitle;
+        [SerializeField] private GameObject[] gameplayPanels;
         [SerializeField] private GameObject errorPanel;
         [SerializeField] private TMP_Text errorText;
         [SerializeField] private CanvasGroup resultGroup;
         [SerializeField] private Button restartButton;
-        [SerializeField] private Button quitButton;
+        [SerializeField] private Button returnToMenuButton;
+        [SerializeField, Min(0)] private float deathSubtitleSeconds = 2f;
         [SerializeField, Min(0.01f)] private float deathFadeSeconds = 0.9f;
         private Tween resultFade;
         private bool resultVisible;
+        private bool deathPresentationStarted;
 
         private void Awake()
         {
             if (restartButton != null) restartButton.onClick.AddListener(Restart);
-            if (quitButton != null) quitButton.onClick.AddListener(Quit);
+            if (returnToMenuButton != null) returnToMenuButton.onClick.AddListener(ReturnToMenu);
+            if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(false);
         }
 
         private void Restart()
         {
-            if (resultGroup == null || !resultGroup.interactable) return;
+            if (resultGroup == null || !resultGroup.interactable || !controller.DeathChoicesReady) return;
+            resultGroup.interactable = false;
             controller.ConfirmOrPass();
         }
 
-        private void Quit()
+        private void ReturnToMenu()
         {
-            if (resultGroup == null || !resultGroup.interactable) return;
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            if (resultGroup == null || !resultGroup.interactable || !controller.DeathChoicesReady) return;
+            resultGroup.interactable = false;
+            SceneManager.LoadScene("Assets/Scenes/MainMenu.unity");
+        }
+
+        public void ShowPlayerDeath()
+        {
+            if (deathPresentationStarted) return;
+            // Hide gameplay panels before enabling the saved Canvas so they never flash on death.
+            if (gameplayPanels != null)
+                foreach (GameObject panel in gameplayPanels)
+                    if (panel != null) panel.SetActive(false);
+            gameObject.SetActive(true);
+            enabled = true;
+            StartCoroutine(PresentDeathChoices());
+        }
+
+        private IEnumerator PresentDeathChoices()
+        {
+            deathPresentationStarted = true;
+            controller.SetDeathChoicesReady(false);
+            if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(true);
+            yield return new WaitForSecondsRealtime(deathSubtitleSeconds);
+            if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(false);
+            SetResultVisible(true);
         }
 
         private void SetResultVisible(bool visible)
@@ -63,14 +88,28 @@ namespace PaperSeizerStone.Presentation
             resultGroup.blocksRaycasts = visible;
             if (visible)
                 resultFade = resultGroup.DOFade(1f, deathFadeSeconds).SetUpdate(true).SetEase(Ease.OutCubic)
-                    .OnComplete(() => resultGroup.interactable = true);
+                    .OnComplete(() =>
+                    {
+                        controller.SetDeathChoicesReady(true);
+                        resultGroup.interactable = true;
+                    });
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+            resultFade?.Kill();
+            SetResultVisible(false);
+            deathPresentationStarted = false;
+            if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(false);
+            if (controller != null) controller.SetDeathChoicesReady(false);
         }
 
         private void OnDestroy()
         {
             resultFade?.Kill();
             if (restartButton != null) restartButton.onClick.RemoveListener(Restart);
-            if (quitButton != null) quitButton.onClick.RemoveListener(Quit);
+            if (returnToMenuButton != null) returnToMenuButton.onClick.RemoveListener(ReturnToMenu);
         }
         private BattleObservation previous;
         private string previousMessage;
@@ -124,6 +163,8 @@ namespace PaperSeizerStone.Presentation
             bool interactive = controller.CanInteract;
             bool tutorial = controller.TutorialVisible;
             bool deathComplete = controller.DeathPresentationComplete;
+            if (deathComplete && !deathPresentationStarted && string.IsNullOrEmpty(error))
+                ShowPlayerDeath();
             if (previous == snapshot && previousMessage == message && previousError == error && previousInteractive == interactive && previousTutorial == tutorial && previousDeathComplete == deathComplete) return;
             previousDeathComplete = deathComplete;
             previous = snapshot;
@@ -143,13 +184,6 @@ namespace PaperSeizerStone.Presentation
             if (enemyScore != null) enemyScore.text = controller.EnemyName + "  " + (snapshot == null ? "00" : snapshot.Enemy.Score.ToString("00"));
             messageText.text = tutorial ? string.Empty : string.IsNullOrEmpty(message) ? "正在准备对局。" : message;
             if (instructionText != null) instructionText.text = tutorial ? string.Empty : snapshot == null ? "正在发牌，请稍候。" : Instruction(snapshot);
-            bool finished = deathComplete;
-            SetResultVisible(finished);
-            if (finished)
-            {
-                resultTitle.text = "你死了";
-                resultDetails.text = "抵达第 " + controller.EncounterNumber + " 场战斗";
-            }
         }
     }
 }

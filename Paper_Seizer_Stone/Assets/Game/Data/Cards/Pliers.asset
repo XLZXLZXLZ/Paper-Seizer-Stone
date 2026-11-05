@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 刀子
   gesture: 2
   ability: 6
-  description: "被翻开时，移除对手的 1 发子弹，最低保留 1 发。"
+  description: "视为剪刀。被翻开时，移除对手的 1 发子弹，最低保留 1 发。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.72, g: 0.76, b: 0.79, a: 1}

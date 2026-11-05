@@ -111,6 +111,7 @@ namespace PaperSeizerStone.Presentation
         public IEnumerator Hide()
         {
             SetInteractable(false);
+            controller.ClearShopHint(this);
             if (selected != null && engraving) selected.SetTag(records[selected].Tag);
             foreach (CardView card in cards) card.transform.DOKill();
             walletArea.Freeze();
@@ -129,8 +130,28 @@ namespace PaperSeizerStone.Presentation
         {
             interactable = value;
             returnButton.interactable = value;
+            if (value) controller.SetShopHint(this, PersistentHint);
             if (!value) engravingStation.SetHover(false);
             if (!value && preview != null) preview.Hide();
+        }
+
+        private string PersistentHint
+        {
+            get
+            {
+                if (inspectOnly) return null;
+                if (!engraving) return "点击卡牌立即烧毁 " + controller.CardRemovalPrice + "筹码";
+                CardTagAppearance entry = controller.Engravings.Find(selectedTag);
+                return entry == null ? null : "刻印 \"" + entry.displayName + "\" " + entry.price + "筹码";
+            }
+        }
+
+        private bool IsReturnHovered()
+        {
+            if (!returnButton.isActiveAndEnabled || !returnButton.interactable) return false;
+            Canvas canvas = returnButton.GetComponentInParent<Canvas>();
+            Camera uiCamera = canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            return RectTransformUtility.RectangleContainsScreenPoint((RectTransform)returnButton.transform, Input.mousePosition, uiCamera);
         }
 
         private void ReturnToShop()
@@ -140,6 +161,7 @@ namespace PaperSeizerStone.Presentation
 
         public void Notify(string message)
         {
+            controller.ShowShopWarning(this, message);
             if (engraving) { engravingStation.Notify(message); return; }
             if (!inspectOnly && emberGlow != null)
             {
@@ -154,7 +176,11 @@ namespace PaperSeizerStone.Presentation
             if (controller == null || !interactable || !controller.CanDeckTableInteract) return;
             engravingStation.SetHover(false);
             if (preview != null) preview.Hide();
+            bool cursorInside = Application.isFocused
+                && new Rect(0, 0, Screen.width, Screen.height).Contains(Input.mousePosition);
+            controller.SetShopHint(this, cursorInside && IsReturnHovered() ? "返回商店" : PersistentHint);
             if (Input.GetKeyDown(KeyCode.Escape)) { controller.CloseBurnTable(); return; }
+            if (!cursorInside) return;
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
             int mask = Physics.DefaultRaycastLayers & ~(1 << PaperSeizerStone.Presentation.Props.PlayerVisibilityLayer.Layer);
             if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
@@ -166,17 +192,24 @@ namespace PaperSeizerStone.Presentation
             if (!Input.GetMouseButtonDown(0)) return;
             if (engraving && action != null && action.Kind == PaperSeizerStone.Presentation.Props.ShopTableActionKind.Engrave)
             {
-                if (selected != null) controller.EngraveCard(records[selected].RecordId, selectedTag);
+                CardTagAppearance entry = controller.Engravings.Find(selectedTag);
+                if (entry != null && adventure.Wallet < entry.price) Notify("筹码不足");
+                else if (selected != null) controller.EngraveCard(records[selected].RecordId, selectedTag);
                 else Notify("请先选择一张牌。");
                 return;
             }
             if (!inspectOnly && !engraving && action != null && action.Kind == PaperSeizerStone.Presentation.Props.ShopTableActionKind.Burn)
             {
-                if (selected != null) controller.RemoveCard(records[selected].RecordId);
-                else Notify("请先选择卡牌。");
+                Notify("点击要烧毁的卡牌即可。");
                 return;
             }
             if (card == null || !records.ContainsKey(card)) return;
+            if (!inspectOnly && !engraving)
+            {
+                selected = card;
+                controller.RemoveCard(records[card].RecordId);
+                return;
+            }
             if (selected != null)
             {
                 selected.SetHighlight(false);
@@ -223,7 +256,6 @@ namespace PaperSeizerStone.Presentation
 
         public IEnumerator Burn(int price)
         {
-            Notify("正在烧掉选中的牌并支付筹码……");
             CardView burning = selected;
             burning.SetHitbox(false);
             burning.SetHighlight(false);
@@ -239,7 +271,11 @@ namespace PaperSeizerStone.Presentation
             yield return payment;
         }
 
-        private void OnDisable() { if (preview != null) preview.Hide(); }
+        private void OnDisable()
+        {
+            if (controller != null) controller.ClearShopHint(this);
+            if (preview != null) preview.Hide();
+        }
 
         private void OnDestroy()
         {

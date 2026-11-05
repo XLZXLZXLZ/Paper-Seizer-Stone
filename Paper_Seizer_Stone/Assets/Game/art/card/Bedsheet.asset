@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bedsheet
   m_EditorClassIdentifier:
   displayName: 床单
-  description: "被翻开时，将一张“虚无”洗入对手牌库。"
+  description: "视为布。被翻开时，将一张“虚无”洗入对手牌库。"
   frontArtwork: {fileID: 2800000, guid: 0cadeaac0474a0f47a2a138fe029591c, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

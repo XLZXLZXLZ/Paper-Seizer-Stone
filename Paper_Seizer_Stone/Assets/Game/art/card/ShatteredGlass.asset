@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ShatteredGlass
   m_EditorClassIdentifier:
   displayName: 碎玻璃
-  description: "炼金玻璃瓶破碎后的剪刀类牌。本场战斗内保留变形。"
+  description: "视为剪刀。炼金玻璃瓶破碎后的剪刀类牌。本场战斗内保留变形。"
   frontArtwork: {fileID: 0}
   artworkIncludesText: 0
   faceTint: {r: 1, g: 1, b: 1, a: 1}

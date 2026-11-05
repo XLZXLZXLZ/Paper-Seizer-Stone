@@ -20,6 +20,7 @@ namespace PaperSeizerStone.Presentation
         {
             if (card == null || priceLabel == null) throw new System.InvalidOperationException("商品缺少卡牌或价格文字。");
             Index = index;
+            priceLabel.gameObject.SetActive(false);
             card.Initialize();
             position = card.transform.localPosition;
             rotation = card.transform.localRotation;
@@ -32,10 +33,9 @@ namespace PaperSeizerStone.Presentation
             card.transform.localRotation = rotation;
             card.gameObject.SetActive(!offer.Sold);
             if (!offer.Sold) card.DisplayShop(definition, true);
-            priceLabel.gameObject.SetActive(!offer.Sold);
-            priceLabel.text = offer.Price + "筹码";
+            priceLabel.gameObject.SetActive(false);
             card.SetHitbox(!offer.Sold);
-            Details = offer.Sold ? "这张商品已经售罄。" : "「" + definition.DisplayName + "」  " + offer.Price + " 筹码   ·   " + definition.Description.Replace("\n", " ");
+            Details = offer.Sold ? null : "购买" + definition.DisplayName + " " + offer.Price + "筹码";
         }
 
         public IEnumerator Purchase(Transform destination, float duration)

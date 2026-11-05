@@ -49,6 +49,7 @@ namespace PaperSeizerStone.Presentation
 
         private float shakeStrength = 1f;
         private bool lethalHit;
+        private bool deathBackdropLocked;
         public void ShakeForShot(float strength = 1f)
         {
             shakeStrength = Mathf.Max(0f, strength);
@@ -59,8 +60,9 @@ namespace PaperSeizerStone.Presentation
         // One call owns the entire buildup, flash, blackout and recovery timeline.
         public void PlayHitScreenEffect(bool immediate = false, bool lethal = false)
         {
-            if (!isActiveAndEnabled) return;
+            if (!isActiveAndEnabled || deathBackdropLocked) return;
             lethalHit = lethal;
+            deathBackdropLocked = lethal;
             hitStart = Time.unscaledTime - (immediate ? HitBuildUpSeconds : 0f);
             EnsureHitOverlay();
         }
@@ -100,11 +102,13 @@ namespace PaperSeizerStone.Presentation
         public bool IsHitEffectPlaying => isActiveAndEnabled
             && Time.unscaledTime - hitStart < HitBuildUpSeconds + hitSequenceDuration;
 
-        public void ResetShotEffects()
+        public void ResetShotEffects(bool clearDeathBackdrop = false)
         {
+            if (deathBackdropLocked && !clearDeathBackdrop) return;
             shakeStart = hitStart = float.NegativeInfinity;
             playerShotFlashStart = float.NegativeInfinity;
             lethalHit = false;
+            deathBackdropLocked = false;
             if (hitOverlay != null)
             {
                 hitOverlay.color = Color.clear;
@@ -114,8 +118,12 @@ namespace PaperSeizerStone.Presentation
 
         public void KeepDeathBackdrop()
         {
-            shakeStart = playerShotFlashStart = float.NegativeInfinity;
-            if (hitOverlay != null) hitOverlay.canvas.sortingOrder = 90;
+            deathBackdropLocked = lethalHit = true;
+            shakeStart = hitStart = playerShotFlashStart = float.NegativeInfinity;
+            EnsureHitOverlay();
+            hitOverlay.canvas.sortingOrder = 90;
+            hitOverlay.color = Color.black;
+            hitOverlay.enabled = true;
         }
 
         public Vector4 HitScreenEffect
@@ -218,7 +226,7 @@ namespace PaperSeizerStone.Presentation
 
         public void Initialize()
         {
-            ResetShotEffects();
+            ResetShotEffects(clearDeathBackdrop: true);
             ApplyPlayerVisibility();
             if (sceneCamera == null || definition == null)
                 throw new System.InvalidOperationException("请配置相机预制体中的 MainCamera 与相机配置 SO。");
@@ -335,6 +343,7 @@ namespace PaperSeizerStone.Presentation
 
         private IEnumerator MoveToPose(Pose target, BattleCameraPose pose)
         {
+            if (deathBackdropLocked) yield break;
             float transitionDuration = definition.TransitionDuration;
             DOTween.Kill(this);
             transitioning = true;
@@ -368,7 +377,7 @@ namespace PaperSeizerStone.Presentation
         private void OnDisable()
         {
             if (openingSequence != null) openingSequence.Cancel();
-            ResetShotEffects();
+            ResetShotEffects(clearDeathBackdrop: true);
             DOTween.Kill(this);
             transitioning = false;
             if (initialized && sceneCamera != null)

@@ -18,6 +18,7 @@ namespace PaperSeizerStone.Presentation
 
         private void ApplyFinish(CardTagCatalog catalog, CardTag tag)
         {
+            HideStatus();
             CardTagAppearance entry = catalog.Find(tag);
             if (properties == null) properties = new MaterialPropertyBlock();
             inset.GetPropertyBlock(properties);
@@ -38,21 +39,20 @@ namespace PaperSeizerStone.Presentation
 
         public void Entrance(CardTagCatalog catalog, CardTag tag, int wallet)
         {
-            CardTagAppearance entry = catalog.Find(tag);
             ApplyFinish(catalog, tag);
-            status.text = entry == null ? "本次无刻印" : "刻印 · " + entry.displayName + "\n" + entry.price + "筹码";
         }
 
         public void Display(CardTagCatalog catalog, CardTag tag, DeckCardRecord card, int wallet)
         {
             ApplyFinish(catalog, tag);
-            CardTagAppearance entry = catalog.Find(tag);
-            if (entry == null) { status.text = "请选择刻印"; return; }
-            string action = card == null ? "先选一张牌" : card.Tag == tag ? "已拥有此刻印" : wallet < entry.price ? "筹码不足"
-                : card.Tag == CardTag.None ? "点击槽位刻印" : "点击槽位替换";
-            status.text = "刻印 · " + entry.displayName + "\n" + entry.price + "筹码 · " + action;
         }
 
-        public void Notify(string message) { status.text = message; }
+        public void Notify(string message) { HideStatus(); }
+
+        private void HideStatus()
+        {
+            // Keep the saved plaque editable; shop prompts use the subtitle overlay.
+            if (status != null) status.gameObject.SetActive(false);
+        }
     }
 }

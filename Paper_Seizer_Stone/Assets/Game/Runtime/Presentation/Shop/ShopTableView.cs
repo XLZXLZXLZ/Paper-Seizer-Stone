@@ -53,6 +53,8 @@ namespace PaperSeizerStone.Presentation
         {
             adventure = state;
             Refresh();
+            // Refresh configures active offers; keep them hidden while the rug is entering.
+            panel.HideImmediately();
         }
 
         public IEnumerator Show(bool showRug = true)
@@ -72,8 +74,11 @@ namespace PaperSeizerStone.Presentation
             if (hideRug) yield return rug.Hide();
         }
 
-        // Errors use the prop's feedback; there is no persistent shop message panel.
-        public void Notify(string message) { deckPile.PulseOutline(); }
+        public void Notify(string message)
+        {
+            controller.ShowShopWarning(this, message);
+            deckPile.PulseOutline();
+        }
 
         public void Refresh()
         {
@@ -99,6 +104,7 @@ namespace PaperSeizerStone.Presentation
             continueBell.SetAvailable(value);
             if (!value)
             {
+                controller.ClearShopHint(this);
                 deckPile.SetHoverOutline(false);
                 if (preview != null) preview.Hide();
             }
@@ -106,18 +112,33 @@ namespace PaperSeizerStone.Presentation
 
         private void Update()
         {
-            if (controller == null || !interactable || !controller.CanShopInteract) return;
+            if (controller == null) return;
             engravingStation.SetHover(false);
             if (preview != null) preview.Hide();
             deckPile.SetHoverOutline(false);
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+            if (!interactable || !controller.CanShopInteract)
+            {
+                controller.ClearShopHint(this);
+                return;
+            }
+            if (!Application.isFocused || !new Rect(0, 0, Screen.width, Screen.height).Contains(Input.mousePosition)
+                || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()))
+            {
+                controller.SetShopHint(this, null);
+                return;
+            }
             int mask = Physics.DefaultRaycastLayers & ~(1 << PlayerVisibilityLayer.Layer);
-            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask)) return;
+            if (!Physics.Raycast(controller.Camera.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100, mask))
+            {
+                controller.SetShopHint(this, null);
+                return;
+            }
             ShopTableAction action = hit.collider.GetComponentInParent<ShopTableAction>();
             if (action != null)
             {
                 if (action.Kind == ShopTableActionKind.Engrave) engravingStation.SetHover(true);
                 if (action.Kind == ShopTableActionKind.InspectDeck) deckPile.SetHoverOutline(true);
+                controller.SetShopHint(this, HintFor(action.Kind));
                 if (!Input.GetMouseButtonDown(0)) return;
                 switch (action.Kind)
                 {
@@ -132,9 +153,28 @@ namespace PaperSeizerStone.Presentation
                 return;
             }
             ShopOfferView offer = hit.collider.GetComponentInParent<ShopOfferView>();
+            controller.SetShopHint(this, offer == null ? null : offer.Details);
             if (offer == null) return;
             if (preview != null) preview.Show(hit.collider.GetComponentInParent<CardView>(), Input.mousePosition);
             if (Input.GetMouseButtonDown(0)) controller.BuyCard(offer.Index);
+        }
+
+        private string HintFor(ShopTableActionKind kind)
+        {
+            switch (kind)
+            {
+                case ShopTableActionKind.Burn:
+                    return "删除一张牌 " + controller.CardRemovalPrice + "筹码";
+                case ShopTableActionKind.InspectDeck:
+                    return "你有 " + adventure.Deck.Count + " 张牌";
+                case ShopTableActionKind.Engrave:
+                    CardTagAppearance entry = controller.Engravings.Find(adventure.EngravingOffer);
+                    return entry == null ? null : "为卡牌刻印 \"" + entry.displayName + "\" " + entry.price + " 筹码";
+                case ShopTableActionKind.Continue:
+                    return "进入下一场战斗";
+                default:
+                    return null;
+            }
         }
 
         public IEnumerator Purchase(int index, int price)
@@ -145,7 +185,11 @@ namespace PaperSeizerStone.Presentation
             yield return payment;
         }
 
-        private void OnDisable() { if (preview != null) preview.Hide(); }
+        private void OnDisable()
+        {
+            if (controller != null) controller.ClearShopHint(this);
+            if (preview != null) preview.Hide();
+        }
         private void OnDestroy() { if (preview != null) Destroy(preview.gameObject); }
     }
 }

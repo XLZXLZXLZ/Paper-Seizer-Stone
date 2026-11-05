@@ -21,8 +21,16 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TextAnimator_TMP dialogueText;
         [SerializeField, Range(0, 1)] private float subtitleOutlineWidth = 0.18f;
         [SerializeField] private Color subtitleOutlineColor = new Color(0.03f, 0.025f, 0.02f, 1);
+        [SerializeField, Min(0.01f)] private float hintCharacterSeconds = 0.045f;
+        [SerializeField, Min(0)] private float hintWarningHoldSeconds = 1.2f;
         [SerializeField] private AudioSource speechSource;
         [SerializeField] private GameObject manualPanel;
+        [SerializeField] private CanvasGroup manualGroup;
+        [SerializeField] private CanvasGroup[] pageContentGroups;
+        [SerializeField, Min(0.01f)] private float manualOpenSeconds = 0.22f;
+        [SerializeField, Min(0.01f)] private float manualCloseSeconds = 0.16f;
+        [SerializeField, Range(0.01f, 1)] private float manualClosedScale = 0.12f;
+        [SerializeField, Min(0.01f)] private float pageFadeSeconds = 0.14f;
         [SerializeField] private TMP_Text manualTitle;
         [SerializeField] private TMP_Text manualBody;
         [SerializeField] private TMP_Text pageNumber;
@@ -37,20 +45,42 @@ namespace PaperSeizerStone.Presentation
         private ShopDefinition shop;
         private bool running;
         private bool manualOpen;
+        private bool manualTransitioning;
+        private bool manualCloseRequested;
+        private RectTransform manualRect;
+        private Vector2 manualRestPosition;
+        private Vector3 manualRestScale;
+        private Coroutine pageTransition;
         private bool inputGuard;
         private int releaseFrame;
         private float nextBlipTime;
         private ManualPage currentPage;
         private int revision;
+        private UnityEngine.Object hintOwner;
+        private string hintText;
+        private string hintWarning;
+        private string displayedHint;
+        private bool displayingHint;
+        private bool displayingWarning;
+        private int hintCharacter;
+        private float nextHintCharacter;
+        private float warningHoldUntil = -1;
         public bool ManualRequested { get; private set; }
         public bool IsPresenting => running || manualOpen;
         public bool BlocksInput => IsPresenting || ManualRequested || inputGuard;
 
         private void Awake()
         {
+            // Fallback only covers untagged characters, preserving authored shake modifiers.
+            dialogueText.DefaultBehaviorsTags = new[] { "shake" };
+            dialogueText.defaultTagsMode = Febucci.UI.Core.TAnimCore.DefaultTagsMode.Fallback;
             inputShield.SetActive(false);
             dialoguePanel.SetActive(false);
+            manualRect = (RectTransform)manualPanel.transform;
+            manualRestPosition = manualRect.anchoredPosition;
+            manualRestScale = manualRect.localScale;
             manualPanel.SetActive(false);
+            ResetManualVisuals();
             manualButton.onClick.AddListener(RequestManual);
             previousButton.onClick.AddListener(() => TurnPage(-1));
             nextButton.onClick.AddListener(() => TurnPage(1));
@@ -70,6 +100,99 @@ namespace PaperSeizerStone.Presentation
         }
 
         public bool HasPlayed(TutorialNode node) => completed.Contains(node);
+
+        // Hints borrow the subtitle visuals without taking the tutorial's input lock.
+        // Views may refresh the same hint every frame without restarting its typewriter.
+        public void SetHint(UnityEngine.Object owner, string text)
+        {
+            if (owner == null) return;
+            if (hintOwner != owner)
+            {
+                StopHintDisplay();
+                hintOwner = owner;
+                hintWarning = null;
+            }
+            hintText = text;
+        }
+
+        public void ClearHint(UnityEngine.Object owner)
+        {
+            if (hintOwner != owner) return;
+            hintOwner = null;
+            hintText = null;
+            hintWarning = null;
+            StopHintDisplay();
+        }
+
+        public void ShowHintWarning(UnityEngine.Object owner, string message)
+        {
+            if (owner == null || string.IsNullOrEmpty(message)) return;
+            if (hintOwner != owner) SetHint(owner, null);
+            hintWarning = message;
+            // A new click can repeat the warning, even when its wording is unchanged.
+            StopHintDisplay();
+        }
+
+        private void StopHintDisplay()
+        {
+            warningHoldUntil = -1;
+            if (!displayingHint) return;
+            displayingHint = false;
+            displayedHint = null;
+            dialoguePanel.SetActive(false);
+            speechSource.Stop();
+        }
+
+        private void LateUpdate()
+        {
+            if (BlocksInput || !Application.isFocused)
+            {
+                StopHintDisplay();
+                return;
+            }
+            if (hintOwner == null)
+            {
+                hintText = null;
+                hintWarning = null;
+                StopHintDisplay();
+                return;
+            }
+            if (!string.IsNullOrEmpty(hintWarning) && displayingHint && displayingWarning
+                && warningHoldUntil >= 0 && Time.unscaledTime >= warningHoldUntil)
+            {
+                hintWarning = null;
+                StopHintDisplay();
+            }
+            bool warning = !string.IsNullOrEmpty(hintWarning);
+            string text = warning ? hintWarning : hintText;
+            if (string.IsNullOrEmpty(text))
+            {
+                StopHintDisplay();
+                return;
+            }
+            if (!displayingHint || displayedHint != text || displayingWarning != warning)
+            {
+                StopHintDisplay();
+                PrepareSubtitle(text);
+                displayedHint = text;
+                displayingHint = true;
+                displayingWarning = warning;
+                hintCharacter = 0;
+                nextHintCharacter = Time.unscaledTime;
+                nextBlipTime = 0;
+            }
+            if (hintCharacter < dialogueText.CharactersCount && Time.unscaledTime >= nextHintCharacter)
+            {
+                char character = dialogueText.Characters[hintCharacter].info.character;
+                dialogueText.SetVisibilityChar(hintCharacter++, true);
+                bool punctuation = char.IsPunctuation(character);
+                if (!punctuation && !char.IsWhiteSpace(character)) PlayBlip();
+                nextHintCharacter = Time.unscaledTime + Mathf.Max(0.01f, hintCharacterSeconds) * (punctuation ? 4 : 1);
+            }
+            if (warning && hintCharacter >= dialogueText.CharactersCount && warningHoldUntil < 0)
+                warningHoldUntil = Time.unscaledTime + Mathf.Max(0, hintWarningHoldSeconds);
+        }
+
         public void RequestManual()
         {
             if (manualOpen) CloseManual();
@@ -103,6 +226,7 @@ namespace PaperSeizerStone.Presentation
             TutorialSequence sequence = definition.Find(node);
             if (sequence == null) yield break;
             int run = revision;
+            StopHintDisplay();
             running = true;
             // Speech uses a bottom subtitle only. The dimmed backdrop belongs to the manual.
             inputShield.SetActive(false);
@@ -129,7 +253,7 @@ namespace PaperSeizerStone.Presentation
             }
         }
 
-        private IEnumerator Say(TutorialLine line, int run)
+        private void PrepareSubtitle(string text)
         {
             dialoguePanel.SetActive(true);
             // The saved subtitle starts inactive. Activate and initialize TMP before its
@@ -139,7 +263,12 @@ namespace PaperSeizerStone.Presentation
             subtitle.outlineWidth = subtitleOutlineWidth;
             subtitle.outlineColor = subtitleOutlineColor;
             dialogueText.timeScale = TimeScale.Unscaled;
-            dialogueText.SetText(line.text, true);
+            dialogueText.SetText(text, true);
+        }
+
+        private IEnumerator Say(TutorialLine line, int run)
+        {
+            PrepareSubtitle(line.text);
             speechSource.Stop();
             speechSource.pitch = 1;
             speechSource.volume = definition.speechVolume * GameAudioSettings.Effects;
@@ -188,28 +317,97 @@ namespace PaperSeizerStone.Presentation
         private IEnumerator OpenManual(ManualPage page)
         {
             int run = revision;
+            StopHintDisplay();
             ManualRequested = false;
             manualOpen = true;
+            manualCloseRequested = false;
+            manualTransitioning = true;
             inputShield.SetActive(true);
-            manualPanel.SetActive(true);
             GuardInput();
-            ShowPage(page);
             try
             {
-                while (IsCurrent(run) && manualOpen) yield return null;
+                ResetManualVisuals();
+                ApplyPage(page);
+                RefreshPageNavigation();
+                Vector2 closedPosition = ManualButtonPosition();
+                SetManualPose(closedPosition, manualClosedScale, 0);
+                manualPanel.SetActive(true);
+                yield return AnimateManual(closedPosition, true, run);
+                if (!IsCurrent(run)) yield break;
+                manualTransitioning = false;
+                manualGroup.interactable = true;
+                while (IsCurrent(run) && !manualCloseRequested) yield return null;
+                if (!IsCurrent(run)) yield break;
+                // Keep manualOpen and the full-screen shield until the fold finishes.
+                yield return AnimateManual(ManualButtonPosition(), false, run);
             }
             finally
             {
+                StopPageTransition();
                 manualOpen = false;
+                manualTransitioning = false;
+                manualCloseRequested = false;
                 manualPanel.SetActive(false);
+                ResetManualVisuals();
                 inputShield.SetActive(false);
                 GuardInput();
             }
         }
 
+        private Vector2 ManualButtonPosition()
+        {
+            RectTransform buttonRect = (RectTransform)manualButton.transform;
+            Vector3 buttonCenter = manualRect.parent.InverseTransformPoint(buttonRect.TransformPoint(buttonRect.rect.center));
+            // Convert the live button center into the panel's anchored coordinates.
+            // Account for a non-centered panel pivot without changing the authored layout.
+            Vector3 foldedCenterOffset = manualRect.localRotation
+                * Vector3.Scale(manualRect.rect.center, manualRestScale * manualClosedScale);
+            return manualRect.anchoredPosition + (Vector2)(buttonCenter - manualRect.localPosition - foldedCenterOffset);
+        }
+
+        private void SetManualPose(Vector2 position, float scale, float alpha)
+        {
+            manualRect.anchoredPosition = position;
+            manualRect.localScale = manualRestScale * scale;
+            manualGroup.alpha = alpha;
+        }
+
+        private IEnumerator AnimateManual(Vector2 closedPosition, bool opening, int run)
+        {
+            float duration = Mathf.Max(0.01f, opening ? manualOpenSeconds : manualCloseSeconds);
+            float elapsed = 0;
+            while (IsCurrent(run) && elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                // Ease out on expansion; reverse that motion when folding away.
+                float progress = opening ? 1 - Mathf.Pow(1 - t, 3) : 1 - t * t * t;
+                SetManualPose(Vector2.Lerp(closedPosition, manualRestPosition, progress),
+                    Mathf.Lerp(manualClosedScale, 1, progress), progress);
+                yield return null;
+            }
+            if (IsCurrent(run))
+                SetManualPose(opening ? manualRestPosition : closedPosition, opening ? 1 : manualClosedScale, opening ? 1 : 0);
+        }
+
+        private void ResetManualVisuals()
+        {
+            if (manualRect == null) return;
+            SetManualPose(manualRestPosition, 1, 0);
+            manualGroup.interactable = false;
+            manualGroup.blocksRaycasts = true;
+            SetPageAlpha(1);
+        }
+
         private void ShowPage(ManualPage page)
         {
-            if (!manualOpen) return;
+            if (!manualOpen || manualTransitioning || pageTransition != null || inputGuard || page == currentPage) return;
+            if (definition.Find(page) == null) return;
+            pageTransition = StartCoroutine(ChangePage(page, revision));
+        }
+
+        private void ApplyPage(ManualPage page)
+        {
             ManualEntry entry = definition.Find(page);
             if (entry == null) return;
             currentPage = page;
@@ -217,18 +415,61 @@ namespace PaperSeizerStone.Presentation
             manualBody.text = entry.body.Replace("{burnPrice}", shop.RemovePrice.ToString())
                 .Replace("{minimumDeck}", shop.MinimumDeckSize.ToString());
             pageNumber.text = ((int)page + 1) + " / " + pageButtons.Length;
-            previousButton.interactable = (int)page > 0;
-            nextButton.interactable = (int)page < pageButtons.Length - 1;
-            for (int i = 0; i < pageButtons.Length; i++) pageButtons[i].interactable = i != (int)page;
+        }
+
+        private void RefreshPageNavigation(bool interactable = true)
+        {
+            previousButton.interactable = interactable && (int)currentPage > 0;
+            nextButton.interactable = interactable && (int)currentPage < pageButtons.Length - 1;
+            for (int i = 0; i < pageButtons.Length; i++) pageButtons[i].interactable = interactable && i != (int)currentPage;
+        }
+
+        private void SetPageAlpha(float alpha)
+        {
+            foreach (CanvasGroup content in pageContentGroups) content.alpha = alpha;
+        }
+
+        private IEnumerator ChangePage(ManualPage page, int run)
+        {
+            RefreshPageNavigation(false);
+            yield return FadePage(1, 0, run);
+            if (!IsCurrent(run)) yield break;
+            ApplyPage(page);
+            yield return FadePage(0, 1, run);
+            if (!IsCurrent(run)) yield break;
+            pageTransition = null;
+            RefreshPageNavigation();
+        }
+
+        private IEnumerator FadePage(float from, float to, int run)
+        {
+            float duration = Mathf.Max(0.01f, pageFadeSeconds * 0.5f);
+            float elapsed = 0;
+            while (IsCurrent(run) && elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                SetPageAlpha(Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, elapsed / duration)));
+                yield return null;
+            }
+            if (IsCurrent(run)) SetPageAlpha(to);
+        }
+
+        private void StopPageTransition()
+        {
+            if (pageTransition == null) return;
+            StopCoroutine(pageTransition);
+            pageTransition = null;
         }
 
         private void TurnPage(int direction) => ShowPage((ManualPage)Mathf.Clamp((int)currentPage + direction, 0, pageButtons.Length - 1));
 
         private void CloseManual()
         {
-            if (!manualOpen || inputGuard) return;
-            manualOpen = false;
-            manualPanel.SetActive(false);
+            if (!manualOpen || manualTransitioning || inputGuard) return;
+            manualCloseRequested = true;
+            manualTransitioning = true;
+            manualGroup.interactable = false;
+            StopPageTransition();
             GuardInput();
         }
 
@@ -236,12 +477,20 @@ namespace PaperSeizerStone.Presentation
         {
             revision++;
             StopAllCoroutines();
+            pageTransition = null;
+            hintOwner = null;
+            hintText = null;
+            hintWarning = null;
+            StopHintDisplay();
             running = false;
             manualOpen = false;
+            manualTransitioning = false;
+            manualCloseRequested = false;
             ManualRequested = false;
             if (speechSource != null) speechSource.Stop();
             dialoguePanel.SetActive(false);
             manualPanel.SetActive(false);
+            ResetManualVisuals();
             inputShield.SetActive(false);
             GuardInput();
         }

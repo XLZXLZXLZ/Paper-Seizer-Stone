@@ -17,7 +17,7 @@ MonoBehaviour:
   loadingBulletClip: {fileID: 7400000, guid: 112301f37c7422f4294b805fef87487c, type: 2}
   gunStart: 0.33333334
   bulletStart: 3
-  fireMoment: -1
+  fireMoment: 5.3333335
   enterBlend: 0.12
   returnBlend: 0.18
   postShotHold: 0

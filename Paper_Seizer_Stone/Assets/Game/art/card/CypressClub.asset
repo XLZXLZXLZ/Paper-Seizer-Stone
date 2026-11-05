@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CypressClub
   m_EditorClassIdentifier:
   displayName: 柏木棒
-  description: "对上布类牌时，只有基础“布”能击败它，其它布类牌造成的败局改为平局。"
+  description: "视为石头。对上布类牌时，只有基础“布”能击败它，其它布类牌造成的败局改为平局。"
   frontArtwork: {fileID: 2800000, guid: e4ed482a111ee364fb06d75495cb44a4, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

@@ -29,6 +29,8 @@ namespace PaperSeizerStone.Configuration
         public float BulletStart => Mathf.Max(0, bulletStart);
         public float Duration => Mathf.Max(Length(characterClip), Mathf.Max(GunStart + Length(gunClip), BulletStart + Length(loadingBulletClip)));
         public float FireTime => Mathf.Clamp(fireMoment < 0 ? Length(characterClip) : fireMoment, 0, Duration);
+        // Keep the firing pose out of the aim hold; it is sampled with the shot feedback.
+        public float AimTime => characterClip == null ? 0 : Mathf.Max(0, FireTime - 1f / Mathf.Max(1, characterClip.frameRate));
         public float EnterBlend => Mathf.Max(0, enterBlend);
         public float ReturnBlend => Mathf.Max(0, returnBlend);
         public float PostShotHold => Mathf.Max(0, postShotHold);

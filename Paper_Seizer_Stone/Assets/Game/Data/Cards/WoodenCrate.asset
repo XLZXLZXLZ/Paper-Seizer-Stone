@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: 柏木棒
   gesture: 0
   ability: 4
-  description: "对上布类牌时，只有基础“布”能击败它，其它布类牌造成的败局改为平局。"
+  description: "视为石头。对上布类牌时，只有基础“布”能击败它，其它布类牌造成的败局改为平局。"
   transformation: {fileID: 0}
   artwork: {fileID: 0}
   faceColor: {r: 0.73, g: 0.57, b: 0.37, a: 1}

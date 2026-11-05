@@ -25,6 +25,7 @@ namespace PaperSeizerStone.Battle
     {
         private readonly List<DeckCardRecord> deck = new List<DeckCardRecord>();
         private readonly List<ShopOffer> offers = new List<ShopOffer>();
+        private readonly int startingLife;
         private int purchaseSerial;
         public IReadOnlyList<DeckCardRecord> Deck { get; }
         public IReadOnlyList<ShopOffer> Offers { get; }
@@ -45,6 +46,7 @@ namespace PaperSeizerStone.Battle
                     throw new ArgumentException("初始牌组包含无效或重复的持有记录。");
                 deck.Add(new DeckCardRecord(card.RecordId, card.DefinitionId, card.Tag));
             }
+            startingLife = life;
             Life = life;
             Deck = deck.AsReadOnly();
             Offers = offers.AsReadOnly();
@@ -56,6 +58,7 @@ namespace PaperSeizerStone.Battle
                 throw new InvalidOperationException("当前不能重复结算战斗。");
             Life = result.Player.Life;
             if (!result.PlayerWon) { Phase = AdventurePhase.Defeat; return; }
+            Life = startingLife;
             Wallet = checked(Wallet + result.RewardChips);
             offers.Clear();
             foreach (ShopOffer item in stock) offers.Add(new ShopOffer(item.DefinitionId, item.Price));

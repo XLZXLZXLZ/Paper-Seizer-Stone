@@ -15,8 +15,8 @@ MonoBehaviour:
   displayName: 均衡牌组
   cards:
   - Card: {fileID: 11400000, guid: 479642ed1224655219da791985cf46cd, type: 2}
-    Copies: 4
+    Copies: 3
   - Card: {fileID: 11400000, guid: e9c195d4c4b83362ded9847faaaad54c, type: 2}
-    Copies: 4
+    Copies: 3
   - Card: {fileID: 11400000, guid: fcf6cbe8af1805bc721b86cd9de2177b, type: 2}
-    Copies: 4
+    Copies: 3

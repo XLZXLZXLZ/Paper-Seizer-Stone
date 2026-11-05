@@ -54,6 +54,7 @@ namespace PaperSeizerStone.Presentation
             if (IsConfigured) side.AlignRestGunToAnimation(gunRoot, gunAnimator, gunClip, gunPlacement);
         }
         public float FireTime => fireClip == null ? 0 : fireMoment < 0 ? fireClip.length : Mathf.Clamp(fireMoment, 0, fireClip.length);
+        public float AimTime => fireClip == null ? 0 : Mathf.Max(0, FireTime - 1f / Mathf.Max(1, fireClip.frameRate));
         private static Pose Read(Transform t) => new Pose { position = t.localPosition, rotation = t.localRotation, scale = t.localScale };
         private static void Restore(Transform t, Pose p) { if (t == null) return; t.localPosition = p.position; t.localRotation = p.rotation; t.localScale = p.scale; }
 
@@ -75,11 +76,11 @@ namespace PaperSeizerStone.Presentation
             {
                 StartAction(fireClip, true);
                 tableGun.gameObject.SetActive(false);
-                while (active && run == revision && clock < FireTime)
+                while (active && run == revision && clock < AimTime)
                 {
                     yield return null;
                     if (!active || run != revision) yield break;
-                    float next = Mathf.Min(FireTime, clock + Time.deltaTime);
+                    float next = Mathf.Min(AimTime, clock + Time.deltaTime);
                     Queue(next, enterBlend <= 0 ? 1 : Mathf.SmoothStep(0, 1, next / enterBlend));
                 }
                 int frame = queued;
@@ -87,6 +88,13 @@ namespace PaperSeizerStone.Presentation
                 ready = active && run == revision;
             }
             finally { if (!ready && run == revision) Cancel(); }
+        }
+
+        public void EvaluateFirePose()
+        {
+            if (!IsShooting || !graph.IsValid()) return;
+            Queue(FireTime, 1);
+            EvaluatePose(0);
         }
 
         public IEnumerator FinishShooting()
@@ -182,9 +190,14 @@ namespace PaperSeizerStone.Presentation
         private void Queue(float time, float blend) { clock = time; weight = Mathf.Clamp01(blend); ++queued; }
         private void LateUpdate()
         {
+            EvaluatePose(Time.unscaledDeltaTime);
+        }
+
+        private void EvaluatePose(float deltaTime)
+        {
             if (!active || !graph.IsValid()) return;
             Restore(characterAnimator.transform, characterBase); Restore(gunRoot, gunBase);
-            characterAnimator.Update(returning ? Time.unscaledDeltaTime : Mathf.Max(0, clock - lastClock));
+            characterAnimator.Update(returning ? deltaTime : Mathf.Max(0, clock - lastClock));
             lastClock = clock;
             if (shooting && gun.IsValid()) gun.SetTime(Mathf.Clamp(clock - gunStart, 0, gunClip.length));
             graph.Evaluate(0);

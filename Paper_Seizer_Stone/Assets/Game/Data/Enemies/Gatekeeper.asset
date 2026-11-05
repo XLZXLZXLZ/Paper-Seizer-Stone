@@ -15,5 +15,5 @@ MonoBehaviour:
   enemyId: gatekeeper
   displayName: 守门人
   life: 1
-  deck: {fileID: 11400000, guid: 30d172c64f83b355321fce3de14e3099, type: 2}
+  deck: {fileID: 11400000, guid: b92be25e146e4ba59f1ac39a7cd926f2, type: 2}
   appearance: {fileID: 0}

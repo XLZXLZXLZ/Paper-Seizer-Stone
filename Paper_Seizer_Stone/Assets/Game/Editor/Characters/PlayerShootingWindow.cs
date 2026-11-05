@@ -12,8 +12,8 @@ namespace PaperSeizerStone.Editor
         [SerializeField] private GameObject bulletSource;
         [SerializeField] private float gunStart = 1f / 3f;
         [SerializeField] private float bulletStart = 3f;
-        [SerializeField] private bool fireOnLastFrame = true;
-        [SerializeField] private float fireMoment = 5.583333f;
+        [SerializeField] private bool fireOnLastFrame;
+        [SerializeField] private float fireMoment = 5.3333335f;
         private AnimationClip fireClip;
         private AnimationClip gunClip;
         private AnimationClip bulletClip;
@@ -37,6 +37,17 @@ namespace PaperSeizerStone.Editor
             if (gunSource == null) gunSource = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerShootingAuthoring.GunSourcePath);
             if (bulletSource == null) bulletSource = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerShootingAuthoring.BulletSourcePath);
             RefreshReadOnly();
+            // Open with the saved timing so synchronizing cannot silently restore an old firing frame.
+            // Focus/refresh still leave the user's unsaved edits alone.
+            if (definition != null)
+            {
+                var saved = new SerializedObject(definition);
+                gunStart = saved.FindProperty("gunStart").floatValue;
+                bulletStart = saved.FindProperty("bulletStart").floatValue;
+                float savedFireMoment = saved.FindProperty("fireMoment").floatValue;
+                fireOnLastFrame = savedFireMoment < 0f;
+                if (!fireOnLastFrame) fireMoment = savedFireMoment;
+            }
         }
 
         private void OnFocus() { if (!busy) RefreshReadOnly(); }

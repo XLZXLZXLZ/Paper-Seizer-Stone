@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Void
   m_EditorClassIdentifier:
   displayName: 虚无
-  description: "衍生卡。输给除“虚无”外的所有卡牌，对上虚无则平局。"
+  description: "视为论外牌。衍生卡。输给除“虚无”外的所有卡牌，对上虚无则平局。"
   frontArtwork: {fileID: 2800000, guid: 2c44562e0ad096a4d9cbe43fbfca39f1, type: 3}
   artworkIncludesText: 1
   faceTint: {r: 1, g: 1, b: 1, a: 1}

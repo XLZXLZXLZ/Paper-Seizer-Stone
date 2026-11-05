@@ -151,22 +151,31 @@ namespace PaperSeizerStone.Presentation
                 SetVisible(loadingBulletVisual, false);
                 CreateGraph();
                 Queue(0, definition.EnterBlend <= 0 ? 1 : 0);
-                while (active && revision == run && clock < definition.FireTime)
+                while (active && revision == run && clock < definition.AimTime)
                 {
                     yield return null;
                     if (!active || revision != run) yield break;
-                    float next = Mathf.Min(definition.FireTime, clock + Time.deltaTime);
+                    float next = Mathf.Min(definition.AimTime, clock + Time.deltaTime);
                     float weight = definition.EnterBlend <= 0 ? 1 : Mathf.Clamp01(next / definition.EnterBlend);
                     Queue(next, weight);
                 }
                 yield return WaitForEvaluation(requestedFrame, run);
                 prepared = active && revision == run;
-                if (prepared) playbackStatus = "等待击发";
+                if (prepared) playbackStatus = "瞄准停留";
             }
             finally
             {
                 if (!prepared && revision == run) Cancel();
             }
+        }
+
+        public void EvaluateFirePose()
+        {
+            if (!active || !graph.IsValid()) return;
+            playbackStatus = "击发";
+            Queue(definition.FireTime, 1);
+            // PresentShots needs the current muzzle pose before spawning effects this frame.
+            EvaluatePose(0);
         }
 
         public IEnumerator Finish()
@@ -305,6 +314,11 @@ namespace PaperSeizerStone.Presentation
 
         private void LateUpdate()
         {
+            EvaluatePose(Time.deltaTime);
+        }
+
+        private void EvaluatePose(float deltaTime)
+        {
             if (!active || !graph.IsValid()) return;
             try
             {
@@ -314,7 +328,7 @@ namespace PaperSeizerStone.Presentation
                 bullet.SetTime(Mathf.Clamp(clock - definition.BulletStart, 0, definition.LoadingBulletClip.length));
                 characterMixer.SetInputWeight(0, 1 - characterWeight);
                 characterMixer.SetInputWeight(1, characterWeight);
-                graph.Evaluate(Time.deltaTime);
+                graph.Evaluate(deltaTime);
                 if (Application.isPlaying)
                 {
                     if (!openSoundPlayed && clock >= definition.OpenSoundTime)

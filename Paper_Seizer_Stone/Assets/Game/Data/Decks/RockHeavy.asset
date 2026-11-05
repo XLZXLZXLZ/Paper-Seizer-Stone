@@ -15,8 +15,12 @@ MonoBehaviour:
   displayName: 重石牌组
   cards:
   - Card: {fileID: 11400000, guid: 479642ed1224655219da791985cf46cd, type: 2}
-    Copies: 8
+    Copies: 6
   - Card: {fileID: 11400000, guid: e9c195d4c4b83362ded9847faaaad54c, type: 2}
     Copies: 2
   - Card: {fileID: 11400000, guid: fcf6cbe8af1805bc721b86cd9de2177b, type: 2}
     Copies: 2
+  - Card: {fileID: 11400000, guid: c0df4b839ee06200b35113d055c055b7, type: 2}
+    Copies: 1
+  - Card: {fileID: 11400000, guid: 2d799db44289c34e7baa7b58e28a2ce2, type: 2}
+    Copies: 1

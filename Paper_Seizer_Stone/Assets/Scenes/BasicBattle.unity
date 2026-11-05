@@ -186,6 +186,7 @@ MonoBehaviour:
   cardPrefab: {fileID: 10028, guid: 136af26088704c8ba91abc3a49af5c70, type: 3}
   cameraRig: {fileID: 2969034553462601966}
   tableView: {fileID: 9156478462501321600}
+  battleHud: {fileID: 900013}
   battleInput: {fileID: 900003}
   shopView: {fileID: 309530341808307401}
   burnView: {fileID: 102172693}
@@ -1681,15 +1682,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 10002, guid: 550a245efcadfba5d2166c451b4fbbb2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 10002, guid: 550a245efcadfba5d2166c451b4fbbb2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 10002, guid: 550a245efcadfba5d2166c451b4fbbb2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 10002, guid: 550a245efcadfba5d2166c451b4fbbb2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2637,6 +2638,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb529a1bb49b740ce785d97b9da476b, type: 3}
+--- !u!114 &900013 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 10100, guid: 550a245efcadfba5d2166c451b4fbbb2,
+    type: 3}
+  m_PrefabInstance: {fileID: 2511134475506925108}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5399e8e1d69d47a8a2b6f6348584b177, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &4513627881449131820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2052224317999067416, guid: 550a245efcadfba5d2166c451b4fbbb2,

@@ -167,6 +167,15 @@ MonoBehaviour:
   subtitleOutlineColor: {r: 0.03, g: 0.025, b: 0.02, a: 1}
   speechSource: {fileID: 11005}
   manualPanel: {fileID: 11060}
+  manualGroup: {fileID: 11294}
+  pageContentGroups:
+  - {fileID: 11295}
+  - {fileID: 11296}
+  - {fileID: 11297}
+  manualOpenSeconds: 0.22
+  manualCloseSeconds: 0.16
+  manualClosedScale: 0.12
+  pageFadeSeconds: 0.14
   manualTitle: {fileID: 11073}
   manualBody: {fileID: 11193}
   pageNumber: {fileID: 11243}
@@ -426,6 +435,7 @@ GameObject:
   - component: {fileID: 11062}
   - component: {fileID: 11063}
   - component: {fileID: 11284}
+  - component: {fileID: 11294}
   m_Layer: 5
   m_Name: RulesManual
   m_TagString: Untagged
@@ -510,6 +520,7 @@ GameObject:
   - component: {fileID: 11071}
   - component: {fileID: 11072}
   - component: {fileID: 11073}
+  - component: {fileID: 11295}
   m_Layer: 5
   m_Name: PageTitle
   m_TagString: Untagged
@@ -1840,6 +1851,7 @@ GameObject:
   - component: {fileID: 11191}
   - component: {fileID: 11192}
   - component: {fileID: 11193}
+  - component: {fileID: 11296}
   m_Layer: 5
   m_Name: PageBody
   m_TagString: Untagged
@@ -2393,6 +2405,7 @@ GameObject:
   - component: {fileID: 11241}
   - component: {fileID: 11242}
   - component: {fileID: 11243}
+  - component: {fileID: 11297}
   m_Layer: 5
   m_Name: PageNumber
   m_TagString: Untagged
@@ -3065,3 +3078,51 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   edgeWidth: 0.18
+--- !u!225 &11294
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11060}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!225 &11295
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11070}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!225 &11296
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11190}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!225 &11297
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11240}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

@@ -123,7 +123,8 @@ namespace PaperSeizerStone.Presentation
                 Pose pose = moving[i];
                 Transform part = pose.Part;
                 part.DOKill();
-                part.gameObject.SetActive(true);
+                // Delayed entries stay hidden until their own motion starts.
+                part.gameObject.SetActive(!enter);
                 Vector3 away = AwayPosition(pose, enter);
                 Quaternion awayRotation = enter && radialWorld ? pose.Rotation
                     : pose.Rotation * Quaternion.Euler(Vector3.Scale(travelRotation,
@@ -135,6 +136,7 @@ namespace PaperSeizerStone.Presentation
                 Tween movement = !radialWorld && part is RectTransform ui ? ui.DOAnchorPos3D(target, seconds) : part.DOLocalMove(target, seconds);
                 // Large decks still finish the transition within a bounded interval.
                 float delay = radialWorld ? (float)motionRandom.NextDouble() * phaseVariation : Mathf.Min(i * stagger, 0.35f);
+                if (enter) sequence.InsertCallback(delay, () => part.gameObject.SetActive(true));
                 sequence.Insert(delay, movement.SetEase(radialWorld ? Ease.InCubic : enter ? Ease.OutCubic : Ease.InCubic));
                 sequence.Insert(delay, part.DOLocalRotateQuaternion(enter ? pose.Rotation : awayRotation, seconds));
             }

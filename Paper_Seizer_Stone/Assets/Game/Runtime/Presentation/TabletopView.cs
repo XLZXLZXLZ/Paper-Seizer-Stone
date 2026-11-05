@@ -516,8 +516,8 @@ namespace PaperSeizerStone.Presentation
                     Debug.LogWarning("玩家开枪动画未接管：" + problem + "本次使用原枪械表现。", this);
                 shootingFallbackReason = problem;
             }
-            float playerReady = animatedPlayer ? playerShooting.Definition.FireTime : gunRaiseDuration;
-            float enemyReady = animatedEnemy ? monster.FireTime : gunRaiseDuration;
+            float playerReady = animatedPlayer ? playerShooting.Definition.AimTime : gunRaiseDuration;
+            float enemyReady = animatedEnemy ? monster.AimTime : gunRaiseDuration;
             float readyTime = playerFires && enemyFires ? Mathf.Max(playerReady, enemyReady) : 0f;
             float playerDelay = playerFires && enemyFires ? readyTime - playerReady : 0f;
             float enemyDelay = playerFires && enemyFires ? readyTime - enemyReady : 0f;
@@ -611,6 +611,10 @@ namespace PaperSeizerStone.Presentation
             bool animatedPlayer = playerShooting != null && playerShooting.IsActive;
             GuaiwuCombatSequence monster = OpponentCombat;
             bool animatedEnemy = monster != null && monster.IsShooting;
+            // Commit both firing poses in the same frame as sound, muzzle effects and impacts.
+            // Preparation and all aim holds leave the animations before their firing frames.
+            if (animatedPlayer) playerShooting.EvaluateFirePose();
+            if (animatedEnemy) monster.EvaluateFirePose();
             bool hit = false;
             Coroutine knockdown = null;
             Coroutine hitReaction = null;
@@ -680,7 +684,7 @@ namespace PaperSeizerStone.Presentation
             enemy.MuzzleFlash.SetActive(false);
             if (animatedPlayer) playerShooting.SetMuzzleFlash(false);
             if (animatedEnemy && monster.MuzzleFlash != null) monster.MuzzleFlash.SetActive(false);
-            BeginPostShotPresentation();
+            if (!animatedPlayer) BeginPostShotPresentation();
             Coroutine enemyReturn = animatedEnemy && !monsterWasHit && monster.IsShooting ? StartCoroutine(monster.FinishShooting()) : null;
 
             if (animatedPlayer)
@@ -688,6 +692,9 @@ namespace PaperSeizerStone.Presentation
                 yield return playerShooting.Finish();
             }
             else if (!playerFired) yield return new WaitForSeconds(0.92f);
+            // Let the player's firing/return pose render before hiding the first-person layer.
+            // A player hit has already hidden it above so the fall presentation can take over immediately.
+            BeginPostShotPresentation();
             if (enemyReturn != null) yield return enemyReturn;
             if (hitReaction != null) yield return hitReaction;
 
