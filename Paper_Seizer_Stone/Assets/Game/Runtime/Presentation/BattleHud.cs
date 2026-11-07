@@ -20,6 +20,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private TMP_Text messageText;
         [SerializeField] private TMP_Text instructionText;
         [SerializeField] private GameObject resultPanel;
+        [SerializeField] private TMP_Text battleCountText;
         [SerializeField] private TMP_Text deathSubtitle;
         [SerializeField] private Image deathArtwork;
         [SerializeField] private GameObject[] gameplayPanels;
@@ -73,6 +74,8 @@ namespace PaperSeizerStone.Presentation
         {
             deathPresentationStarted = true;
             controller.SetDeathChoicesReady(false);
+            if (battleCountText != null)
+                battleCountText.text = "本局经历了 " + controller.EncounterNumber + " 场战斗";
             if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(true);
             yield return new WaitForSecondsRealtime(deathSubtitleSeconds);
             if (deathSubtitle != null) deathSubtitle.gameObject.SetActive(false);

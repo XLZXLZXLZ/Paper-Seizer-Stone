@@ -7,6 +7,8 @@ namespace PaperSeizerStone.Battle
     public sealed class BattleEngine
     {
         private readonly Random random;
+        private readonly bool guaranteePlayerHits;
+        private readonly int playerShotBulletBonus;
         private readonly Dictionary<string, CardSpec> catalog = new Dictionary<string, CardSpec>();
         private BattleObservation enemyCheatStart;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -24,7 +26,8 @@ namespace PaperSeizerStone.Battle
         public BattleState State { get; }
 
         public BattleEngine(IReadOnlyList<CardSpec> definitions, IReadOnlyList<DeckCardRecord> playerDeck,
-            IReadOnlyList<DeckCardRecord> enemyDeck, int playerLife, int enemyLife, int chips, int seed)
+            IReadOnlyList<DeckCardRecord> enemyDeck, int playerLife, int enemyLife, int chips, int seed,
+            bool guaranteePlayerHits = false, int playerShotBulletBonus = 0)
         {
             if (playerLife < 1 || enemyLife < 1 || chips < 0) throw new ArgumentException("战斗的初始生命或筹码配置无效。");
             foreach (CardSpec definition in definitions) catalog.Add(definition.Id, definition);
@@ -33,6 +36,8 @@ namespace PaperSeizerStone.Battle
                     throw new ArgumentException("玻璃必须配置碎玻璃变形目标。");
             State = new BattleState(playerLife, enemyLife, chips);
             random = new Random(seed);
+            this.guaranteePlayerHits = guaranteePlayerHits;
+            this.playerShotBulletBonus = Math.Max(0, Math.Min(BasicRules.Chambers, playerShotBulletBonus));
             AddDeck(playerDeck, catalog, Side.Player);
             AddDeck(enemyDeck, catalog, Side.Enemy);
             Shuffle(State.Get(Side.Player).DrawCards);
@@ -494,8 +499,10 @@ namespace PaperSeizerStone.Battle
             FighterState enemy = State.Get(Side.Enemy);
             bool playerFires = player.Score > enemy.Score;
             bool enemyFires = enemy.Score > player.Score;
+            // Opening assistance affects only the shot roll, never visible ammunition or cheat capacity.
+            int playerShotBullets = Math.Min(BasicRules.Chambers, player.Bullets + playerShotBulletBonus);
             // Only the higher-scoring side fires; a tie consumes no shot random draw.
-            bool playerHit = playerFires && random.Next(BasicRules.Chambers) < player.Bullets;
+            bool playerHit = playerFires && (random.Next(BasicRules.Chambers) < playerShotBullets || guaranteePlayerHits);
             bool enemyHit = enemyFires && random.Next(BasicRules.Chambers) < enemy.Bullets;
             if (playerHit) enemy.Life = Math.Max(0, enemy.Life - 1);
             if (enemyHit) player.Life = Math.Max(0, player.Life - 1);

@@ -7,10 +7,12 @@ using PaperSeizerStone.Configuration;
 using PaperSeizerStone.Presentation;
 using PaperSeizerStone.InputControl;
 using PaperSeizerStone.Audio;
+using PaperSeizerStone.Presentation.MainMenu;
 
 namespace PaperSeizerStone.Flow
 {
     // Coordinates one action batch at a time. Presentation completion only unlocks the next step.
+    [DefaultExecutionOrder(-100)]
     public sealed class BattleController : MonoBehaviour
     {
         [SerializeField] private BattleDefinition definition;
@@ -24,6 +26,7 @@ namespace PaperSeizerStone.Flow
         [SerializeField] private TablePanel battlePanel;
         [SerializeField] private TutorialDirector tutorial;
         [SerializeField] private BossBattleLighting bossLighting;
+        [SerializeField] private MenuSettingsPanel settings;
         [Header("动画之间的留白")]
         [SerializeField, Min(0)] private float actionPause = 0.15f;
         [SerializeField, Min(0)] private float phasePause = 0.3f;
@@ -40,6 +43,8 @@ namespace PaperSeizerStone.Flow
         private bool burningDeck;
         private bool inspectingDeck;
         private bool engravingDeck;
+        private bool settingsRequested;
+        private bool previousSettingsBlocked;
         public CardTagCatalog Engravings => definition.Shop.Engravings;
         public int CardRemovalPrice => definition.Shop.RemovePrice;
         public CardTag AvailableEngraving => adventure == null ? CardTag.None : adventure.EngravingOffer;
@@ -66,6 +71,8 @@ namespace PaperSeizerStone.Flow
             }
         }
         private bool TutorialBlocked => tutorial != null && tutorial.BlocksInput;
+        public bool SettingsBlockInput => settings != null
+            && (settings.BlocksMenu || Time.frameCount <= settings.LastClosedFrame);
         private bool previousTutorialBlocked;
 
         public event Action<BattleObservation> BattleFinished;
@@ -77,12 +84,12 @@ namespace PaperSeizerStone.Flow
         public int CycleNumber => definition == null ? 1 : definition.GetCycleNumber(EncounterNumber - 1);
         public int EncounterInCycle => (EncounterNumber - 1) % BattleDefinition.EncountersPerCycle + 1;
         public bool IsBossEncounter => currentEnemy != null && currentEnemy.IsBoss;
-        public bool CanInteract => !DeathPresentationComplete && !busy && !TutorialBlocked && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
+        public bool CanInteract => !SettingsBlockInput && !DeathPresentationComplete && !busy && !TutorialBlocked && engine != null && adventure != null && adventure.Phase != AdventurePhase.Shop;
         public bool CanCheatDraw => CanInteract && engine.State.Phase == BattlePhase.PlayerCheat
             && engine.State.Get(Side.Enemy).Bullets + 2 <= BasicRules.Chambers
             && engine.State.Get(Side.Player).DrawPile.Count + engine.State.Get(Side.Player).DiscardPile.Count > 0;
-        public bool CanShopInteract => !busy && !TutorialBlocked && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
-        public bool CanDeckTableInteract => !busy && !TutorialBlocked && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanShopInteract => !SettingsBlockInput && !busy && !TutorialBlocked && !burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
+        public bool CanDeckTableInteract => !SettingsBlockInput && !busy && !TutorialBlocked && burningDeck && adventure != null && adventure.Phase == AdventurePhase.Shop;
         public bool CanBurnInteract => CanDeckTableInteract && !inspectingDeck && !engravingDeck;
         public bool CanEngraveInteract => CanDeckTableInteract && engravingDeck;
         public bool CanDrag => CanInteract && (engine.State.Phase == BattlePhase.Planning
@@ -121,6 +128,8 @@ namespace PaperSeizerStone.Flow
         private void Update()
         {
             if (adventure == null || !string.IsNullOrEmpty(initializationError)) return;
+            UpdateSettings();
+            if (SettingsBlockInput) return;
             if (previousTutorialBlocked != TutorialBlocked)
             {
                 previousTutorialBlocked = TutorialBlocked;
@@ -136,6 +145,42 @@ namespace PaperSeizerStone.Flow
                 battleInput.SuspendInteraction();
                 StartCoroutine(BrowseManual());
             }
+        }
+
+        private void UpdateSettings()
+        {
+            if (settings == null || !settings.IsReady || !settings.isActiveAndEnabled) return;
+            if (Application.isFocused && Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (SettingsBlockInput)
+                {
+                    if (settings.IsOpen) settings.Hide();
+                }
+                // Let the manual and deck-table views consume their own Escape first.
+                else if ((tutorial == null || !tutorial.IsManualOpen)
+                    && (!burningDeck || busy || TutorialBlocked))
+                    settingsRequested = true;
+            }
+
+            if (settingsRequested && !SettingsBlockInput && (!busy || DeathChoicesReady) && !TutorialBlocked
+                && (!DeathPresentationComplete || DeathChoicesReady))
+            {
+                settingsRequested = false;
+                battleInput.SuspendInteraction();
+                shopView.SetInteractable(false);
+                burnView.SetInteractable(false);
+                tutorial.ClearHint(shopView);
+                tutorial.ClearHint(burnView);
+                settings.Show();
+            }
+
+            bool blocked = SettingsBlockInput;
+            if (previousSettingsBlocked && !blocked && adventure.Phase == AdventurePhase.Shop)
+            {
+                if (burningDeck) burnView.Refresh();
+                else shopView.Refresh();
+            }
+            previousSettingsBlocked = blocked;
         }
 
         private IEnumerator BrowseManual()
@@ -161,7 +206,7 @@ namespace PaperSeizerStone.Flow
             bossLighting.Restore();
             currentEnemy = definition.GetEnemy(adventure.EncounterIndex);
             engine = definition.CreateEngine(adventure, out actualSeed);
-            enemy = new BasicEnemyPolicy(unchecked(actualSeed + 7919));
+            enemy = definition.CreateEnemyPolicy(adventure, actualSeed);
             tableView.ResetEncounter(currentEnemy);
         }
 
@@ -210,6 +255,8 @@ namespace PaperSeizerStone.Flow
 
         private void OnDisable()
         {
+            settingsRequested = false;
+            if (settings != null) settings.CloseImmediately();
             StopAllCoroutines();
             if (bossLighting != null) bossLighting.Restore();
             if (tutorial != null) tutorial.Cancel();

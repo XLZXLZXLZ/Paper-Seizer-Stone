@@ -105,7 +105,7 @@ MonoBehaviour:
   - {fileID: 1943723331919050915}
   stationaryRoots:
   - {fileID: 3994875636903827992}
-  - {fileID: 0}
+  - {fileID: 98000013}
   - {fileID: 4502991734277502480}
   runtimeRoots:
   - {fileID: 10008}
@@ -3092,6 +3092,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 6852970795845402299, guid: c1e8863c0c2eb8d4ab14a436c46d97cb,
     type: 3}
+  m_PrefabInstance: {fileID: 2846914305493672780}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &98000013 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2403489728647077614, guid: c1e8863c0c2eb8d4ab14a436c46d97cb, type: 3}
   m_PrefabInstance: {fileID: 2846914305493672780}
   m_PrefabAsset: {fileID: 0}
 --- !u!108 &98000012 stripped

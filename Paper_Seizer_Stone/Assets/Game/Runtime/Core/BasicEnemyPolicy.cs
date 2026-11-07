@@ -7,7 +7,13 @@ namespace PaperSeizerStone.Battle
     public sealed class BasicEnemyPolicy
     {
         private readonly Random random;
-        public BasicEnemyPolicy(int seed) { random = new Random(seed); }
+        private readonly int lastCheatRevealStep;
+
+        public BasicEnemyPolicy(int seed, int lastCheatRevealStep = int.MaxValue)
+        {
+            random = new Random(seed);
+            this.lastCheatRevealStep = lastCheatRevealStep;
+        }
 
         public int[] ChooseLayout(BattleObservation observation)
         {
@@ -73,6 +79,7 @@ namespace PaperSeizerStone.Battle
 
         public CheatAction ChooseCheat(BattleObservation observation)
         {
+            if (observation.RevealStep > lastCheatRevealStep) return new CheatAction(CheatKind.Pass);
             FighterObservation own = observation.Get(observation.Observer);
             FighterObservation opponent = observation.Get(BasicRules.Other(observation.Observer));
             var forbidden = new HashSet<int>(observation.ForbiddenCards);

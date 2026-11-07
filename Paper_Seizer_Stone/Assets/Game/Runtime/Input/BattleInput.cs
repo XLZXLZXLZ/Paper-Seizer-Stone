@@ -47,6 +47,12 @@ namespace PaperSeizerStone.InputControl
         private void Update()
         {
             if (controller == null || controller.Camera == null || controller.View == null) return;
+            if (controller.SettingsBlockInput)
+            {
+                SuspendInteraction();
+                controller.View.SetConfirmInteraction(false);
+                return;
+            }
             if (!controller.CanDrag && dragging != null) CancelDrag();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (Application.isFocused && Input.GetKeyDown(KeyCode.F8)) controller.DebugBoostNextScore();

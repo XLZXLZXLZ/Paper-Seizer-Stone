@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 10001, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_Name
+      value: InGameSettings
+      objectReference: {fileID: 0}
+    - target: {fileID: 10003, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_SortingOrder
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 10010, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 10014, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 10135, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: handleEscape
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70201, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 10123, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -110
+      objectReference: {fileID: 0}
+    - target: {fileID: 10123, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 10128, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 190
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+--- !u!1 &910001 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 10001, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+  m_PrefabInstance: {fileID: 100100001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &910002 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 10002, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+  m_PrefabInstance: {fileID: 100100001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &910003 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 10135, guid: 639eef2b1b055eb08a8bbc43fe156501, type: 3}
+  m_PrefabInstance: {fileID: 100100001}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fd0bb8dfd855d2f86800931707bffb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -12,7 +12,7 @@ namespace PaperSeizerStone.Presentation
         [SerializeField] private Transform[] parts;
         [Tooltip("优先下落的垫座、托盘等物件；需同时包含在转场物件中。")]
         [SerializeField] private Transform[] entryFirstParts;
-        [Tooltip("共享桌体等固定物件及其子层级始终不参与转场。")]
+        [Tooltip("固定物件始终不参与转场；嵌套在转场物件内的固定物件会保持世界位姿移到本组件下。")]
         [SerializeField] private Transform[] stationaryRoots;
         [Tooltip("Direct active children are animated individually: live cards and physics tokens.")]
         [SerializeField] private Transform[] runtimeRoots;
@@ -53,6 +53,7 @@ namespace PaperSeizerStone.Presentation
         {
             if (initialized) return;
             if (parts == null || parts.Length == 0) throw new InvalidOperationException(name + "未配置转场物件。");
+            DetachStationaryChildren();
             foreach (Transform part in parts)
             {
                 if (part == null) throw new InvalidOperationException(name + "有未绑定的转场物件。");
@@ -60,6 +61,22 @@ namespace PaperSeizerStone.Presentation
                 authored.Add(new Pose { Part = part, Position = PositionOf(part), Rotation = part.localRotation });
             }
             initialized = true;
+        }
+
+        private void DetachStationaryChildren()
+        {
+            if (stationaryRoots == null) return;
+            foreach (Transform root in stationaryRoots)
+            {
+                if (root == null) continue;
+                foreach (Transform part in parts)
+                {
+                    if (part == null || root == part || !root.IsChildOf(part) || IsStationary(part)) continue;
+                    // Detach before entry/exit motion or SetActive(false) reaches the moving parent.
+                    root.SetParent(transform, worldPositionStays: true);
+                    break;
+                }
+            }
         }
 
         private bool IsStationary(Transform part)

@@ -72,6 +72,7 @@ namespace PaperSeizerStone.Presentation
         private float warningHoldUntil = -1;
         private float subtitleTargetAlpha;
         public bool ManualRequested { get; private set; }
+        public bool IsManualOpen => manualOpen;
         public bool IsPresenting => running || manualOpen;
         public bool BlocksInput => IsPresenting || ManualRequested || inputGuard;
 

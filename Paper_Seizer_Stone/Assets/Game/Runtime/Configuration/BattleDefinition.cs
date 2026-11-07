@@ -70,7 +70,17 @@ namespace PaperSeizerStone.Configuration
             List<DeckCardRecord> enemyDeck = enemy.Deck.CreateRecords("enemy");
             ApplyEnemyEngravings(enemyDeck, adventure.EncounterIndex, actualSeed);
             return new BattleEngine(specs, adventure.Deck, enemyDeck,
-                adventure.Life, enemy.Life, chips, actualSeed);
+                adventure.Life, enemy.Life, chips, actualSeed,
+                guaranteePlayerHits: adventure.EncounterIndex == 0,
+                playerShotBulletBonus: adventure.EncounterIndex < EncountersPerCycle ? 1 : 0);
+        }
+
+        public BasicEnemyPolicy CreateEnemyPolicy(AdventureState adventure, int actualSeed)
+        {
+            // Use the cumulative encounter index so assistance ends after the first boss.
+            int lastCheatRevealStep = adventure.EncounterIndex == 0 ? 1
+                : adventure.EncounterIndex < EncountersPerCycle ? 2 : int.MaxValue;
+            return new BasicEnemyPolicy(unchecked(actualSeed + 7919), lastCheatRevealStep);
         }
 
         private void ApplyEnemyEngravings(List<DeckCardRecord> deck, int encounterIndex, int actualSeed)
